@@ -1,0 +1,385 @@
+:root{
+  --bg:#ffffff; --panel:#ffffff; --panel-2:#f9f9f9; --text:#111111; --muted:#666666;
+  --accent:#2f6bff; --accent-alt:#3478ff; --danger:#ff4444;
+  --radius:6px;
+  --shadow:0 4px 12px rgba(0,0,0,0.1);
+  --stroke-bg:#eeeeee;
+}
+:root[data-theme="dark"]{
+  --bg:#0f1220; --panel:#171a2b; --panel-2:#1c2038; --text:#e8eaf6; --muted:#aab0d5;
+  --accent:#6c8cff; --accent-alt:#5a7cff; --danger:#ff4d6d;
+  --shadow:0 8px 24px rgba(0,0,0,0.35);
+  --stroke-bg:rgba(255,255,255,.12);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  font-weight:400;
+}
+
+.wrap{
+  max-width:1100px;
+  margin:0 auto;
+  padding:32px 20px;
+  display:grid;
+  gap:24px;
+}
+
+header{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+h1{
+  font-size:clamp(24px,4vw,36px);
+  margin:0;
+  font-weight:500;
+}
+
+/* ===== Tabs ===== */
+
+nav.tabs{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+/* Верхние переключатели (Cooking / Sport / Study / General) */
+nav.tabs .tab{
+  padding:0 18px;
+  border-radius:999px;
+  font-family:'Poppins',sans-serif;
+  font-size:0.9rem;
+  font-weight:500;
+  cursor:pointer;
+  height:38px;
+  min-width:90px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+
+  background:var(--panel-2);
+  color:var(--muted);
+  border:1px solid transparent;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+nav.tabs .tab:hover{
+  background:rgba(47,107,255,0.08);
+}
+
+nav.tabs .tab[aria-selected="true"]{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+
+.small{
+  padding:6px 12px;
+  min-width:auto;
+  height:auto;
+}
+
+/* ===== Cards ===== */
+
+.card{
+  background:var(--panel);
+  border:1px solid #eee;
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:var(--shadow);
+}
+:root[data-theme="dark"] .card{
+  border-color:rgba(255,255,255,.06);
+}
+
+.card h2{
+  margin-top:0;
+  font-size:20px;
+  color:var(--text);
+  font-weight:500;
+}
+
+.row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+/* Ряды с кнопками */
+.row.buttons{
+  margin-top:16px;
+  gap:10px;
+  width:100%;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* ===== Buttons (унифицированный стиль) ===== */
+
+button{
+  font-family:'Poppins',sans-serif;
+  font-size:0.9rem;
+  font-weight:500;
+  border-radius:999px;
+  padding:0 18px;
+  height:40px;
+  border:none;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--panel-2);
+  color:var(--text);
+  box-shadow:0 2px 4px rgba(0,0,0,0.06);
+  box-sizing:border-box;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Лёгкий hover — без прыжков */
+button:hover{
+  box-shadow:0 3px 8px rgba(0,0,0,0.14);
+}
+
+/* Основная кнопка Start */
+button.primary{
+  background:var(--accent);
+  color:#fff;
+  box-shadow:0 5px 14px rgba(47,107,255,0.4);
+}
+button.primary:hover{
+  background:var(--accent-alt);
+}
+
+/* Вторичная кнопка Reset и пресеты */
+button.secondary{
+  background:transparent;
+  color:var(--muted);
+  border:1px solid rgba(0,0,0,0.08);
+  box-shadow:none;
+}
+:root[data-theme="dark"] button.secondary{
+  border-color:rgba(255,255,255,0.22);
+}
+
+/* Первый ряд в карточке — пресеты (Cooking/Sport/Study) или инпуты (General) */
+.card .row.buttons:first-of-type{
+  margin-top:18px;
+  /* фиксированная высота, чтобы все вкладки выглядели одинаково */
+  min-height:40px;
+  align-items:center;
+}
+
+/* Вид пресет-кнопок */
+.card .row.buttons:first-of-type button.secondary{
+  min-width:76px;
+  height:34px;
+  font-size:0.85rem;
+  padding:0 14px;
+}
+
+/* Активный пресет — ЯВНО другой */
+.card .row.buttons:first-of-type button.secondary.is-active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+
+/* Второй ряд — Start / Reset */
+.card .row.buttons:last-of-type{
+  margin-top:18px;
+}
+
+.card .row.buttons:last-of-type button{
+  min-width:110px;
+}
+
+/* Start чуть шире, как основной акцент */
+.card .row.buttons:last-of-type button.primary{
+  flex:1;
+  max-width:220px;
+}
+
+/* Дополнительные состояния для кнопок снизу */
+
+/* Любые кнопки КРОМЕ основной (primary) — лёгкий фон при наведении */
+button:not(.primary):hover{
+  background:rgba(47,107,255,0.08);
+}
+
+/* Любая кнопка при нажатии */
+button:active{
+  background:rgba(47,107,255,0.16);
+}
+
+/* Основная кнопка Start при нажатии — чуть темнее */
+button.primary:active{
+  background:var(--accent-alt);
+}
+
+/* Пресеты при наведении */
+.card .row.buttons:first-of-type button.secondary:hover{
+  background:rgba(47,107,255,0.08);
+  border-color:rgba(47,107,255,0.25);
+}
+
+/* Уже выбранный пресет, при наведении — чуть ярче */
+.card .row.buttons:first-of-type button.secondary.is-active:hover{
+  background:var(--accent-alt);
+}
+
+/* ===== Time in circle ===== */
+
+.time{
+  font-family:'Roboto Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums lining-nums;
+  font-feature-settings:'tnum' 1,'lnum' 1;
+  font-size:40px;
+  text-align:center;
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+
+.time.finished{
+  color:var(--danger);
+  text-shadow:0 0 10px rgba(255,0,0,0.4);
+  transform:translate(-50%,-50%) scale(1.05);
+  transition:color 0.15s ease,transform 0.15s ease,text-shadow 0.15s ease;
+}
+
+.ring-prog.finished{
+  stroke:var(--danger);
+}
+
+/* === Circle timer === */
+
+.circle-timer{
+  position:relative;
+  width:220px;
+  height:220px;
+  margin:16px auto;
+}
+
+.progress-ring{
+  transform:rotate(-90deg);
+  width:100%;
+  height:100%;
+}
+
+.ring-bg{
+  fill:none;
+  stroke:#e0e0e0;
+  stroke-width:10;
+}
+
+.ring-prog{
+  fill:none;
+  stroke:#3b6fe1;
+  stroke-width:10;
+  stroke-linecap:round;
+  transition:stroke-dashoffset 0.2s linear;
+}
+
+/* В тёмной теме */
+:root[data-theme="dark"] .ring-bg{
+  stroke:rgba(255,255,255,0.15);
+}
+:root[data-theme="dark"] .ring-prog{
+  stroke:#6c8cff;
+}
+
+/* Inputs на вкладке General — в стиле кнопок */
+#panel-general .row.buttons:first-of-type{
+  justify-content:center;
+  gap:10px;
+}
+
+/* Сами поля как пилюли */
+input[type=number]{
+  width:120px;
+  height:34px; /* ближе к высоте пресетов */
+  font-family:'Poppins', sans-serif;
+  font-size:0.9rem;
+  text-align:center;
+  padding:0 16px;
+  border-radius:999px;
+  border:1px solid rgba(0,0,0,0.08);
+  background:var(--panel-2);
+  color:var(--text);
+  box-shadow:none;
+  -moz-appearance:textfield;
+}
+
+/* Тёмная тема для инпутов */
+:root[data-theme="dark"] input[type=number]{
+  background:var(--panel-2);
+  border-color:rgba(255,255,255,.22);
+  box-shadow:none;
+}
+
+/* Без стрелочек у number */
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button{
+  -webkit-appearance:none;
+  margin:0;
+}
+
+
+/* --- Выравнивание первой строки под кругом на всех вкладках --- */
+.card .row.buttons:first-of-type{
+  /* поверх старых правил */
+  min-height:40px;           /* высота как у кнопок */
+  align-items:center;
+}
+
+/* --- Инпуты в General: как кнопки-пилюли --- */
+#panel-general .row.buttons:first-of-type{
+  justify-content:center;
+  gap:10px;
+}
+
+#panel-general input[type=number]{
+  width:120px;
+  height:40px;               /* как у кнопок */
+  padding:0 16px;
+  border-radius:999px;
+  font-size:0.9rem;
+  font-family:'Poppins', sans-serif;
+  text-align:center;
+
+  background:var(--panel-2);
+  color:var(--text);
+  border:1px solid rgba(0,0,0,0.08);
+  box-shadow:none;
+}
+
+/* в тёмной теме бордер/фон под общий стиль */
+:root[data-theme="dark"] #panel-general input[type=number]{
+  background:var(--panel-2);
+  border-color:rgba(255,255,255,0.22);
+}

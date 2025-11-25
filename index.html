@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="TimerHub — simple timers for cooking, sport, study and general use." />
+  <meta name="theme-color" content="#ffffff" />
+  <title>TimerHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>TimerHub</h1>
+      <nav class="tabs">
+        <div class="tab" data-tab="cook" aria-selected="true">Cooking</div>
+        <div class="tab" data-tab="sport">Sport</div>
+        <div class="tab" data-tab="study">Study</div>
+        <div class="tab" data-tab="general">General</div>
+      </nav>
+      <button id="themeToggle" class="secondary small">Theme</button>
+    </header>
+
+    <!-- Cooking -->
+    <section class="card" id="panel-cook">
+      <h2>Cooking</h2>
+      <div class="circle-timer">
+        <svg class="progress-ring" width="220" height="220" aria-hidden="true">
+          <circle class="ring-bg" cx="110" cy="110" r="98" />
+          <circle class="ring-prog" id="cookRing" cx="110" cy="110" r="98" />
+        </svg>
+        <div class="time" id="cookDisplay" aria-live="polite">03:00.00</div>
+      </div>
+      <div class="row buttons">
+        <button data-cook="180" class="secondary">3 min</button>
+        <button data-cook="420" class="secondary">7 min</button>
+        <button data-cook="720" class="secondary">12 min</button>
+      </div>
+      <div class="row buttons">
+        <button id="cookToggle" class="primary">Start</button>
+        <button id="cookReset" class="secondary">Reset</button>
+      </div>
+    </section>
+
+    <!-- Sport -->
+    <section class="card" id="panel-sport" hidden>
+      <h2>Sport</h2>
+      <div class="circle-timer">
+        <svg class="progress-ring" width="220" height="220" aria-hidden="true">
+          <circle class="ring-bg" cx="110" cy="110" r="98" />
+          <circle class="ring-prog" id="sportRing" cx="110" cy="110" r="98" />
+        </svg>
+        <div class="time" id="sportDisplay" aria-live="polite">00:30.00</div>
+      </div>
+      <div class="row buttons">
+        <button data-sport="30" class="secondary">30 sec</button>
+        <button data-sport="60" class="secondary">1 min</button>
+        <button data-sport="180" class="secondary">3 min</button>
+      </div>
+      <div class="row buttons">
+        <button id="sportToggle" class="primary">Start</button>
+        <button id="sportReset" class="secondary">Reset</button>
+      </div>
+    </section>
+
+    <!-- Study -->
+    <section class="card" id="panel-study" hidden>
+      <h2>Study</h2>
+      <div class="circle-timer">
+        <svg class="progress-ring" width="220" height="220" aria-hidden="true">
+          <circle class="ring-bg" cx="110" cy="110" r="98" />
+          <circle class="ring-prog" id="studyRing" cx="110" cy="110" r="98" />
+        </svg>
+        <div class="time" id="studyDisplay" aria-live="polite">25:00.00</div>
+      </div>
+      <div class="row buttons">
+        <button data-study="1500" class="secondary">25 min</button>
+        <button data-study="3000" class="secondary">50 min</button>
+        <button data-study="5400" class="secondary">90 min</button>
+      </div>
+      <div class="row buttons">
+        <button id="studyToggle" class="primary">Start</button>
+        <button id="studyReset" class="secondary">Reset</button>
+      </div>
+    </section>
+
+    <!-- General -->
+    <section class="card" id="panel-general" hidden>
+      <h2>General Timer</h2>
+      <div class="circle-timer">
+        <svg class="progress-ring" width="220" height="220" aria-hidden="true">
+          <circle class="ring-bg" cx="110" cy="110" r="98" />
+          <circle class="ring-prog" id="generalRing" cx="110" cy="110" r="98" />
+        </svg>
+        <div class="time" id="generalDisplay" aria-live="polite">00:30.00</div>
+      </div>
+      <div class="row buttons">
+        <input type="number" id="generalMin" value="0" min="0" placeholder="Min">
+        <input type="number" id="generalSec" value="30" min="0" max="59" placeholder="Sec">
+      </div>
+      <div class="row buttons">
+        <button id="generalToggle" class="primary">Start</button>
+        <button id="generalReset" class="secondary">Reset</button>
+      </div>
+    </section>
+
+    <footer>TimerHub © demo. Hotkeys: Space — start/pause, R — reset.</footer>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
