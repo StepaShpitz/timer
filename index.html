@@ -3,32 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TimerHub — Timers for Cooking, Sport, Study & More</title>
-  <meta name="description" content="TimerHub — beautiful timers for cooking, sport, Pomodoro, HIIT intervals and more. Free, fast, no ads." />
-  <meta name="keywords" content="timer, online timer, cooking timer, pomodoro timer, HIIT timer, interval timer, stopwatch, study timer" />
+  <title>TimerHub — Online Timer for Cooking, Sport, Pomodoro & More</title>
+  <meta name="description" content="Free online timers: cooking timer, HIIT interval timer, Pomodoro, stopwatch. Beautiful, fast, no ads." />
+  <meta name="keywords" content="timer, online timer, cooking timer, pomodoro timer, HIIT timer, interval timer, stopwatch, study timer, free timer" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0d0f1a" />
   <link rel="canonical" href="https://timerforyou.com/" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="TimerHub — Beautiful Timers for Every Need" />
-  <meta property="og:description" content="Cooking, Sport, Pomodoro, HIIT, Stopwatch — all in one place. Free & beautiful." />
+  <meta property="og:description" content="Cooking, Sport, Pomodoro, HIIT, Stopwatch — all in one place. Free & no ads." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://timerforyou.com/" />
 
-  <!-- Schema.org structured data -->
+  <!-- Schema.org -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "TimerHub",
-    "url": "https://timerforyou.com/",
-    "description": "Free online timers: cooking, sport, Pomodoro, HIIT intervals, stopwatch.",
-    "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "Any",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-  }
+  {"@context":"https://schema.org","@type":"WebApplication","name":"TimerHub","url":"https://timerforyou.com/","description":"Free online timers: cooking, sport, Pomodoro, HIIT intervals, stopwatch.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
   </script>
+
+  <meta name="google-site-verification" content="-VMEz6fNdztlL3leRTxeYPUYP7KZb_uJu08hMlTWNLk" />
+
+  <!-- TODO: paste your Google Analytics tag here -->
+  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script> -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -50,206 +47,213 @@
       <span class="logo-icon">⏱</span>
       <span class="logo-text">TimerHub</span>
     </div>
-    <button id="themeToggle" class="btn-icon" aria-label="Toggle theme" title="Toggle light/dark">
-      <span class="theme-icon">☀️</span>
-    </button>
+    <button id="themeToggle" class="btn-icon" aria-label="Toggle theme"><span class="theme-icon">☀️</span></button>
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Timer modes">
-    <button class="tab active" data-tab="cook"     role="tab" aria-selected="true"  aria-controls="panel-cook">🍳 Cooking</button>
-    <button class="tab"        data-tab="sport"    role="tab" aria-selected="false" aria-controls="panel-sport">💪 Sport</button>
-    <button class="tab"        data-tab="hiit"     role="tab" aria-selected="false" aria-controls="panel-hiit">🔥 HIIT</button>
-    <button class="tab"        data-tab="pomodoro" role="tab" aria-selected="false" aria-controls="panel-pomodoro">🍅 Pomodoro</button>
-    <button class="tab"        data-tab="stopwatch"role="tab" aria-selected="false" aria-controls="panel-stopwatch">🏁 Stopwatch</button>
-    <button class="tab"        data-tab="general"  role="tab" aria-selected="false" aria-controls="panel-general">⚙️ Custom</button>
+    <button class="tab active" data-tab="cook"      role="tab" aria-selected="true"  aria-controls="panel-cook">🍳 Cooking</button>
+    <button class="tab"        data-tab="sport"     role="tab" aria-selected="false" aria-controls="panel-sport">💪 Sport</button>
+    <button class="tab"        data-tab="hiit"      role="tab" aria-selected="false" aria-controls="panel-hiit">🔥 HIIT</button>
+    <button class="tab"        data-tab="pomodoro"  role="tab" aria-selected="false" aria-controls="panel-pomodoro">🍅 Pomodoro</button>
+    <button class="tab"        data-tab="stopwatch" role="tab" aria-selected="false" aria-controls="panel-stopwatch">🏁 Stopwatch</button>
+    <button class="tab"        data-tab="general"   role="tab" aria-selected="false" aria-controls="panel-general">⚙️ Custom</button>
   </nav>
 
   <!-- ===== COOKING ===== -->
   <section class="card" id="panel-cook" role="tabpanel">
-    <div class="card-header">
-      <h1 class="card-title">Cooking Timer</h1>
-      <p class="card-desc">Perfect timing for your recipes</p>
-    </div>
-    <div class="circle-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="ring-track" cx="110" cy="110" r="98"/>
-        <circle class="ring-fill" id="cookRing" cx="110" cy="110" r="98"/>
-      </svg>
-      <div class="time-display" id="cookDisplay" aria-live="polite">03:00</div>
-      <div class="time-label" id="cookLabel">ready</div>
-    </div>
-    <div class="presets">
-      <button class="preset" data-cook="180">3 min</button>
-      <button class="preset" data-cook="300">5 min</button>
-      <button class="preset" data-cook="420">7 min</button>
-      <button class="preset" data-cook="720">12 min</button>
-      <button class="preset" data-cook="1800">30 min</button>
-    </div>
-    <div class="controls">
-      <button id="cookToggle" class="btn-primary">Start</button>
-      <button id="cookReset"  class="btn-ghost">Reset</button>
+    <div class="card-inner">
+      <div class="circle-wrap">
+        <svg class="ring-svg" viewBox="0 0 220 220">
+          <circle class="ring-track" cx="110" cy="110" r="98"/>
+          <circle class="ring-fill" id="cookRing" cx="110" cy="110" r="98"/>
+        </svg>
+        <div class="time-display" id="cookDisplay" aria-live="polite">03:00</div>
+        <div class="time-label" id="cookLabel">ready</div>
+      </div>
+      <div class="card-right-top">
+        <div>
+          <div class="card-title">🍳 Cooking Timer</div>
+          <div class="card-desc">Perfect timing for your recipes</div>
+        </div>
+        <div class="presets">
+          <button class="preset" data-cook="180">3 min</button>
+          <button class="preset" data-cook="300">5 min</button>
+          <button class="preset" data-cook="420">7 min</button>
+          <button class="preset" data-cook="720">12 min</button>
+          <button class="preset" data-cook="1800">30 min</button>
+        </div>
+      </div>
+      <div class="card-right-bottom">
+        <div class="controls">
+          <button id="cookToggle" class="btn-primary">Start</button>
+          <button id="cookReset"  class="btn-ghost">Reset</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ===== SPORT ===== -->
   <section class="card" id="panel-sport" hidden role="tabpanel">
-    <div class="card-header">
-      <h1 class="card-title">Sport Timer</h1>
-      <p class="card-desc">Sets, rests, and everything in between</p>
-    </div>
-    <div class="circle-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="ring-track" cx="110" cy="110" r="98"/>
-        <circle class="ring-fill" id="sportRing" cx="110" cy="110" r="98"/>
-      </svg>
-      <div class="time-display" id="sportDisplay" aria-live="polite">00:30</div>
-      <div class="time-label" id="sportLabel">ready</div>
-    </div>
-    <div class="presets">
-      <button class="preset" data-sport="20">20 sec</button>
-      <button class="preset" data-sport="30">30 sec</button>
-      <button class="preset" data-sport="60">1 min</button>
-      <button class="preset" data-sport="120">2 min</button>
-      <button class="preset" data-sport="300">5 min</button>
-    </div>
-    <div class="controls">
-      <button id="sportToggle" class="btn-primary">Start</button>
-      <button id="sportReset"  class="btn-ghost">Reset</button>
+    <div class="card-inner">
+      <div class="circle-wrap">
+        <svg class="ring-svg" viewBox="0 0 220 220">
+          <circle class="ring-track" cx="110" cy="110" r="98"/>
+          <circle class="ring-fill" id="sportRing" cx="110" cy="110" r="98"/>
+        </svg>
+        <div class="time-display" id="sportDisplay" aria-live="polite">00:30</div>
+        <div class="time-label" id="sportLabel">ready</div>
+      </div>
+      <div class="card-right-top">
+        <div>
+          <div class="card-title">💪 Sport Timer</div>
+          <div class="card-desc">Sets, rests, and everything in between</div>
+        </div>
+        <div class="presets">
+          <button class="preset" data-sport="20">20 sec</button>
+          <button class="preset" data-sport="30">30 sec</button>
+          <button class="preset" data-sport="60">1 min</button>
+          <button class="preset" data-sport="120">2 min</button>
+          <button class="preset" data-sport="300">5 min</button>
+        </div>
+      </div>
+      <div class="card-right-bottom">
+        <div class="controls">
+          <button id="sportToggle" class="btn-primary">Start</button>
+          <button id="sportReset"  class="btn-ghost">Reset</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ===== HIIT ===== -->
   <section class="card" id="panel-hiit" hidden role="tabpanel">
-    <div class="card-header">
-      <h1 class="card-title">HIIT Interval Timer</h1>
-      <p class="card-desc">Work hard, rest smart</p>
-    </div>
-    <div class="circle-wrap hiit-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="ring-track" cx="110" cy="110" r="98"/>
-        <circle class="ring-fill" id="hiitRing" cx="110" cy="110" r="98"/>
-      </svg>
-      <div class="time-display" id="hiitDisplay" aria-live="polite">00:20</div>
-      <div class="hiit-phase-badge" id="hiitPhaseBadge">WORK</div>
-    </div>
-    <div class="hiit-stats">
-      <div class="stat-box"><span class="stat-val" id="hiitRoundDisplay">1</span><span class="stat-key">Round</span></div>
-      <div class="stat-box"><span class="stat-val" id="hiitTotalDisplay">8</span><span class="stat-key">Total</span></div>
-    </div>
-    <div class="hiit-inputs">
-      <label class="inp-group">
-        <span>Work (sec)</span>
-        <input type="number" id="hiitWork" value="20" min="1" max="999">
-      </label>
-      <label class="inp-group">
-        <span>Rest (sec)</span>
-        <input type="number" id="hiitRest" value="10" min="1" max="999">
-      </label>
-      <label class="inp-group">
-        <span>Rounds</span>
-        <input type="number" id="hiitRounds" value="8" min="1" max="99">
-      </label>
-    </div>
-    <div class="controls">
-      <button id="hiitToggle" class="btn-primary">Start</button>
-      <button id="hiitReset"  class="btn-ghost">Reset</button>
+    <div class="card-inner">
+      <div class="circle-wrap">
+        <svg class="ring-svg" viewBox="0 0 220 220">
+          <circle class="ring-track" cx="110" cy="110" r="98"/>
+          <circle class="ring-fill" id="hiitRing" cx="110" cy="110" r="98"/>
+        </svg>
+        <div class="time-display" id="hiitDisplay" aria-live="polite">00:20</div>
+        <div class="hiit-phase-badge" id="hiitPhaseBadge">WORK</div>
+      </div>
+      <div class="card-right-top">
+        <div>
+          <div class="card-title">🔥 HIIT Timer</div>
+          <div class="card-desc">Work hard, rest smart</div>
+        </div>
+        <div class="hiit-stats">
+          <div class="stat-box"><span class="stat-val" id="hiitRoundDisplay">1</span><span class="stat-key">Round</span></div>
+          <div class="stat-box"><span class="stat-val" id="hiitTotalDisplay">8</span><span class="stat-key">Total</span></div>
+        </div>
+        <div class="inp-row">
+          <label class="inp-group"><span>Work (s)</span><input type="number" id="hiitWork" value="20" min="1" max="999"></label>
+          <label class="inp-group"><span>Rest (s)</span><input type="number" id="hiitRest" value="10" min="1" max="999"></label>
+          <label class="inp-group"><span>Rounds</span><input type="number" id="hiitRounds" value="8" min="1" max="99"></label>
+        </div>
+      </div>
+      <div class="card-right-bottom">
+        <div class="controls">
+          <button id="hiitToggle" class="btn-primary">Start</button>
+          <button id="hiitReset"  class="btn-ghost">Reset</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ===== POMODORO ===== -->
   <section class="card" id="panel-pomodoro" hidden role="tabpanel">
-    <div class="card-header">
-      <h1 class="card-title">Pomodoro Timer</h1>
-      <p class="card-desc">Focus deeply, rest completely</p>
-    </div>
-    <div class="circle-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="ring-track" cx="110" cy="110" r="98"/>
-        <circle class="ring-fill" id="pomRing" cx="110" cy="110" r="98"/>
-      </svg>
-      <div class="time-display" id="pomDisplay" aria-live="polite">25:00</div>
-      <div class="time-label" id="pomPhaseLabel">Focus</div>
-    </div>
-    <div class="pom-dots" id="pomDots" aria-label="Completed pomodoros"></div>
-    <div class="hiit-inputs">
-      <label class="inp-group">
-        <span>Focus (min)</span>
-        <input type="number" id="pomFocusMin" value="25" min="1" max="90">
-      </label>
-      <label class="inp-group">
-        <span>Short break (min)</span>
-        <input type="number" id="pomShortMin" value="5" min="1" max="30">
-      </label>
-      <label class="inp-group">
-        <span>Long break (min)</span>
-        <input type="number" id="pomLongMin" value="15" min="1" max="60">
-      </label>
-    </div>
-    <div class="controls">
-      <button id="pomToggle" class="btn-primary">Start</button>
-      <button id="pomSkip"   class="btn-ghost">Skip</button>
-      <button id="pomReset"  class="btn-ghost">Reset</button>
+    <div class="card-inner">
+      <div class="circle-wrap">
+        <svg class="ring-svg" viewBox="0 0 220 220">
+          <circle class="ring-track" cx="110" cy="110" r="98"/>
+          <circle class="ring-fill" id="pomRing" cx="110" cy="110" r="98"/>
+        </svg>
+        <div class="time-display" id="pomDisplay" aria-live="polite">25:00</div>
+        <div class="time-label" id="pomPhaseLabel">Focus</div>
+      </div>
+      <div class="card-right-top">
+        <div>
+          <div class="card-title">🍅 Pomodoro</div>
+          <div class="card-desc">Focus deeply, rest completely</div>
+        </div>
+        <div class="pom-dots" id="pomDots" aria-label="Completed pomodoros"></div>
+        <div class="inp-row">
+          <label class="inp-group"><span>Focus (m)</span><input type="number" id="pomFocusMin" value="25" min="1" max="90"></label>
+          <label class="inp-group"><span>Short (m)</span><input type="number" id="pomShortMin" value="5"  min="1" max="30"></label>
+          <label class="inp-group"><span>Long (m)</span><input type="number" id="pomLongMin"  value="15" min="1" max="60"></label>
+        </div>
+      </div>
+      <div class="card-right-bottom">
+        <div class="controls">
+          <button id="pomToggle" class="btn-primary">Start</button>
+          <button id="pomSkip"   class="btn-ghost">Skip</button>
+          <button id="pomReset"  class="btn-ghost">Reset</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- ===== STOPWATCH ===== -->
   <section class="card" id="panel-stopwatch" hidden role="tabpanel">
-    <div class="card-header">
-      <h1 class="card-title">Stopwatch</h1>
-      <p class="card-desc">Measure every second</p>
+    <div class="card-inner">
+      <div class="circle-wrap">
+        <svg class="ring-svg" viewBox="0 0 220 220">
+          <circle class="ring-track" cx="110" cy="110" r="98"/>
+          <circle class="ring-fill" id="swRing" cx="110" cy="110" r="98"/>
+        </svg>
+        <div class="time-display sw-display" id="swDisplay" aria-live="polite">00:00.00</div>
+      </div>
+      <div class="card-right-top">
+        <div>
+          <div class="card-title">🏁 Stopwatch</div>
+          <div class="card-desc">Measure every second, track every lap</div>
+        </div>
+        <ul class="lap-list" id="lapList" aria-label="Lap times"></ul>
+      </div>
+      <div class="card-right-bottom">
+        <div class="controls">
+          <button id="swToggle" class="btn-primary">Start</button>
+          <button id="swLap"    class="btn-ghost">Lap</button>
+          <button id="swReset"  class="btn-ghost">Reset</button>
+        </div>
+      </div>
     </div>
-    <div class="circle-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="ring-track" cx="110" cy="110" r="98"/>
-        <circle class="ring-fill" id="swRing" cx="110" cy="110" r="98"/>
-      </svg>
-      <div class="time-display sw-display" id="swDisplay" aria-live="polite">00:00.00</div>
-    </div>
-    <div class="controls">
-      <button id="swToggle" class="btn-primary">Start</button>
-      <button id="swLap"    class="btn-ghost">Lap</button>
-      <button id="swReset"  class="btn-ghost">Reset</button>
-    </div>
-    <ul class="lap-list" id="lapList" aria-label="Lap times"></ul>
   </section>
 
   <!-- ===== CUSTOM ===== -->
   <section class="card" id="panel-general" hidden role="tabpanel">
-    <div class="card-header">
-      <h1 class="card-title">Custom Timer</h1>
-      <p class="card-desc">Set any duration you need</p>
-    </div>
-    <div class="circle-wrap">
-      <svg class="ring-svg" viewBox="0 0 220 220">
-        <circle class="ring-track" cx="110" cy="110" r="98"/>
-        <circle class="ring-fill" id="generalRing" cx="110" cy="110" r="98"/>
-      </svg>
-      <div class="time-display" id="generalDisplay" aria-live="polite">00:30</div>
-      <div class="time-label" id="generalLabel">ready</div>
-    </div>
-    <div class="hiit-inputs">
-      <label class="inp-group">
-        <span>Hours</span>
-        <input type="number" id="generalHour" value="0" min="0" max="23">
-      </label>
-      <label class="inp-group">
-        <span>Minutes</span>
-        <input type="number" id="generalMin" value="0" min="0" max="59">
-      </label>
-      <label class="inp-group">
-        <span>Seconds</span>
-        <input type="number" id="generalSec" value="30" min="0" max="59">
-      </label>
-    </div>
-    <div class="controls">
-      <button id="generalToggle" class="btn-primary">Start</button>
-      <button id="generalReset"  class="btn-ghost">Reset</button>
+    <div class="card-inner">
+      <div class="circle-wrap">
+        <svg class="ring-svg" viewBox="0 0 220 220">
+          <circle class="ring-track" cx="110" cy="110" r="98"/>
+          <circle class="ring-fill" id="generalRing" cx="110" cy="110" r="98"/>
+        </svg>
+        <div class="time-display" id="generalDisplay" aria-live="polite">00:30</div>
+        <div class="time-label" id="generalLabel">ready</div>
+      </div>
+      <div class="card-right-top">
+        <div>
+          <div class="card-title">⚙️ Custom Timer</div>
+          <div class="card-desc">Set any duration you need</div>
+        </div>
+        <div class="inp-row">
+          <label class="inp-group"><span>Hours</span><input type="number" id="generalHour" value="0"  min="0" max="23"></label>
+          <label class="inp-group"><span>Minutes</span><input type="number" id="generalMin"  value="0"  min="0" max="59"></label>
+          <label class="inp-group"><span>Seconds</span><input type="number" id="generalSec"  value="30" min="0" max="59"></label>
+        </div>
+      </div>
+      <div class="card-right-bottom">
+        <div class="controls">
+          <button id="generalToggle" class="btn-primary">Start</button>
+          <button id="generalReset"  class="btn-ghost">Reset</button>
+        </div>
+      </div>
     </div>
   </section>
 
   <footer>
-    <span>TimerHub © 2025</span>
-    <span class="hotkeys">Hotkeys: <kbd>Space</kbd> start/pause · <kbd>R</kbd> reset · <kbd>L</kbd> lap</span>
+    <span>TimerHub © 2025 · <a href="/sitemap.xml" style="color:inherit;opacity:0.6">sitemap</a></span>
+    <span class="hotkeys"><kbd>Space</kbd> start/pause · <kbd>R</kbd> reset · <kbd>L</kbd> lap</span>
   </footer>
 
 </div>
