@@ -1,263 +1,821 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TimerHub — Online Timer for Cooking, Sport, Pomodoro & More</title>
-  <meta name="description" content="Free online timers: cooking timer, HIIT interval timer, Pomodoro, stopwatch. Beautiful, fast, no ads." />
-  <meta name="keywords" content="timer, online timer, cooking timer, pomodoro timer, HIIT timer, interval timer, stopwatch, study timer, free timer" />
-  <meta name="robots" content="index, follow" />
-  <meta name="theme-color" content="#0d0f1a" />
-  <link rel="canonical" href="https://timerforyou.com/" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Пошаговая тактика на клетках: случайные карты, туман войны, местность даёт способности.">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Тактика на клетках</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+/* Layout: field board with edge rulers on the left, command panel on the right; stacks under 900px */
+:root{
+  --bg:#e6e8e1; --surface:#f4f5f0; --ink:#1c2420; --muted:#5d6a63; --line:#c3c9bf;
+  --plain:#e4e6dd; --plain-alt:#dfe2d7;
+  --forest:#c4dcb5; --ic-forest:#2f6a3b;
+  --hill:#ecdcb4; --ic-hill:#8d6519;
+  --swamp:#c0ddd8; --ic-swamp:#26706a;
+  --rock:#b3b9b4; --ic-rock:#4e5651;
+  --tower:#dcd6f1; --ic-tower:#4f4196;
+  --forge:#e3d6cd; --ic-forge:#b04a12;
+  --spring:#c6e2f3; --ic-spring:#1a6296;
+  --team-p:#2f6fb5; --team-p-hi:#7fb4ec; --team-p-edge:#123760;
+  --team-e:#bf3f29; --team-e-hi:#ef8d75; --team-e-edge:#5e180c; --emblem:#f6f2e6;
+  --heart:#d8352a; --heart-edge:#6e1610; --heart-hole:rgba(0,0,0,.18); --hp-ok:#3f9a55; --hp-mid:#d29a1e; --hp-low:#d2402a;
+  --goal:#a8740c; --fog:#e6e8e1c4; --tex:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAeElEQVR4nGNkgAINIw0ZGPvGuRtPkMWQ+fjkyNHPoGGkIQPDyI5B5+OTo0Q/QcNpZTEKfyAsRrF8QCxGVj8QFsP4jOiGUJqqSdVPdx+j68cIAVr7eLQcwMofLQdGy4HRcmC0HBgtB0bLgdFyYLQcGC0HRsuBgSwHAJAo0giVh/H2AAAAAElFTkSuQmCC);
+  --blue:#2c5c8c; --red:#b0442c; --reach:#5fa874; --target:#e39581; --ring:#1c2420;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --c: clamp(27px, 5.1vw, 54px);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#161b19; --surface:#1f2623; --ink:#e3e8e2; --muted:#94a199; --line:#2f3834;
+  --plain:#232a27; --plain-alt:#212825;
+  --forest:#223b2a; --ic-forest:#7cc78a;
+  --hill:#463b23; --ic-hill:#e6b85a;
+  --swamp:#1b3b3d; --ic-swamp:#66c6be;
+  --rock:#464d49; --ic-rock:#232826;
+  --tower:#322e4e; --ic-tower:#b3a6ef;
+  --forge:#3a2d27; --ic-forge:#ff9a4c;
+  --spring:#1b3449; --ic-spring:#76c3f2;
+  --team-p:#3c82d4; --team-p-hi:#8cc2fa; --team-p-edge:#0c2645;
+  --team-e:#d6513a; --team-e-hi:#f79a82; --team-e-edge:#43110a; --emblem:#f6f2e6;
+  --heart:#f0503f; --heart-edge:#3a0a06; --heart-hole:rgba(0,0,0,.45); --hp-ok:#58b86d; --hp-mid:#e3ad35; --hp-low:#ef5a40;
+  --goal:#e0b040; --fog:#161b19cc; --tex:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAdUlEQVR4nO2USwrAIAwFzS28/+l6i9dNLYktllZqNiMI5vsihLFyHEm1vc1s8z5vj2Jf6ouk2q4fprdHsZn6x+Z/CQc7QziIpwj7/Azhc0H7JrNb/bZ++Y8vw9064cACYTgQ8uEAHIADcAAOwAE4AAfgQCYHdjEmmHy33e2jAAAAAElFTkSuQmCC);
+  --blue:#6fa3d8; --red:#e0735a; --reach:#3f8a58; --target:#8a3a2c; --ring:#f0e6c8; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#161b19; --surface:#1f2623; --ink:#e3e8e2; --muted:#94a199; --line:#2f3834;
+  --plain:#232a27; --plain-alt:#212825;
+  --forest:#223b2a; --ic-forest:#7cc78a;
+  --hill:#463b23; --ic-hill:#e6b85a;
+  --swamp:#1b3b3d; --ic-swamp:#66c6be;
+  --rock:#464d49; --ic-rock:#232826;
+  --tower:#322e4e; --ic-tower:#b3a6ef;
+  --forge:#3a2d27; --ic-forge:#ff9a4c;
+  --spring:#1b3449; --ic-spring:#76c3f2;
+  --team-p:#3c82d4; --team-p-hi:#8cc2fa; --team-p-edge:#0c2645;
+  --team-e:#d6513a; --team-e-hi:#f79a82; --team-e-edge:#43110a; --emblem:#f6f2e6;
+  --heart:#f0503f; --heart-edge:#3a0a06; --heart-hole:rgba(0,0,0,.45); --hp-ok:#58b86d; --hp-mid:#e3ad35; --hp-low:#ef5a40;
+  --goal:#e0b040; --fog:#161b19cc; --tex:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAdUlEQVR4nO2USwrAIAwFzS28/+l6i9dNLYktllZqNiMI5vsihLFyHEm1vc1s8z5vj2Jf6ouk2q4fprdHsZn6x+Z/CQc7QziIpwj7/Azhc0H7JrNb/bZ++Y8vw9064cACYTgQ8uEAHIADcAAOwAE4AAfgQCYHdjEmmHy33e2jAAAAAElFTkSuQmCC);
+  --blue:#6fa3d8; --red:#e0735a; --reach:#3f8a58; --target:#8a3a2c; --ring:#f0e6c8; color-scheme:dark}
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="TimerHub — Beautiful Timers for Every Need" />
-  <meta property="og:description" content="Cooking, Sport, Pomodoro, HIIT, Stopwatch — all in one place. Free & no ads." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://timerforyou.com/" />
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+.wrap{max-width:1200px;margin:0 auto;padding-block:20px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px}
+h1{font-family:var(--display);font-weight:700;font-size:2rem;letter-spacing:.01em;margin:0;text-transform:uppercase;line-height:1}
+.status{font-family:var(--display);font-size:1.2rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.status .side-p{color:var(--blue)} .status .side-e{color:var(--red)}
 
-  <!-- Schema.org -->
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"WebApplication","name":"TimerHub","url":"https://timerforyou.com/","description":"Free online timers: cooking, sport, Pomodoro, HIIT intervals, stopwatch.","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
-  </script>
+.layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
 
-  <meta name="google-site-verification" content="-VMEz6fNdztlL3leRTxeYPUYP7KZb_uJu08hMlTWNLk" />
+.board-wrap{position:relative;overflow-x:auto;max-width:100%}
+.board-frame{display:grid;grid-template-columns:auto auto;gap:4px;width:max-content}
+.axis-x{grid-column:2;display:grid;grid-template-columns:repeat(12,var(--c));gap:2px;padding:0 2px}
+.axis-y{grid-column:1;grid-row:2;display:grid;grid-template-rows:repeat(9,var(--c));gap:2px;padding:2px 0}
+.axis-x span,.axis-y span{font:600 12px/1 var(--display);color:var(--muted);display:grid;place-items:center;letter-spacing:.06em;min-width:12px}
+.board{grid-column:2;grid-row:2;display:grid;grid-template-columns:repeat(12,var(--c));gap:2px;padding:2px;background:var(--line);border-radius:4px;width:max-content;user-select:none}
+.cell{width:var(--c);height:var(--c);background:var(--plain);position:relative;display:grid;place-items:center;cursor:pointer;--ic:var(--muted)}
+.cell.alt{background:var(--plain-alt)}
+.cell.t-plain{background-image:var(--tex);background-size:64px 64px;image-rendering:pixelated}
+.cell.t-forest{background:var(--forest);--ic:var(--ic-forest)}
+.cell.t-hill{background:var(--hill);--ic:var(--ic-hill)}
+.cell.t-swamp{background:var(--swamp);--ic:var(--ic-swamp)}
+.cell.t-rock{background:var(--rock);--ic:var(--ic-rock);cursor:default}
+.cell.t-tower{background:var(--tower);--ic:var(--ic-tower)}
+.cell.t-forge{background:var(--forge);--ic:var(--ic-forge)}
+.cell.t-spring{background:var(--spring);--ic:var(--ic-spring)}
+.ticon{position:absolute;left:15%;top:15%;width:70%;height:70%;color:var(--ic);pointer-events:none;z-index:1;transition:all .15s}
+.cell.occ .ticon{left:auto;top:2px;right:2px;width:34%;height:34%;opacity:.85}
+.cell::before,.cell::after{content:"";position:absolute;inset:0;pointer-events:none}
+.cell.reach::before{background:color-mix(in srgb,var(--team-p) 22%,transparent);box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--team-p) 75%,transparent);z-index:1}
+.cell.reach:hover{outline:2px solid var(--ring);outline-offset:-2px}
+.cell.target::before{background:var(--target);opacity:.8;z-index:1}
+.cell.fog::after{background:var(--fog);z-index:3}
+.dz{position:absolute;left:0;bottom:0;width:0;height:0;border-left:14px solid var(--red);border-top:14px solid transparent;z-index:2;pointer-events:none}
+.dz:not(:empty){width:auto;height:auto;border:0;background:var(--red);color:var(--bg);font:700 10px/1 var(--body);padding:2px 3px;border-top-right-radius:3px}
+.dzall{position:absolute;inset:0;z-index:1;pointer-events:none;background:repeating-linear-gradient(45deg,color-mix(in srgb,var(--red) 32%,transparent) 0 3px,transparent 3px 8px)}
+button.on{background:var(--red);border-color:var(--red);color:var(--bg)}
+.warn{color:var(--red);font-weight:600}
+.cell.trail::before{background:radial-gradient(circle,var(--red) 0 3px,transparent 4px);opacity:.75;z-index:1}
+.cell.sel::after{z-index:3;--k:var(--ring);background:
+  linear-gradient(var(--k),var(--k)) left top/10px 3px,linear-gradient(var(--k),var(--k)) left top/3px 10px,
+  linear-gradient(var(--k),var(--k)) right top/10px 3px,linear-gradient(var(--k),var(--k)) right top/3px 10px,
+  linear-gradient(var(--k),var(--k)) left bottom/10px 3px,linear-gradient(var(--k),var(--k)) left bottom/3px 10px,
+  linear-gradient(var(--k),var(--k)) right bottom/10px 3px,linear-gradient(var(--k),var(--k)) right bottom/3px 10px;background-repeat:no-repeat}
+.mark{position:absolute;inset:5px;border:2px dashed var(--goal);pointer-events:none;z-index:2}
+.mark.point{border-radius:50%} .mark.exit{border-radius:2px;border-style:solid}
 
-  <!-- TODO: paste your Google Analytics tag here -->
-  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-XXXXXXXXXX');</script> -->
+.unit{width:78%;height:78%;margin-bottom:10%;position:relative;z-index:2;overflow:visible;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.4));transition:filter .15s,opacity .15s}
+.unit.p{--team:var(--team-p);--hi:var(--team-p-hi);--edge:var(--team-p-edge)}
+.unit.e{--team:var(--team-e);--hi:var(--team-e-hi);--edge:var(--team-e-edge)}
+.unit.done{filter:grayscale(.85);opacity:.5}
+.hearts{position:absolute;left:3%;right:3%;bottom:2px;display:flex;justify-content:center;z-index:2;pointer-events:none}
+.hearts svg{flex:1 1 0;max-width:8px;aspect-ratio:12/11;height:auto}
+.hearts.big{position:static;justify-content:flex-start;gap:2px}
+.hearts.big svg{max-width:15px;width:15px;flex:none}
+.hp{position:absolute;left:18%;right:18%;bottom:3px;height:4px;background:rgba(0,0,0,.45);border-radius:1px;overflow:hidden;pointer-events:none;z-index:2}
+.hp i{display:block;height:100%;background:var(--hp-ok)}
+.hp.mid i{background:var(--hp-mid)} .hp.low i{background:var(--hp-low)}
+.hp::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(100% / 9 - 1px),rgba(0,0,0,.4) calc(100% / 9 - 1px) calc(100% / 9))}
+.pv{position:absolute;top:0;right:3px;font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--ink);z-index:2;pointer-events:none}
+.cell.hit{animation:hit .45s ease-out}
+@keyframes hit{0%{box-shadow:inset 0 0 0 30px var(--target)}100%{box-shadow:inset 0 0 0 0 transparent}}
+.dmg{position:absolute;top:-4px;right:4px;font-family:var(--display);font-weight:700;font-size:1rem;color:var(--red);pointer-events:none;z-index:4;animation:rise .8s ease-out forwards}
+@keyframes rise{from{transform:translateY(6px);opacity:1}to{transform:translateY(-10px);opacity:0}}
+@media (prefers-reduced-motion:reduce){.cell.hit,.dmg{animation:none}}
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+.overlay{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 80%,transparent);border-radius:4px;z-index:5}
+.overlay div{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;padding:16px}
+.overlay strong{font-family:var(--display);font-size:2.6rem;text-transform:uppercase;line-height:1}
+
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.label{font-family:var(--display);font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.obj-name{font-family:var(--display);font-size:1.45rem;font-weight:700;line-height:1.1}
+.obj-desc{margin:0;max-width:62ch}
+.obj-prog{font-weight:600;font-variant-numeric:tabular-nums;color:var(--goal)}
+.unit-card{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-variant-numeric:tabular-nums;margin:0}
+.unit-card .name{grid-column:1/-1;font-family:var(--display);font-size:1.3rem;font-weight:600}
+.unit-card dt{color:var(--muted)} .unit-card dd{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.8rem;padding:2px 8px;border-radius:10px;border:1px solid var(--goal);color:var(--ink)}
+.empty{color:var(--muted);margin:0}
+.hover{font-size:.9rem;min-height:2.6em}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:600 .95rem var(--body);padding:8px 14px;border-radius:3px;border:1px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+button.primary{background:var(--ink);color:var(--bg)}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible,summary:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+kbd{font:500 .75rem var(--body);opacity:.7;margin-left:4px}
+.log{list-style:none;margin:0;padding:0;max-height:180px;overflow:auto;font-size:.88rem;display:flex;flex-direction:column;gap:3px;font-variant-numeric:tabular-nums}
+.log li.p{color:var(--blue)} .log li.e{color:var(--red)} .log li.sys{color:var(--muted)}
+
+details{border-top:1px solid var(--line);padding-top:8px}
+details:first-of-type{border-top:0;padding-top:0}
+summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.05rem;letter-spacing:.02em}
+.ref{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:10px 0 4px;font-size:.9rem;align-items:start}
+.ref .sw{width:30px;height:30px;border-radius:3px;display:grid;place-items:center;position:relative;box-shadow:inset 0 0 0 1px var(--line)}
+.ref p{align-self:center}
+.ref .sw .mark{inset:3px}
+.ref p{margin:0}
+.credit{margin:6px 0 0;font-size:.78rem;color:var(--muted)}
+.credit a{color:inherit}
+.rules{margin:10px 0 4px;padding-left:18px;font-size:.9rem;display:flex;flex-direction:column;gap:5px;max-width:64ch}
+
+</style>
 </head>
 <body>
 
-<div class="bg-orbs" aria-hidden="true">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- fighters: player = heater shield + knight helm, enemy = angular shield + horned helm -->
+  <symbol id="u-p" viewBox="0 0 512 512">
+    <circle cx="256" cy="268" r="232" style="fill:var(--edge)"/>
+    <circle cx="256" cy="252" r="226" style="fill:var(--team);stroke:var(--edge);stroke-width:18"/>
+    <circle cx="256" cy="252" r="186" style="fill:none;stroke:var(--hi);stroke-width:10;opacity:.6"/>
+    <g transform="translate(101 97) scale(.605)" style="fill:var(--emblem)"><path d="M258.094 18.5c-74.34 0-138.073 62.498-156.188 148.438 52.758-7.697 102.23-22.044 153.938-45.094l4.125-1.813 3.967 2.064c49.424 25.667 97.648 41.026 150.657 46.406-17.66-86.744-81.71-150-156.5-150zm1.28 122.156c-57.41 25.148-112.883 39.993-172.53 47 6.724 32.847 6.91 65.935-.5 98.938 89.29 41.602 231.648 43.154 340.594-.125-10.762-32.516-11.727-65.66-1.188-98.408-59.03-4.235-112.628-20.06-166.375-47.406zm-13.5 33.125h18.72v127.75h-18.72V173.78zm-58.78 11.19h18.687v101.655h-18.686V184.97zm115.72 0H321.5v101.655h-18.688V184.97zm-171.72 14.905h18.687v79.28h-18.686v-79.28zm227.72 0H377.5v79.28h-18.688v-79.28zm38.748 116.75c-14.302 4.282-28.96 7.873-43.78 10.844l-19.22 64.06c26.114-17.337 48.002-43.31 63-74.905zm-277.53 2.875c13.95 28.257 33.448 51.85 56.562 68.53l-17.688-58.905c-13.397-2.61-26.387-5.826-38.875-9.625zm213.156 11.656c-51.63 8.175-104.745 8.588-153.72 1.438l20.845 69.5c18 8.52 37.49 13.187 57.78 13.187 18.588 0 36.507-3.92 53.22-11.124l21.875-73zm-195.5 47.156c-19.436 21.562-36.416 44.367-48.594 72.157 70.233-8.736 133.743 14.684 168.03 50.75 39.684-35.607 103.71-55.685 170.876-44.25-15.08-29.372-33.32-51.982-53.938-74-31.187 31.75-71.53 51-115.968 51-46.568 0-88.65-21.142-120.406-55.658z"/></g>
+  </symbol>
+  <symbol id="u-e" viewBox="0 0 512 512">
+    <path d="M256 40l200 112v232L256 496 56 384V152z" transform="translate(0 16)" style="fill:var(--edge)"/>
+    <path d="M256 30l200 112v232L256 486 56 374V142z" style="fill:var(--team);stroke:var(--edge);stroke-width:18;stroke-linejoin:round"/>
+    <path d="M256 74l162 91v188L256 444 94 353V165z" style="fill:none;stroke:var(--hi);stroke-width:10;opacity:.6;stroke-linejoin:round"/>
+    <g transform="translate(101 103) scale(.605)" style="fill:var(--emblem)"><path d="M256 51c-1.216 1.157-3.235 3.694-5.595 7.47-4.552 7.283-10.594 19.233-18.383 34.8v9.94c6.19 4.752 14.906 7.626 23.978 7.626 9.072 0 17.787-2.874 23.978-7.627v-9.94c-7.79-15.567-13.83-27.517-18.383-34.8-2.36-3.776-4.38-6.313-5.595-7.47zm-42.743 54.286c-28.17 6.895-55.87 20.62-82.175 41.132-16.04 80.706-31.2 175.83-16.89 254.565 6.188 2.322 12.687 4.44 19.403 6.398l-3.062-12.257-4.305-6.455 7.807-5.204c6.304-4.203 13.54-7.85 21.487-10.99-5.028-6.777-8.326-15.44-11.545-24.286-5.46-15.013-9.66-31.84-13.654-44.028l-9.792-29.87 24.565 19.616c24.47 19.543 49.132 32.704 82.918 56.314l10.07 7.037c5.944-.26 11.928-.39 17.917-.39 5.99 0 11.973.13 17.916.39l10.07-7.037c33.787-23.61 58.45-36.77 82.92-56.314l24.563-19.616-9.793 29.87c-3.995 12.19-8.193 29.015-13.654 44.028-3.22 8.847-6.517 17.51-11.545 24.287 7.948 3.138 15.183 6.786 21.487 10.99l7.807 5.203-4.305 6.455-3.062 12.258c6.716-1.956 13.215-4.075 19.402-6.397 14.31-78.736-.85-173.86-16.89-254.565-26.305-20.51-54.004-34.237-82.174-41.132v6.31l-2.75 2.746c-10.55 10.552-25.398 15.26-39.993 15.26-14.595 0-29.442-4.708-39.994-15.26l-2.75-2.746v-6.31zm75.98 55.876 13.39 13.145-6.572 6.695c-12.91 13.147-27.168 19.604-41.277 18.865-14.108-.74-26.793-8.077-38.39-18.442l-6.995-6.253 12.504-13.99 6.996 6.25c9.774 8.735 18.788 13.273 26.867 13.696 8.08.423 16.495-2.67 26.905-13.272l6.573-6.694zm-149.998 3.885c19.807 0 41.364 9.12 60.852 19.946 19.487 10.826 36.416 23.397 45.862 32.843l-13.268 13.267c-7.234-7.234-23.665-19.683-41.708-29.707-18.043-10.024-38.186-17.584-51.74-17.584v-18.765zm233.52 0v18.765c-13.552 0-33.695 7.56-51.738 17.584-18.043 10.024-34.474 22.473-41.708 29.707l-13.268-13.267c9.446-9.446 26.375-22.017 45.862-32.843 19.488-10.827 41.045-19.946 60.853-19.946zm-226.887 36.11c16.68 16.68 47.577 47.29 93.447 47.29v.316l16.757-24.214 16.603 24.475v-.578c45.87 0 76.767-30.61 93.447-47.29l13.268 13.266c-8.234 8.233-21.14 21.197-38.61 32.218 4.916 4.755 7.998 11.397 7.998 18.697 0 14.283-11.78 26.063-26.063 26.063-14.282 0-26.062-11.78-26.062-26.063 0-.183.01-.364.014-.546-3.9.798-7.922 1.415-12.06 1.828l28.074 41.386-3.79 5.315c-7.152 10.026-16.657 15.68-26.033 18.204-9.376 2.525-18.523 2.41-26.863 2.41s-17.496.107-26.944-2.4-19.065-8.05-26.67-17.95l-4.17-5.425 28.773-41.58c-4-.41-7.887-1.017-11.662-1.79.004.183.014.364.014.547 0 14.283-11.78 26.063-26.062 26.063-14.283 0-26.063-11.78-26.063-26.063 0-7.3 3.082-13.942 7.998-18.696-17.47-11.02-30.376-23.984-38.61-32.217l13.268-13.267zm-128.076 16.11c2.95 6.932 8.367 15.73 16.54 27.413 12.455 17.8 29.556 41.635 46.575 75.674 1.848 3.697 4.587 6.08 8.64 7.774.07-13.807.677-27.726 1.7-41.656l-24.876-21.55 12.286-14.184 14.638 12.68a899.357 899.357 0 0 1 3.23-26.948c-7.94-6.23-17.723-10.416-28.564-13.373-16.628-4.535-34.943-5.58-50.17-5.83zm476.406 0c-15.226.25-33.54 1.295-50.17 5.83-10.84 2.957-20.623 7.142-28.562 13.373a899.29 899.29 0 0 1 3.23 26.947l14.638-12.68 12.286 14.185-24.875 21.55c1.02 13.93 1.628 27.848 1.7 41.656 4.05-1.694 6.79-4.077 8.638-7.774 17.02-34.04 34.12-57.873 46.575-75.674 8.173-11.682 13.59-20.48 16.54-27.412zm-238.28 40.48L221.81 307.04c3.74 3.347 7.608 5.175 12.06 6.356 6.265 1.663 13.79 1.772 22.13 1.772s15.874-.117 21.982-1.762c4.345-1.17 8.01-2.94 11.476-6.216l-33.535-49.442zm-66.643.292c-4.142 0-7.298 3.155-7.298 7.297 0 4.14 3.156 7.297 7.298 7.297 4.14 0 7.297-3.156 7.297-7.297 0-4.142-3.156-7.298-7.297-7.298zm133.44 0c-4.14 0-7.297 3.155-7.297 7.297 0 4.14 3.156 7.297 7.297 7.297 4.142 0 7.298-3.156 7.298-7.297 0-4.142-3.156-7.298-7.298-7.298zm-166.322 67.34c1.684 5.604 3.355 11.28 5.214 16.392 4.053 11.14 9.25 19.18 12.498 22.424l27.458-9.153c-16.38-10.857-31.114-20.08-45.17-29.662zm199.204 0c-14.056 9.583-28.79 18.806-45.17 29.663l27.458 9.153c3.247-3.245 8.445-11.283 12.498-22.424 1.86-5.112 3.53-10.788 5.214-16.39zM256 375.634c-41.212 0-82.64 7.558-105.97 20.12l13.58 54.32c61.668 14.57 123.112 14.57 184.78 0l13.58-54.32c-23.33-12.562-64.758-20.12-105.97-20.12zm-.018 10.543c23.4-.08 46.826 4.167 70.074 13.005l8.77 3.334-6.67 17.542-8.77-3.336c-42.466-16.144-84.223-15.572-126.88.04l-8.814 3.226-6.448-17.623 8.81-3.223c23.152-8.473 46.527-12.883 69.928-12.964z"/></g>
+  </symbol>
+  <symbol id="u-crown" viewBox="0 0 512 512">
+    <circle cx="420" cy="92" r="88" style="fill:var(--goal);stroke:var(--edge);stroke-width:14"/>
+    <g transform="translate(358 30) scale(.242)" style="fill:var(--edge)"><path d="M256 77.527c-28.554 59.928-54.586 129.729-55.912 171.23 8.106 8.904 15.512 20.237 21.314 31.84 6.48 12.959 11.159 25.504 11.159 36.714v7.162l-6.946 1.736c-66.268 16.567-117.525 16.69-168.181-.195l-6.272-2.092v-6.611c0-15.216-1.409-46.505 15.164-67.383a30.878 30.878 0 0 0-4.385-6.205c-4.186-4.627-10.398-9.935-17.129-14.743-6.73-4.807-14.012-9.164-20.302-12.193-1.295-.623-2.295-.892-3.51-1.38.946 26.658 4.726 70.82 11.693 112.624 2.773 16.637 6.043 32.722 9.715 46.89 151.612 14.462 275.572 14.462 427.184 0 3.672-14.168 6.942-30.253 9.715-46.89 6.967-41.803 10.747-85.966 11.693-112.625-1.215.489-2.215.758-3.51 1.381-6.29 3.029-13.572 7.386-20.303 12.193-6.73 4.808-12.942 10.116-17.128 14.743a31.68 31.68 0 0 0-4.32 6.088c17.421 20.991 15.099 52.656 15.099 67.5v6.61l-6.272 2.093c-50.656 16.885-101.913 16.762-168.181.195l-6.946-1.736v-7.162c0-11.21 4.68-23.755 11.159-36.713 5.802-11.604 13.208-22.937 21.314-31.84-1.326-41.502-27.358-111.303-55.912-171.23zm0 31.963 42.541 127.623L256 300.926l-42.541-63.813 34.002-102.008L256 109.49zm0 56.922-22.682 68.043 7.621 11.43c5.09-24.4 12.37-47.622 22.932-55.86L256 166.412zM47.852 393.508c5.502 16.226 12.645 26.698 15.904 29.09 128.174 15.834 256.314 15.834 384.488 0 3.259-2.392 10.402-12.865 15.904-29.09-146.943 13.646-269.353 13.646-416.296 0z"/></g>
+  </symbol>
+  <!-- health hearts -->
+  <symbol id="hp-full" viewBox="-1 -1 12 11"><path d="M5 8.6L1.1 4.8C-.3 3.4-.2 1.3 1.2.5 2.4-.2 3.9.1 5 1.4 6.1.1 7.6-.2 8.8.5c1.4.8 1.5 2.9.1 4.3z" style="fill:var(--heart);stroke:var(--heart-edge);stroke-width:1;stroke-linejoin:round"/></symbol>
+  <symbol id="hp-empty" viewBox="-1 -1 12 11"><path d="M5 8.6L1.1 4.8C-.3 3.4-.2 1.3 1.2.5 2.4-.2 3.9.1 5 1.4 6.1.1 7.6-.2 8.8.5c1.4.8 1.5 2.9.1 4.3z" style="fill:var(--heart-hole);stroke:var(--heart);stroke-width:1.1;stroke-linejoin:round"/></symbol>
+  <!-- terrain icons, drawn in currentColor -->
+  <symbol id="t-forest" viewBox="0 0 512 512" fill="currentColor"><path d="M169.92 15.654c-10.512 16.697-22.392 34.058-41.688 50.473.46.447.934.89 1.405 1.336l23.55-.406-3.527 10.7a71.131 71.131 0 0 1-1.678 4.552 183.485 183.485 0 0 0 8.872 5.788l25.052 15.33-45.99-.793c-1.954 2.474-4.06 4.9-6.305 7.275 8.8 11.517 22.045 22.713 38.675 32.766l-12.404-.365-.015 5.678c8.53 6.358 17.792 12.448 27.162 18.48 18.11-11.568 31.79-24.5 39.51-37.616l-57.353.99 25.052-15.33c8.97-5.488 16.525-11.115 23.082-16.867-5.098-5.475-9-10.962-11.257-16.69l-4.04-10.246 29.742-1.823C205.14 54.41 182.44 38.31 169.92 15.654zm234.605 13.223c-6.537 12.962-13.88 29.016-23.638 44.63 10.927 18.367 24.428 35.997 46.773 52.382l20.42 14.97-52.51-1.085c6.956 12.136 19.936 26.858 34.58 40.047 19.157 17.254 40.928 32.572 53.907 39.914l11.34 6.418c.005-4.163.005-7.382.015-13.972-17.176-11.938-29.767-25.795-36.322-42.2l-4.115-10.298 43.605-2.58c-9.91-4.358-19.747-8.263-28.723-12.06-8.498-3.594-16.23-7.107-22.724-11.23-6.495-4.122-12.102-8.954-14.858-15.943l-3.93-9.962 36.077-3.178c-24.245-20.226-47.223-48.756-59.897-75.853zM84.027 34.62c-12.52 22.656-35.22 38.757-57.843 53.234l29.738 1.822-4.037 10.244c-4.78 12.125-16.815 24.123-33.182 36.873-.295 11.21-.392 17.66-.385 17.732.005.044.19 1.1.29 3.127.038.742.04 3.177.066 4.358l13.828.797-.004.55-3.906 9.778c-1.18 2.955-2.498 6.07-4.16 9.232l11.525-7.05c37.376-22.87 50.42-48.163 67.395-74.833l-.233 6.366 4.474-1.875a72.336 72.336 0 0 1-3.305-8.25l-3.528-10.7 26.582.46C107.068 69.66 94.836 51.787 84.027 34.618zM263.06 61.036c-10.808 17.168-23.04 35.04-43.314 51.86l26.582-.458-3.527 10.7c-6.657 20.188-22.772 37.89-44.874 52.91l17.916 11.573 18.273.688-4.127 10.5c-2.305 5.863-5.355 11.4-9.01 16.65l8.737-6.19c17.913-12.69 36.773-27.495 51.8-41.534 10.026-9.365 17.978-18.52 23.083-25.914l-50.537-3.715 16.5-12.773c10.37-8.027 20.973-15.94 30.924-24.178-15.49-11.246-29.53-24.024-38.423-40.12zm93.07.68c-12.76 26.805-36.227 46.04-59.107 63.506l31.39 2.306-3.194 9.726c-4.503 13.7-16.983 27.412-32.783 42.172-10.794 10.083-23.245 20.29-35.896 29.926l49.278 3.494-3.26 9.78c-11.273 33.806-46.845 56.924-75.816 75.597 13.487 8.056 27.67 15.44 39.813 22.318 68.34 18.82 147.594 6.972 200.924-16-13.19-7.554-23.844-14.547-32.748-23.006-11.805-11.216-20.072-24.96-26.377-44.183l-3.017-9.208 51.97-6.61c-11.874-8.21-25.17-18.39-37.867-29.825-20.11-18.113-38.394-38.003-43.915-58.067L372.68 123.3l27.867.577c-21.174-20.07-33.542-41.485-44.416-62.16zM108.78 121.84c-10.807 17.168-23.038 35.04-43.313 51.86l26.582-.456-3.53 10.697c-8.24 24.998-30.974 46.186-61.625 63.185l52.94 1.99-4.126 10.496c-11.05 28.11-29.76 52.974-61.038 71.585 73.885 22.566 156.574 31.568 231.582-3.572-12.908-7.055-26.9-14.653-40.33-23.56-18.07-11.983-34.525-25.736-41.71-43.713l-4.116-10.3 48.4-2.864c-11.828-7.625-23.415-15.48-33.557-23.383-16.245-12.663-29.06-24.086-34.02-36.664l-4.04-10.247 29.74-1.823c-22.62-14.476-45.318-30.576-57.84-53.23zm-40.52 67.816-49.016.844c-.168.218-.32.44-.492.656-.276 21.495-.448 33.384-.502 42.38 23.342-13.057 40.863-28.338 50.01-43.88zm105.674 12.403a189.592 189.592 0 0 0 10.845 9.124 360.036 360.036 0 0 0 11.14 8.308c5.44-5.177 10.084-10.545 13.692-16.092l-35.678-1.34zm41.658 20.428a112.599 112.599 0 0 1-5.947 6.504 619.186 619.186 0 0 0 28.38 17.815l17.645 10.427c11.34-9.42 21.135-19.423 27.215-29.972l-67.293-4.774zm279.803 10.334-68.383 8.698c4.666 11.45 10.047 19.75 17.28 26.992l-.21-9.6c17.455-.996 34.705-3.352 51.4-7.363-.065-7.174-.084-12.42-.087-18.728zm-243.96 27.852-66.394 3.928c3.903 5.187 9.085 10.326 15.097 15.314a495.837 495.837 0 0 0 19.455 3.504c10.638-7.12 21.72-14.713 31.842-22.746zm-219.744 2.64-.29 35.618c10.746-10.37 18.692-21.97 24.83-34.694l-24.54-.924zm413.947 66.534c-14.262 4.577-29.517 8.396-45.38 11.222l5.55 132.18h42.978l-3.148-143.402zm-181.83 7.002a257.23 257.23 0 0 1-8.018 4.046l-.927 114.274h52.682l-2.426-110.496c-13.946-1.552-27.788-4.123-41.313-7.824zm120.54 6.693c-15.085 1.992-30.582 3.05-46.18 2.994l-.386 139.742h52.56l-5.994-142.737zm-353.38 9.146-.924 114.04H74.31l1.975-104.398c-15.362-2.464-30.51-5.75-45.318-9.643zm174.72 6.27c-11.576 2.87-23.226 4.935-34.898 6.284l3.915 66.195h33.065l-2.084-72.48zm-113.443 5.628-2.508 132.56 72.692-2.287-7.584-128.21c-20.97 1.29-41.936.424-62.6-2.062z"/></symbol>
+  <symbol id="t-hill" viewBox="0 0 512 512" fill="currentColor"><path d="m245.795 19.12-52.363 153.513 26.67 61.937 38.884-52.37 53.217 67.493 11.682-40.486-78.09-190.086zM101.172 193.69l-29.06 80.222 24.54-12.715 24.803 14.33 11.64-48.013-31.923-33.825zm83.267 5.308-20.776 60.904-15.27-16.177-14.662 60.48-37.568-21.707-33.44 17.324L19.04 420.42l84.884 30.937 73.418-22.437 73.935 19.47 71.66-21.536 91.973 25.226 77.28-31.66-48.44-89.006-39.045 26.664-38.892-27.576-27.153 42.79-15.78-10.013 39.032-61.51-26.6-64.752-15.246 52.83-60.634-76.9-43.664 58.81-31.33-72.76zm223.06 65.81L375.84 314.7l29.066 20.61 29.865-20.394-27.27-50.11z"/></symbol>
+  <symbol id="t-swamp" viewBox="0 0 512 512" fill="currentColor"><path d="M199.188 19.97a9.5 9.5 0 0 0-8.407 4.843 907.166 907.166 0 0 0-10.843 19.156c-6.34-1.118-12.595-.258-16.406 3.53-24.12 23.98-59.702 101.133-45.31 111.688 1.968 1.444 4.086 2.64 6.31 3.656-16.64 42.836-30.184 86.292-40.124 128.562-1.928-65.01-14.337-127.164-62.22-162.937 44.087 58.265 48.88 155.865 41.877 236.405-11.69.81-23.34 1.66-34.97 2.53l1.407 18.94a6141.72 6141.72 0 0 1 31.656-2.283c-5.404 47.895-14.473 87.508-20.718 105.47l28.28-7.782 19.844 3.906c3.195-33.745 7.683-68.574 16.47-104.437 104.756-6.35 212.06-8.943 325.124-.814 9.21 20.087 7.668 38.25 2.563 64.156-.69-30.596-32.682-59.164-127.25-57.718-37.285.583-99.973 24.92-93.345 61.594 10.04 55.48 93.935 63.74 164.875 37.75l-32.78-43.72 76.467 37.75c7.045-10.18 11.56-21.598 12-32.843 14.556 1.83 29.126 3.61 43.625 5.875 20.6-36.8 25.25-154.36-88-314.47 39.61 88.105 71.88 190.382 63.157 224.22-2.253-.186-4.504-.385-6.75-.563-28.424-38.034-94.285-80.812-127.814-97.562C370.742 309.23 401.776 337.56 419 360.53c-38.743-2.512-76.81-3.813-114.313-4.155-66.03-.6-130.31 1.732-193.5 5.47 14.246-49.464 37.544-100.834 77.75-153.97-51.342 38.358-77.508 85.502-95.406 134.72 9.764-55.987 26.784-116.065 49.69-174.908 1.743.234 3.47.45 5.186.625 23.065 2.38 49.024-68.143 52.688-105.343.375-3.812-1.312-7.414-4.188-10.44 3.37-6.11 6.79-12.172 10.28-18.155a9.5 9.5 0 0 0-8-14.406z"/></symbol>
+  <symbol id="t-rock" viewBox="0 0 512 512" fill="currentColor"><path d="m317.727 108.904-95.192 96.592-26.93 86.815 17.54 36.723 20.417 9.287 33.182-55.082 11.297-3.61 61.75 26.85 20.26-12.998 4.47-43.7 11.42 53.634-10.622 14.162 3.772 1.64 5.238 6.5 6.832 34.343 55.977-66.775 13.98.23 22.397 28.575-9.453-52.244L434.01 166.81l-116.28-57.906zM123.61 120.896 94.08 173l-4.603 27.62 25.98-8.442 11.704 7.377.084.634 28.295 59.865 13.773-4.543 10.94 4.668 3.922 8.21 19.517-62.917-1.074-33.336-40.15-.522-29.732-23.78 34.06 10.888 42.49-7.727 26.034 15.88 36.282-36.815a332.698 332.698 0 0 0-8.58-3.52l-79.58 10.126-3.528-.25-56.307-15.52zm249.33 36.422 47.058 66.02 2.107 62.51-25.283-59.698-65.322-60.404 41.44-8.428zm-262.2 55.32-64.234 20.876-16.71 78.552 50.794 5.582.596-7.14 37.662-36.707-8.108-61.16zm56.688 62.45-36.44 12.016-31.644 30.84 22.588 30.867 57.326 1.74 16.5-16.16-28.33-59.302zm110.666 24.19-44.307 73.546-.033 57.14 97.264 12.216 44.242-19.528-17.666-88.806-79.5-34.567zM443.8 313.36l-46.843 55.876.287 1.774 65.147 13.887 25.78-14.926-44.37-56.613zm-138.382 15.89 39.23 22.842 13.41 50.658-26.82 23.838-45.015-2.553 38.562-28.242 2.483-39.23-21.85-27.312zm-238.37 53.838-8.77 28.51 13.152 48.498 91.037-11.91 1.32-26.418-62.582-31.995-34.156-6.684z"/></symbol>
+  <symbol id="t-tower" viewBox="0 0 512 512" fill="currentColor"><path d="m256 32-96 48h23v71h-32v50h30.945L155.36 440.244l-.653.477.522.72-4.175 37.566-.994 8.945 17.89 1.99.995-8.946L171.61 457h168.78l2.665 23.994.994 8.945 17.89-1.99-.995-8.944-4.174-37.567.523-.72-.654-.476L330.054 201H361v-50h-32V80h23l-96-48zm-48 64h32v48h-32V96zm64 0h32v48h-32V96zm-103 73h14v14h-14v-14zm32 0h14v14h-14v-14zm32 0h14v14h-14v-14zm32 0h14v14h-14v-14zm32 0h14v14h-14v-14zm32 0h14v14h-14v-14zm-113.328 32h80.656L256 236.848 215.672 201zm-16.65 9.283L240.33 247h-45.385l4.08-36.717zm113.955 0 4.08 36.717h-45.385l41.305-36.717zM192.945 265h31.383l-34.822 30.953 3.44-30.953zm58.477 0h9.156l51.75 46H199.672l51.75-46zm36.25 0h31.383l3.44 30.953L287.67 265zm-83.994 64h104.644L256 367.053 203.678 329zm-18.8 8.586L236.323 375h-55.6l4.157-37.414zm142.243 0L331.278 375h-55.6l51.444-37.414zM178.724 393h41.6l-45.26 32.914 3.66-32.914zm72.205 0h10.144l63.25 46H187.678l63.25-46zm40.75 0h41.6l3.658 32.914L291.678 393z"/></symbol>
+  <symbol id="t-forge" viewBox="0 0 512 512" fill="currentColor"><path d="M413.375 69.906 336.937 191.47l-8.25-32.69-30.218 88.97 62.655-29.375.22 29.438 127.03-50.938-70.813-1.97 47.782-68.686-73.47 39.25 21.5-95.564zM210.22 102.094l-32 14.406 16.874 55.656-177.813 80.03 12.564 27.876L207.656 200l30.406 49.47 49.313-22.19-21.344-70.343-55.81-54.843zM197.593 266.78v20.345h-88.906c15.994 38.807 51.225 65.43 88.906 74.28v32.97h58.562c-12.118 30.528-33.505 55.684-58.47 77.594H172.22v18.686h284.34V471.97h-27.406c-28.734-21.895-50.055-47.018-61.625-77.595h63.658v-29.188c19.748-6.995 39.5-19.51 59.25-36.687-19.812-17.523-39.23-27.25-59.25-31.938v-29.78H197.594z"/></symbol>
+  <symbol id="t-spring" viewBox="0 0 512 512" fill="currentColor"><path d="M406.043 316c24.11 96.443-50.59 180-150 180s-174.405-82.38-150-180c15-60 90-150 150-300 60 150 135 240 150 300z"/></symbol>
+</svg>
 
 <div class="wrap">
-
   <header>
-    <div class="logo">
-      <span class="logo-icon">⏱</span>
-      <span class="logo-text">TimerHub</span>
-    </div>
-    <button id="themeToggle" class="btn-icon" aria-label="Toggle theme"><span class="theme-icon">☀️</span></button>
+    <h1>Тактика на клетках</h1>
+    <div class="status" id="status"></div>
   </header>
-
-  <nav class="tabs" role="tablist" aria-label="Timer modes">
-    <button class="tab active" data-tab="cook"      role="tab" aria-selected="true"  aria-controls="panel-cook">🍳 Cooking</button>
-    <button class="tab"        data-tab="sport"     role="tab" aria-selected="false" aria-controls="panel-sport">💪 Sport</button>
-    <button class="tab"        data-tab="hiit"      role="tab" aria-selected="false" aria-controls="panel-hiit">🔥 HIIT</button>
-    <button class="tab"        data-tab="pomodoro"  role="tab" aria-selected="false" aria-controls="panel-pomodoro">🍅 Pomodoro</button>
-    <button class="tab"        data-tab="stopwatch" role="tab" aria-selected="false" aria-controls="panel-stopwatch">🏁 Stopwatch</button>
-    <button class="tab"        data-tab="general"   role="tab" aria-selected="false" aria-controls="panel-general">⚙️ Custom</button>
-  </nav>
-
-  <!-- ===== COOKING ===== -->
-  <section class="card" id="panel-cook" role="tabpanel">
-    <div class="card-inner">
-      <div class="circle-wrap">
-        <svg class="ring-svg" viewBox="0 0 220 220">
-          <circle class="ring-track" cx="110" cy="110" r="98"/>
-          <circle class="ring-fill" id="cookRing" cx="110" cy="110" r="98"/>
-        </svg>
-        <div class="time-display" id="cookDisplay" aria-live="polite">03:00</div>
-        <div class="time-label" id="cookLabel">ready</div>
+  <div class="layout">
+    <div class="board-wrap">
+      <div class="board-frame">
+        <div class="axis-x" id="axisX" aria-hidden="true"></div>
+        <div class="axis-y" id="axisY" aria-hidden="true"></div>
+        <div class="board" id="board" role="grid" aria-label="Игровое поле"></div>
       </div>
-      <div class="card-right-top">
-        <div>
-          <div class="card-title">🍳 Cooking Timer</div>
-          <div class="card-desc">Perfect timing for your recipes</div>
-        </div>
-        <div class="presets">
-          <button class="preset" data-cook="180">3 min</button>
-          <button class="preset" data-cook="300">5 min</button>
-          <button class="preset" data-cook="420">7 min</button>
-          <button class="preset" data-cook="720">12 min</button>
-          <button class="preset" data-cook="1800">30 min</button>
+      <div class="overlay" id="overlay" hidden><div><strong id="ovText"></strong><span id="ovReason"></span><button class="primary" id="ovBtn">Новая карта</button></div></div>
+    </div>
+    <div class="panel">
+      <div class="box">
+        <div class="label">Цель миссии</div>
+        <div class="obj-name" id="objName"></div>
+        <p class="obj-desc" id="objDesc"></p>
+        <div class="obj-prog" id="objProg"></div>
+      </div>
+      <div class="box">
+        <div class="label">Выбранный боец</div>
+        <div id="card"></div>
+        <div class="btns">
+          <button id="waitBtn">Ждать<kbd>W</kbd></button>
+          <button id="endBtn" class="primary">Конец хода<kbd>Space</kbd></button>
+          <button id="dangerBtn" aria-pressed="false">Угрозы<kbd>T</kbd></button>
+          <button id="resetBtn">Новая карта</button>
         </div>
       </div>
-      <div class="card-right-bottom">
-        <div class="controls">
-          <button id="cookToggle" class="btn-primary">Start</button>
-          <button id="cookReset"  class="btn-ghost">Reset</button>
-        </div>
+      <div class="box">
+        <div class="label">Под курсором</div>
+        <div class="hover" id="hover"><p class="empty">Наведите на клетку, чтобы увидеть местность и бойца.</p></div>
+      </div>
+      <div class="box">
+        <div class="label">Журнал</div>
+        <ul class="log" id="log"></ul>
+      </div>
+      <div class="box">
+        <details>
+          <summary>Правила</summary>
+          <ul class="rules">
+            <li>Все бойцы одинаковы: 9 HP, урон 3, ход 2 клетки, атака по соседней клетке, обзор 3 клетки.</li>
+            <li>За ход каждый боец может переместиться и затем атаковать. Атаковать можно и без движения.</li>
+            <li>Способности даёт только местность: боец получает их, пока стоит на нужной клетке.</li>
+            <li><b>Фланг:</b> +1 к урону за каждого другого союзника атакующего, стоящего рядом с целью.</li>
+            <li>Свои бойцы не мешают движению: сквозь союзника можно пройти, но остановиться на его клетке нельзя.</li>
+            <li><b>Зона контроля:</b> войдя на клетку рядом с врагом, боец останавливается. Пройти мимо нельзя.</li>
+            <li><b>Туман войны:</b> врагов видно только в радиусе обзора ваших бойцов. Невидимый враг может остановить движение засадой.</li>
+            <li>Поведение противника зависит от миссии. В миссиях «Уничтожить всех», «Блицкриг» и «Защитить командира» он сразу идёт в атаку (на командира в первую очередь). В «Удержать точку» он занимает точку. В «Прорыве к выходу» двое врагов идут навстречу, а двое охраняют выход и атакуют, когда вы подходите ближе чем на 4 клетки.</li>
+            <li><b>Угрозы:</b> красный уголок на зелёной клетке значит, что видимые враги смогут ударить туда в свой ход (цифра — сколько врагов). Кнопка «Угрозы» (T) показывает всю опасную зону. Враги в тумане не учитываются.</li>
+            <li>Уничтожение всех врагов — победа в любой миссии. Гибель всего отряда — поражение.</li>
+            <li>Каждая новая карта и цель создаются случайно.</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Местность и способности</summary>
+          <div class="ref" id="terrRef"></div>
+        </details>
+        <details>
+          <summary>Цели миссий</summary>
+          <div class="ref" id="objRef"></div>
+        </details>
+        <p class="credit">Иконки: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> — Delapouite, Lorc, Sbed (CC BY 3.0). Шрифт: Barlow (Google Fonts).</p>
       </div>
     </div>
-  </section>
-
-  <!-- ===== SPORT ===== -->
-  <section class="card" id="panel-sport" hidden role="tabpanel">
-    <div class="card-inner">
-      <div class="circle-wrap">
-        <svg class="ring-svg" viewBox="0 0 220 220">
-          <circle class="ring-track" cx="110" cy="110" r="98"/>
-          <circle class="ring-fill" id="sportRing" cx="110" cy="110" r="98"/>
-        </svg>
-        <div class="time-display" id="sportDisplay" aria-live="polite">00:30</div>
-        <div class="time-label" id="sportLabel">ready</div>
-      </div>
-      <div class="card-right-top">
-        <div>
-          <div class="card-title">💪 Sport Timer</div>
-          <div class="card-desc">Sets, rests, and everything in between</div>
-        </div>
-        <div class="presets">
-          <button class="preset" data-sport="20">20 sec</button>
-          <button class="preset" data-sport="30">30 sec</button>
-          <button class="preset" data-sport="60">1 min</button>
-          <button class="preset" data-sport="120">2 min</button>
-          <button class="preset" data-sport="300">5 min</button>
-        </div>
-      </div>
-      <div class="card-right-bottom">
-        <div class="controls">
-          <button id="sportToggle" class="btn-primary">Start</button>
-          <button id="sportReset"  class="btn-ghost">Reset</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== HIIT ===== -->
-  <section class="card" id="panel-hiit" hidden role="tabpanel">
-    <div class="card-inner">
-      <div class="circle-wrap">
-        <svg class="ring-svg" viewBox="0 0 220 220">
-          <circle class="ring-track" cx="110" cy="110" r="98"/>
-          <circle class="ring-fill" id="hiitRing" cx="110" cy="110" r="98"/>
-        </svg>
-        <div class="time-display" id="hiitDisplay" aria-live="polite">00:20</div>
-        <div class="hiit-phase-badge" id="hiitPhaseBadge">WORK</div>
-      </div>
-      <div class="card-right-top">
-        <div>
-          <div class="card-title">🔥 HIIT Timer</div>
-          <div class="card-desc">Work hard, rest smart</div>
-        </div>
-        <div class="hiit-stats">
-          <div class="stat-box"><span class="stat-val" id="hiitRoundDisplay">1</span><span class="stat-key">Round</span></div>
-          <div class="stat-box"><span class="stat-val" id="hiitTotalDisplay">8</span><span class="stat-key">Total</span></div>
-        </div>
-        <div class="inp-row">
-          <label class="inp-group"><span>Work (s)</span><input type="number" id="hiitWork" value="20" min="1" max="999"></label>
-          <label class="inp-group"><span>Rest (s)</span><input type="number" id="hiitRest" value="10" min="1" max="999"></label>
-          <label class="inp-group"><span>Rounds</span><input type="number" id="hiitRounds" value="8" min="1" max="99"></label>
-        </div>
-      </div>
-      <div class="card-right-bottom">
-        <div class="controls">
-          <button id="hiitToggle" class="btn-primary">Start</button>
-          <button id="hiitReset"  class="btn-ghost">Reset</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== POMODORO ===== -->
-  <section class="card" id="panel-pomodoro" hidden role="tabpanel">
-    <div class="card-inner">
-      <div class="circle-wrap">
-        <svg class="ring-svg" viewBox="0 0 220 220">
-          <circle class="ring-track" cx="110" cy="110" r="98"/>
-          <circle class="ring-fill" id="pomRing" cx="110" cy="110" r="98"/>
-        </svg>
-        <div class="time-display" id="pomDisplay" aria-live="polite">25:00</div>
-        <div class="time-label" id="pomPhaseLabel">Focus</div>
-      </div>
-      <div class="card-right-top">
-        <div>
-          <div class="card-title">🍅 Pomodoro</div>
-          <div class="card-desc">Focus deeply, rest completely</div>
-        </div>
-        <div class="pom-dots" id="pomDots" aria-label="Completed pomodoros"></div>
-        <div class="inp-row">
-          <label class="inp-group"><span>Focus (m)</span><input type="number" id="pomFocusMin" value="25" min="1" max="90"></label>
-          <label class="inp-group"><span>Short (m)</span><input type="number" id="pomShortMin" value="5"  min="1" max="30"></label>
-          <label class="inp-group"><span>Long (m)</span><input type="number" id="pomLongMin"  value="15" min="1" max="60"></label>
-        </div>
-      </div>
-      <div class="card-right-bottom">
-        <div class="controls">
-          <button id="pomToggle" class="btn-primary">Start</button>
-          <button id="pomSkip"   class="btn-ghost">Skip</button>
-          <button id="pomReset"  class="btn-ghost">Reset</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== STOPWATCH ===== -->
-  <section class="card" id="panel-stopwatch" hidden role="tabpanel">
-    <div class="card-inner">
-      <div class="circle-wrap">
-        <svg class="ring-svg" viewBox="0 0 220 220">
-          <circle class="ring-track" cx="110" cy="110" r="98"/>
-          <circle class="ring-fill" id="swRing" cx="110" cy="110" r="98"/>
-        </svg>
-        <div class="time-display sw-display" id="swDisplay" aria-live="polite">00:00.00</div>
-      </div>
-      <div class="card-right-top">
-        <div>
-          <div class="card-title">🏁 Stopwatch</div>
-          <div class="card-desc">Measure every second, track every lap</div>
-        </div>
-        <ul class="lap-list" id="lapList" aria-label="Lap times"></ul>
-      </div>
-      <div class="card-right-bottom">
-        <div class="controls">
-          <button id="swToggle" class="btn-primary">Start</button>
-          <button id="swLap"    class="btn-ghost">Lap</button>
-          <button id="swReset"  class="btn-ghost">Reset</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== CUSTOM ===== -->
-  <section class="card" id="panel-general" hidden role="tabpanel">
-    <div class="card-inner">
-      <div class="circle-wrap">
-        <svg class="ring-svg" viewBox="0 0 220 220">
-          <circle class="ring-track" cx="110" cy="110" r="98"/>
-          <circle class="ring-fill" id="generalRing" cx="110" cy="110" r="98"/>
-        </svg>
-        <div class="time-display" id="generalDisplay" aria-live="polite">00:30</div>
-        <div class="time-label" id="generalLabel">ready</div>
-      </div>
-      <div class="card-right-top">
-        <div>
-          <div class="card-title">⚙️ Custom Timer</div>
-          <div class="card-desc">Set any duration you need</div>
-        </div>
-        <div class="inp-row">
-          <label class="inp-group"><span>Hours</span><input type="number" id="generalHour" value="0"  min="0" max="23"></label>
-          <label class="inp-group"><span>Minutes</span><input type="number" id="generalMin"  value="0"  min="0" max="59"></label>
-          <label class="inp-group"><span>Seconds</span><input type="number" id="generalSec"  value="30" min="0" max="59"></label>
-        </div>
-      </div>
-      <div class="card-right-bottom">
-        <div class="controls">
-          <button id="generalToggle" class="btn-primary">Start</button>
-          <button id="generalReset"  class="btn-ghost">Reset</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <span>TimerHub © 2025 · <a href="/sitemap.xml" style="color:inherit;opacity:0.6">sitemap</a></span>
-    <span class="hotkeys"><kbd>Space</kbd> start/pause · <kbd>R</kbd> reset · <kbd>L</kbd> lap</span>
-  </footer>
-
+  </div>
 </div>
 
-<script src="script.js" defer></script>
+<script>
+const W = 12, H = 9, COLS = 'ABCDEFGHIJKL';
+const BASE = { hp: 9, atk: 3, move: 2, range: 1, vision: 3 };
+const HOLD_N = 3, TIMED_N = 12, VIP_N = 10;
+const TERRAIN = {
+  plain:  { name: 'Равнина', glyph: '',          effect: 'Без эффекта.' },
+  rock:   { name: 'Скала',   glyph: '',          effect: 'Непроходима.' },
+  forest: { name: 'Лес',     glyph: '♣︎', ability: 'Укрытие', effect: 'Укрытие: входящий урон −1.' },
+  hill:   { name: 'Холм',    glyph: '▲',         ability: 'Высота',  effect: 'Высота: дальность атаки +1 (2 клетки).' },
+  tower:  { name: 'Вышка',   glyph: '◎',         ability: 'Обзор',   effect: 'Обзор: радиус видимости +2.' },
+  forge:  { name: 'Кузня',   glyph: '✦',         ability: 'Закалка', effect: 'Закалка: урон +1.' },
+  spring: { name: 'Родник',  glyph: '✚',         ability: 'Лечение', effect: 'Лечение: +2 HP в начале своего хода.' },
+  swamp:  { name: 'Болото',  glyph: '≈',         effect: 'Вход в болото сразу заканчивает движение.' },
+};
+const OBJ = {
+  kill:  { name: 'Уничтожить всех', desc: 'Победа, когда на карте не останется врагов.' },
+  hold:  { name: 'Удержать точку',  desc: `Держите бойца на отмеченной точке ${HOLD_N} хода подряд. Если точка пуста или на ней враг, отсчёт сбрасывается.` },
+  exit:  { name: 'Прорыв к выходу', desc: 'Доведите любого бойца до клетки выхода на правом краю карты.' },
+  vip:   { name: 'Защитить командира', desc: `Командир (жетон с короной) должен продержаться ${VIP_N} ходов. Его гибель — поражение.` },
+  timed: { name: 'Блицкриг', desc: `Уничтожьте всех врагов за ${TIMED_N} ходов.` },
+};
+const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+const key = (x,y) => x + ',' + y;
+const coord = (x,y) => COLS[x] + (y + 1);
+const dist = (a,b) => Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const shuffle = a => { for (let i = a.length-1; i > 0; i--){ const j = rnd(i+1); [a[i],a[j]] = [a[j],a[i]]; } return a; };
+const inside = (x,y) => x >= 0 && y >= 0 && x < W && y < H;
+
+let S;
+
+/* ---------- map generation ---------- */
+function generate(){
+  let last;
+  for (let attempt = 0; attempt < 200; attempt++){
+    const T = Array.from({length:H}, () => Array(W).fill('plain'));
+    const get = (x,y) => T[y][x];
+    const inner = x => x >= 2 && x <= W-3;
+    for (let i = 0; i < 13; i++){ const x = 1 + rnd(W-2), y = rnd(H); T[y][x] = 'rock'; }
+    const cluster = (type, n, minS, maxS) => {
+      for (let i = 0; i < n; i++){
+        let x = 2 + rnd(W-4), y = rnd(H), size = minS + rnd(maxS-minS+1);
+        for (let s = 0; s < size; s++){
+          if (inside(x,y) && inner(x) && get(x,y) === 'plain') T[y][x] = type;
+          const [dx,dy] = pick(DIRS); x += dx; y += dy;
+        }
+      }
+    };
+    cluster('forest', 4, 2, 4); cluster('swamp', 2, 2, 3); cluster('hill', 3, 1, 2);
+    cluster('tower', 1, 1, 1); cluster('forge', 2, 1, 1); cluster('spring', 1, 1, 1);
+
+    const obj = pick(Object.keys(OBJ));
+    let point = null; const exits = new Set();
+    if (obj === 'hold'){
+      const opts = []; for (let y = 1; y < H-1; y++) for (let x = 4; x <= W-5; x++) if (get(x,y) !== 'rock') opts.push({x,y});
+      point = pick(opts); T[point.y][point.x] = 'plain';
+    }
+    if (obj === 'exit'){
+      const cy = 1 + rnd(H-2);
+      for (let y = cy-1; y <= cy+1; y++){ T[y][W-1] = 'plain'; exits.add(key(W-1,y)); }
+    }
+    const free = (xs) => { const c = []; for (const x of xs) for (let y = 0; y < H; y++){
+      const t = get(x,y); if (t !== 'rock' && t !== 'swamp' && !exits.has(key(x,y)) && !(point && point.x===x && point.y===y)) c.push({x,y}); } return shuffle(c); };
+    const pSpawn = free([0,1]).slice(0,4);
+    const eSpawn = free(obj === 'exit' ? [W-5,W-4,W-3,W-2] : [W-2,W-1]).slice(0,4);
+    if (pSpawn.length < 4 || eSpawn.length < 4) continue;
+
+    // every important cell must be reachable over passable ground
+    const seen = new Set([key(pSpawn[0].x,pSpawn[0].y)]); const q = [pSpawn[0]];
+    while (q.length){ const c = q.shift(); for (const [dx,dy] of DIRS){ const nx=c.x+dx, ny=c.y+dy, k=key(nx,ny);
+      if (inside(nx,ny) && !seen.has(k) && get(nx,ny) !== 'rock'){ seen.add(k); q.push({x:nx,y:ny}); } } }
+    const must = [...pSpawn, ...eSpawn, ...(point ? [point] : []), ...[...exits].map(k => { const [x,y]=k.split(',').map(Number); return {x,y}; })];
+    last = { T, obj, point, exits, pSpawn, eSpawn };
+    if (must.every(c => seen.has(key(c.x,c.y)))) return last;
+  }
+  return last;
+}
+
+function newGame(){
+  const m = generate();
+  let id = 0;
+  const mk = (side, c) => ({ id: id++, side, x: c.x, y: c.y, hp: BASE.hp, moved: false, acted: false, vip: false, name: 'Боец' });
+  const units = [...m.pSpawn.map(c => mk('p', c)), ...m.eSpawn.map(c => mk('e', c))];
+  if (m.obj === 'vip'){ units[0].vip = true; units[0].name = 'Командир'; }
+  S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units,
+        terr: m.T, obj: m.obj, point: m.point, exits: m.exits, hold: 0,
+        alert: ['kill','timed','vip','exit'].includes(m.obj), result: null, reason: '' };
+  if (m.obj === 'exit') units.filter(u => u.side === 'e').slice(0, 2).forEach(u => { u.guard = true; });
+  updateVis();
+  addLog('sys', `Миссия: ${OBJ[S.obj].name}. Ход 1.`);
+  if (S.alert) addLog('sys', S.obj === 'vip' ? 'Противник знает, где командир, и идёт в атаку.' : S.obj === 'exit' ? 'Двое врагов охраняют выход, остальные выдвигаются навстречу.' : 'Противник выдвигается навстречу.');
+  render(); renderHover();
+}
+
+/* ---------- rules helpers ---------- */
+const alive = side => S.units.filter(u => u.hp > 0 && (!side || u.side === side));
+const unitAt = (x,y) => S.units.find(u => u.hp > 0 && u.x === x && u.y === y);
+const selected = () => S.units.find(u => u.id === S.sel && u.hp > 0);
+const terr = (x,y) => S.terr[y][x];
+const terrOf = u => terr(u.x,u.y);
+const rangeOf = u => BASE.range + (terrOf(u) === 'hill' ? 1 : 0);
+const visionOf = u => BASE.vision + (terrOf(u) === 'tower' ? 2 : 0);
+const known = u => u.side === 'p' || S.vis.has(key(u.x,u.y));
+const abilitiesOf = u => { const a = TERRAIN[terrOf(u)].ability; return a ? [a] : []; };
+
+function updateVis(){
+  S.vis = new Set();
+  for (const p of alive('p')){
+    const v = visionOf(p);
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++)
+      if (Math.abs(x-p.x) + Math.abs(y-p.y) <= v) S.vis.add(key(x,y));
+  }
+}
+
+function dmgParts(a, t){
+  const forge = terrOf(a) === 'forge' ? 1 : 0;
+  const flank = alive(a.side).filter(o => o !== a && dist(o,t) === 1).length;
+  const cover = terrOf(t) === 'forest' ? 1 : 0;
+  return { d: Math.max(1, BASE.atk + forge + flank - cover), forge, flank, cover };
+}
+
+// Movement field: stops on swamp and in enemy zone of control. Players only account for enemies they can see.
+function reach(u){
+  const isP = u.side === 'p';
+  const opp = alive(isP ? 'e' : 'p').filter(o => !isP || S.vis.has(key(o.x,o.y)));
+  const zoc = new Set();
+  opp.forEach(o => DIRS.forEach(([dx,dy]) => zoc.add(key(o.x+dx,o.y+dy))));
+  // own fighters can be walked through (but not stopped on); enemies block if you can see them
+  const blocked = (x,y) => { const o = unitAt(x,y); return o && o.side !== u.side && (!isP || S.vis.has(key(x,y))); };
+  const start = key(u.x,u.y);
+  const d = new Map([[start, { n: 0, prev: null }]]); const q = [[u.x,u.y]];
+  while (q.length){
+    const [x,y] = q.shift(); const k = key(x,y), n = d.get(k).n;
+    if (n >= BASE.move) continue;
+    if (k !== start && (zoc.has(k) || terr(x,y) === 'swamp')) continue;
+    for (const [dx,dy] of DIRS){
+      const nx = x+dx, ny = y+dy, nk = key(nx,ny);
+      if (!inside(nx,ny) || d.has(nk) || terr(nx,ny) === 'rock' || blocked(nx,ny)) continue;
+      const o = unitAt(nx,ny);
+      d.set(nk, { n: n+1, prev: k, occ: !!(o && o.side === u.side) }); q.push([nx,ny]);
+    }
+  }
+  return d;
+}
+function pathTo(d, k){
+  const path = []; let cur = k;
+  while (d.get(cur).prev){ path.unshift(cur.split(',').map(Number)); cur = d.get(cur).prev; }
+  return path;
+}
+const targetsOf = u => alive(u.side === 'p' ? 'e' : 'p').filter(t => known(t) && dist(u,t) <= rangeOf(u));
+
+function addLog(cls, text){ S.log.unshift({cls,text}); S.log.length = Math.min(S.log.length, 50); }
+
+function attack(a, t){
+  const p = dmgParts(a, t);
+  t.hp = Math.max(0, t.hp - p.d);
+  a.acted = a.moved = true;
+  S.hit = { x: t.x, y: t.y, dmg: p.d };
+  if (a.side === 'p') S.alert = true;
+  const notes = [];
+  if (p.flank) notes.push(`фланг +${p.flank}`);
+  if (p.forge) notes.push('кузня +1');
+  if (p.cover) notes.push('лес −1');
+  addLog(a.side, `${a.name} ${coord(a.x,a.y)} бьёт ${t.name.toLowerCase()} ${coord(t.x,t.y)}: −${p.d}` +
+    (notes.length ? ` (${notes.join(', ')})` : '') + (t.hp === 0 ? ' — уничтожен' : ` → ${t.hp} HP`));
+  if (t.side === 'p') updateVis();
+}
+
+function finish(win, reason){
+  S.phase = 'over'; S.result = win ? 'Победа' : 'Поражение'; S.reason = reason;
+  addLog('sys', reason);
+  return true;
+}
+function checkOver(){
+  if (S.phase === 'over') return true;
+  if (!alive('p').length) return finish(false, 'Ваш отряд погиб.');
+  if (S.obj === 'vip' && !alive('p').some(u => u.vip)) return finish(false, 'Командир погиб.');
+  if (!alive('e').length) return finish(true, 'Все враги уничтожены.');
+  if (S.obj === 'exit' && alive('p').some(u => S.exits.has(key(u.x,u.y)))) return finish(true, 'Боец прорвался к выходу.');
+  return false;
+}
+function endRoundChecks(){
+  if (S.obj === 'hold'){
+    const onP = unitAt(S.point.x, S.point.y);
+    if (onP && onP.side === 'p'){ S.hold++; addLog('sys', `Точка удержана: ${S.hold}/${HOLD_N}`); }
+    else if (S.hold){ S.hold = 0; addLog('sys', 'Удержание прервано.'); }
+    if (S.hold >= HOLD_N) return finish(true, 'Точка удержана.');
+  }
+  if (S.obj === 'timed' && S.turn >= TIMED_N) return finish(false, 'Время вышло.');
+  if (S.obj === 'vip' && S.turn >= VIP_N) return finish(true, 'Командир продержался до подкрепления.');
+  return false;
+}
+function heal(side){
+  for (const u of alive(side)) if (terrOf(u) === 'spring' && u.hp < BASE.hp){
+    u.hp = Math.min(BASE.hp, u.hp + 2);
+    if (known(u)) addLog(side, `${u.name} ${coord(u.x,u.y)} лечится у родника → ${u.hp} HP`);
+  }
+}
+
+/* ---------- player actions ---------- */
+const ANIMATE = typeof window !== 'undefined';
+
+// Cells that visible enemies could attack in their next turn → number of attackers
+function dangerMap(){
+  const m = new Map();
+  for (const e of alive('e').filter(known)){
+    const hit = new Set();
+    for (const [k, v] of reach(e)){
+      if (v.occ) continue;
+      const [x,y] = k.split(',').map(Number);
+      const r = BASE.range + (terr(x,y) === 'hill' ? 1 : 0);
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++){
+        const s = Math.abs(dx) + Math.abs(dy);
+        if (s > 0 && s <= r && inside(x+dx,y+dy)) hit.add(key(x+dx,y+dy));
+      }
+    }
+    hit.forEach(k => m.set(k, (m.get(k) || 0) + 1));
+  }
+  return m;
+}
+
+async function animateMove(u, steps){
+  const fx = u.x, fy = u.y;
+  S.busy = true;
+  for (const [x,y] of steps.slice(0,-1)){ u.x = x; u.y = y; render(); await sleep(110); }
+  u.x = fx; u.y = fy; S.busy = false;
+  render();
+  if (S.pendingEnd){ S.pendingEnd = false; endTurn(); }
+}
+
+function onCell(x,y){
+  if (S.phase !== 'player' || S.busy) return;
+  const u = unitAt(x,y), sel = selected();
+  const vu = u && known(u) ? u : null;
+  S.hit = null;
+  if (sel){
+    if (vu && vu.side === 'e' && !sel.acted && dist(sel,vu) <= rangeOf(sel)){
+      attack(sel, vu); S.sel = null;
+      if (!checkOver()) maybeAutoEnd();
+      return render();
+    }
+    if (!sel.moved && !vu){
+      const d = reach(sel), k = key(x,y);
+      if (d.has(k) && k !== key(sel.x,sel.y)){
+        const steps = movePlayer(sel, d, k);
+        if (ANIMATE && steps.length > 1 && S.phase !== 'over') return animateMove(sel, steps);
+        return render();
+      }
+    }
+  }
+  S.sel = (vu && vu.side === 'p' && !vu.acted && vu !== sel) ? vu.id : null;
+  render();
+}
+
+function movePlayer(sel, d, k){
+  const from = coord(sel.x,sel.y);
+  const path = pathTo(d, k);
+  let ambush = false;
+  const steps = [];
+  for (let i = 0; i < path.length; i++){
+    const [nx,ny] = path[i];
+    const blocker = unitAt(nx,ny);
+    if (blocker && blocker.side !== sel.side){ ambush = true; break; }
+    sel.x = nx; sel.y = ny; updateVis(); steps.push([nx,ny]);
+    if (i < path.length - 1 && alive('e').some(e => dist(e,sel) === 1)){ ambush = true; break; }
+  }
+  sel.moved = true;
+  addLog('p', `${sel.name} ${from} → ${coord(sel.x,sel.y)}`);
+  if (ambush){ addLog('sys', `Засада! Враг в тумане остановил бойца на ${coord(sel.x,sel.y)}.`); S.alert = true; }
+  if (checkOver()) return steps;
+  if (!targetsOf(sel).length){ sel.acted = true; S.sel = null; maybeAutoEnd(); }
+  return steps;
+}
+
+function waitUnit(){
+  const sel = selected(); if (!sel || S.phase !== 'player' || S.busy) return;
+  sel.acted = sel.moved = true; S.sel = null;
+  addLog('p', `${sel.name} ${coord(sel.x,sel.y)} ждёт`);
+  maybeAutoEnd(); render();
+}
+function maybeAutoEnd(){
+  if (S.phase === 'player' && alive('p').every(u => u.acted))
+    setTimeout(() => { if (S.busy) S.pendingEnd = true; else endTurn(); }, 350);
+}
+
+/* ---------- enemy turn ---------- */
+async function endTurn(){
+  if (S.phase !== 'player' || S.busy) return;
+  S.phase = 'enemy'; S.sel = null; S.hit = null; S.trail = new Set(); render();
+  heal('e');
+  if (!S.alert && alive('e').some(e => alive('p').some(p => dist(e,p) <= visionOf(e)))){
+    S.alert = true; addLog('sys', 'Противник заметил ваш отряд.');
+  }
+  await sleep(250);
+  S.threat = threatMap();
+  S.focus = pickFocus();
+  // fighters who are further from the target move first, so the ones striking last get the flank bonus
+  const order = alive('e').sort((a,b) => (S.focus ? dist(b,S.focus) - dist(a,S.focus) : 0));
+  for (const e of order){
+    if (e.hp <= 0) continue;
+    if (S.focus && S.focus.hp <= 0) S.focus = pickFocus();
+    const shown = await enemyAct(e);
+    render();
+    if (checkOver()) break;
+    if (shown) await sleep(420);
+  }
+  if (S.phase !== 'over') endRoundChecks();
+  if (S.phase === 'over') return render();
+  S.turn++; S.phase = 'player'; S.hit = null;
+  S.units.forEach(u => { u.moved = u.acted = false; });
+  addLog('sys', `Ход ${S.turn}.`);
+  heal('p');
+  render();
+}
+
+const terrBonus = t => ({ forest: 1, hill: 1, forge: 1, spring: .5, tower: .3, swamp: -1 }[t] || 0);
+
+// How many of the player's fighters could hit each cell next turn
+function threatMap(){
+  const m = new Map();
+  for (const p of alive('p')){
+    const hit = new Set();
+    for (const [k, v] of reach(p)){
+      if (v.occ) continue;
+      const [x,y] = k.split(',').map(Number);
+      const r = BASE.range + (terr(x,y) === 'hill' ? 1 : 0);
+      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
+        if (Math.abs(dx) + Math.abs(dy) <= r && Math.abs(dx) + Math.abs(dy) > 0 && inside(x+dx,y+dy)) hit.add(key(x+dx,y+dy));
+    }
+    hit.forEach(k => m.set(k, (m.get(k) || 0) + 1));
+  }
+  return m;
+}
+
+// Shared target for the whole enemy squad this turn: the VIP, or the weakest, most exposed fighter
+function pickFocus(){
+  const players = alive('p'), enemies = alive('e');
+  if (S.obj === 'vip'){ const v = players.find(p => p.vip); if (v) return v; }
+  let best = null, bv = Infinity;
+  for (const p of players){
+    const avg = enemies.reduce((s,e) => s + dist(e,p), 0) / Math.max(1, enemies.length);
+    const v = p.hp * 1.2 + avg * 0.8 + (terrOf(p) === 'forest' ? 1.5 : 0);
+    if (v < bv){ bv = v; best = p; }
+  }
+  return best;
+}
+
+async function enemyAct(e){
+  if (!S.alert && S.obj !== 'hold') return false;
+  const players = alive('p');
+  const ox = e.x, oy = e.y;
+  const hurt = e.hp <= 3;
+  const focus = S.focus && S.focus.hp > 0 ? S.focus : null;
+  let best = null;
+  const field = reach(e);
+  for (const [k, v] of field){
+    if (v.occ) continue;
+    const [x,y] = k.split(',').map(Number);
+    e.x = x; e.y = y;
+    let score, tgt = null;
+    const ts = S.alert ? players.filter(p => dist(e,p) <= rangeOf(e)) : [];
+    if (ts.length){
+      let bv = -1;
+      for (const t of ts){
+        const d = dmgParts(e,t).d;
+        const val = d + (d >= t.hp ? 6 : 0) + (t.vip ? 3 : 0) + (t === focus ? 2 : 0) + (BASE.hp - t.hp) * 0.3;
+        if (val > bv){ bv = val; tgt = t; }
+      }
+      score = 100 + bv * 3;
+    } else {
+      const goals = S.alert ? (S.obj === 'vip' ? players.filter(p => p.vip) : players) : [];
+      // head for the shared target, but don't ignore a much closer fighter
+      score = goals.length ? -2 * Math.min(...goals.map(p => dist(e,p) - (p === focus ? 2 : 0))) : -Infinity;
+      // set up a flank: stand next to a cell that is next to the focus and already pressured by an ally
+      if (focus && dist(e, focus) === 2){
+        const allies = alive('e').filter(o => o !== e && dist(o, focus) === 1).length;
+        score += 1 + allies;
+      }
+      if (S.obj === 'hold'){ const dp = dist(e, S.point); score = Math.max(score, -2*dp + (dp === 0 ? 8 : 0)); }
+      if (S.obj === 'exit' && e.guard && !players.some(p => dist(p, {x:ox, y:oy}) <= 4)){
+        score = -2 * Math.min(...[...S.exits].map(k => { const [ex,ey] = k.split(',').map(Number); return Math.abs(ex-x) + Math.abs(ey-y); }));
+      }
+    }
+    const t = terr(x,y);
+    score += terrBonus(t) - v.n * 0.01;
+    // avoid ending where several fighters can gang up next turn
+    const threat = S.threat ? (S.threat.get(k) || 0) : 0;
+    score -= (hurt ? 2.5 : 1.2) * Math.max(0, threat - 1);
+    // wounded: fall back to a spring, or at least into cover
+    if (hurt && t === 'spring') score += 40;
+    if (hurt && t === 'forest') score += 3;
+    if (!best || score > best.score) best = { x, y, score, tgt, retreat: hurt && t === 'spring' };
+  }
+  e.x = ox; e.y = oy;
+  let shown = false;
+  if (best && (best.x !== ox || best.y !== oy)){
+    const was = S.vis.has(key(ox,oy));
+    let seenAny = was;
+    for (const [nx,ny] of pathTo(field, key(best.x,best.y))){
+      const prevK = key(e.x,e.y);
+      e.x = nx; e.y = ny;
+      if (S.vis.has(prevK) || S.vis.has(key(nx,ny))){
+        seenAny = true;
+        if (S.vis.has(prevK)) S.trail.add(prevK);
+        render(); await sleep(170);
+      }
+    }
+    if (seenAny){ shown = true; addLog('e', `${e.name} ${was ? coord(ox,oy) : 'из тумана'} → ${coord(e.x,e.y)}` + (best.retreat ? ' (отступает к роднику)' : '')); }
+  }
+  if (best && best.tgt && dist(e, best.tgt) <= rangeOf(e)){ attack(e, best.tgt); shown = true; }
+  return shown;
+}
+
+/* ---------- rendering ---------- */
+const heartsHTML = (hp, big) => `<div class="hearts${big ? ' big' : ''}" aria-hidden="true">` +
+  Array.from({length: BASE.hp}, (_, i) => `<svg><use href="#hp-${i < hp ? 'full' : 'empty'}"/></svg>`).join('') + '</div>';
+function render(){
+  const sel = S.phase === 'player' ? selected() : null;
+  const r = sel && !sel.moved ? reach(sel) : null;
+  const dz = (r || S.showDanger) && S.phase === 'player' ? dangerMap() : null;
+  S.dz = dz;
+  dangerBtn.classList.toggle('on', !!S.showDanger);
+  dangerBtn.setAttribute('aria-pressed', S.showDanger ? 'true' : 'false');
+  const tgt = sel && !sel.acted ? new Set(targetsOf(sel).map(t => t.id)) : new Set();
+  let html = '';
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+    const k = key(x,y), t = terr(x,y), raw = unitAt(x,y), u = raw && known(raw) ? raw : null;
+    const cls = ['cell', 't-' + t];
+    if (t === 'plain' && (x+y) % 2) cls.push('alt');
+    if (!S.vis.has(k)) cls.push('fog');
+    else if (S.trail && S.trail.has(k) && !raw) cls.push('trail');
+    if (r && !u && r.has(k) && k !== key(sel.x,sel.y)) cls.push('reach');
+    if (u && tgt.has(u.id)) cls.push('target');
+    if (sel && u === sel) cls.push('sel');
+    const isHit = S.hit && S.hit.x === x && S.hit.y === y;
+    if (isHit) cls.push('hit');
+    if (u) cls.push('occ');
+    let inner = t === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${t}"/></svg>`;
+    const dn = dz ? (dz.get(k) || 0) : 0;
+    if (dn && S.vis.has(k)){
+      if (S.showDanger) inner += '<span class="dzall"></span>';
+      if (r && !u && r.has(k) && k !== key(sel.x,sel.y)) inner += `<span class="dz" title="Под ударом: ${dn}">${dn > 1 ? dn : ''}</span>`;
+    }
+    if (S.point && S.point.x === x && S.point.y === y) inner += '<span class="mark point"></span>';
+    if (S.exits.has(k)) inner += '<span class="mark exit"></span>';
+    if (u){
+      inner += `<svg class="unit ${u.side}${u.side === 'p' && u.acted && S.phase === 'player' ? ' done' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip ? '<use href="#u-crown"/>' : ''}</svg>
+        ${heartsHTML(u.hp)}`;
+      if (tgt.has(u.id)) inner += `<span class="pv">−${dmgParts(sel,u).d}</span>`;
+    }
+    if (isHit && S.vis.has(k)) inner += `<span class="dmg">−${S.hit.dmg}</span>`;
+    html += `<div class="${cls.join(' ')}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш ' : 'враг ') + u.name.toLowerCase() + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
+  }
+  board.innerHTML = html;
+
+  const side = S.phase === 'enemy' ? '<span class="side-e">Ход противника</span>' : S.phase === 'over' ? 'Бой окончен' : '<span class="side-p">Ваш ход</span>';
+  const seenE = alive('e').filter(known).length;
+  document.getElementById('status').innerHTML = `Ход ${S.turn} · ${side} · Ваших ${alive('p').length} · Врагов видно ${seenE}`;
+
+  objName.textContent = OBJ[S.obj].name;
+  objDesc.textContent = OBJ[S.obj].desc;
+  objProg.textContent = {
+    kill:  `Осталось врагов: ${alive('e').length}`,
+    hold:  `Удержание: ${S.hold} из ${HOLD_N} · точка ${S.point ? coord(S.point.x,S.point.y) : ''}`,
+    exit:  `Выход: ${[...S.exits].map(k => { const [x,y] = k.split(',').map(Number); return coord(x,y); }).join(', ')}`,
+    vip:   `Ход ${S.turn} из ${VIP_N}`,
+    timed: `Ход ${S.turn} из ${TIMED_N} · врагов осталось ${alive('e').length}`,
+  }[S.obj];
+
+  if (sel){
+    const ab = abilitiesOf(sel);
+    const state = sel.acted ? 'действие сделано' : sel.moved ? 'может атаковать' : 'может идти и атаковать';
+    card.innerHTML = `<dl class="unit-card"><div class="name">${sel.name} · ${coord(sel.x,sel.y)}</div>
+      <dt>Здоровье</dt><dd style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">${heartsHTML(sel.hp, true)}<span>${sel.hp} / ${BASE.hp}</span></dd><dt>Дальность</dt><dd>${rangeOf(sel)}</dd>
+      <dt>Обзор</dt><dd>${visionOf(sel)}</dd><dt>Статус</dt><dd>${state}</dd></dl>
+      <div class="chips">${ab.length ? ab.map(a => `<span class="chip">${a}</span>`).join('') : '<span class="empty">Способностей нет — встаньте на особую местность</span>'}</div>`;
+  } else {
+    const left = alive('p').filter(u => !u.acted).length;
+    card.innerHTML = `<p class="empty">${S.phase === 'player' ? `Нажмите на своего бойца. Готовы действовать: ${left}.` : S.phase === 'enemy' ? 'Противник действует…' : 'Начните новую карту.'}</p>`;
+  }
+  waitBtn.disabled = !sel;
+  endBtn.disabled = S.phase !== 'player';
+  log.innerHTML = S.log.map(l => `<li class="${l.cls}">${l.text}</li>`).join('');
+
+  overlay.hidden = S.phase !== 'over';
+  if (S.phase === 'over'){ ovText.textContent = S.result; ovReason.textContent = S.reason; }
+}
+
+function renderHover(){
+  const h = S.hover;
+  if (!h){ hover.innerHTML = '<p class="empty">Наведите на клетку, чтобы увидеть местность и бойца.</p>'; return; }
+  const t = TERRAIN[terr(h.x,h.y)], k = key(h.x,h.y);
+  const raw = unitAt(h.x,h.y), u = raw && known(raw) ? raw : null;
+  let s = `<b>${coord(h.x,h.y)} · ${t.name}</b> — ${t.effect}`;
+  if (S.point && S.point.x === h.x && S.point.y === h.y) s += ' Точка удержания.';
+  if (S.exits.has(k)) s += ' Клетка выхода.';
+  if (!S.vis.has(k)) s += ' <span class="empty">Вне поля зрения.</span>';
+  else if (S.phase === 'player'){
+    const n = (S.dz || dangerMap()).get(k) || 0;
+    if (n) s += ` <span class="warn">Под ударом: ${n} ${n === 1 ? 'враг может' : 'врага могут'} атаковать эту клетку в свой ход.</span>`;
+  }
+  if (u) s += `<br>${u.side === 'p' ? 'Ваш' : 'Враг:'} ${u.name.toLowerCase()}, ${u.hp}/${BASE.hp} HP` + (abilitiesOf(u).length ? `, способность: ${abilitiesOf(u).join(', ')}` : '');
+  hover.innerHTML = s;
+}
+
+function buildRefs(){
+  terrRef.innerHTML = Object.entries(TERRAIN).map(([id,t]) =>
+    `<div class="sw cell t-${id}" style="width:30px;height:30px;cursor:default">${id === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${id}"/></svg>`}</div><p><b>${t.name}.</b> ${t.effect}</p>`).join('');
+  axisX.innerHTML = [...COLS].map(c => `<span>${c}</span>`).join('');
+  axisY.innerHTML = Array.from({length: H}, (_, i) => `<span>${i + 1}</span>`).join('');
+  objRef.innerHTML = Object.entries(OBJ).map(([id,o]) =>
+    `<div class="sw cell" style="width:30px;height:30px;cursor:default">${id === 'hold' ? '<span class="mark point"></span>' : id === 'exit' ? '<span class="mark exit"></span>' : ''}</div><p><b>${o.name}.</b> ${o.desc}</p>`).join('');
+}
+
+board.addEventListener('click', ev => {
+  const c = ev.target.closest('.cell'); if (!c) return;
+  onCell(+c.dataset.x, +c.dataset.y);
+});
+board.addEventListener('mouseover', ev => {
+  const c = ev.target.closest('.cell'); if (!c) return;
+  const x = +c.dataset.x, y = +c.dataset.y;
+  if (!S.hover || S.hover.x !== x || S.hover.y !== y){ S.hover = { x, y }; renderHover(); }
+});
+board.addEventListener('mouseleave', () => { S.hover = null; renderHover(); });
+waitBtn.onclick = waitUnit;
+endBtn.onclick = endTurn;
+resetBtn.onclick = newGame;
+const toggleDanger = () => { S.showDanger = !S.showDanger; render(); renderHover(); };
+dangerBtn.onclick = toggleDanger;
+ovBtn.onclick = newGame;
+document.addEventListener('keydown', ev => {
+  if (ev.target.closest('button,summary') && (ev.key === ' ' || ev.key === 'Enter')) return;
+  if (ev.key === ' '){ ev.preventDefault(); endTurn(); }
+  else if ('wWцЦ'.includes(ev.key)) waitUnit();
+  else if ('tTеЕ'.includes(ev.key)) toggleDanger();
+  else if (ev.key === 'Escape'){ S.sel = null; render(); }
+});
+buildRefs();
+newGame();
+</script>
+
 </body>
 </html>
