@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="description" content="Пошаговая тактика на клетках: случайные карты, туман войны, местность даёт способности.">
+<meta name="description" content="Пошаговая тактика на клетках: случайные карты, туман войны, местность даёт способности, кампания.">
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Тактика на клетках</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -131,8 +131,19 @@ button.on{background:var(--red);border-color:var(--red);color:var(--bg)}
 @media (prefers-reduced-motion:reduce){.cell.hit,.dmg{animation:none}}
 
 .overlay{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 80%,transparent);border-radius:4px;z-index:5}
-.overlay div{text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;padding:16px}
-.overlay strong{font-family:var(--display);font-size:2.6rem;text-transform:uppercase;line-height:1}
+.ov-card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px;width:min(440px,calc(100% - 32px));max-height:calc(100% - 24px);overflow:auto;display:flex;flex-direction:column;gap:12px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.ov-card h2{font-family:var(--display);font-size:2.2rem;text-transform:uppercase;line-height:1;margin:0;text-wrap:balance}
+.ov-card h2.win{color:var(--hp-ok)} .ov-card h2.loss{color:var(--red)}
+.ov-card p{margin:0;color:var(--muted)}
+.ov-card .ov-btns{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.ov-card .ov-btns button{text-align:left;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.ov-card .ov-btns small{font-weight:500;opacity:.75}
+.squad{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.squad li{display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.squad .nm{font-weight:600}
+.squad .note{grid-column:1/-1;font-size:.82rem;color:var(--muted)}
+.squad .dead{color:var(--muted);text-decoration:line-through}
+.eyebrow{font-family:var(--display);font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 
 .panel{display:flex;flex-direction:column;gap:14px;min-width:0}
 .box{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
@@ -216,7 +227,7 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.05
         <div class="axis-y" id="axisY" aria-hidden="true"></div>
         <div class="board" id="board" role="grid" aria-label="Игровое поле"></div>
       </div>
-      <div class="overlay" id="overlay" hidden><div><strong id="ovText"></strong><span id="ovReason"></span><button class="primary" id="ovBtn">Новая карта</button></div></div>
+      <div class="overlay" id="overlay" hidden></div>
     </div>
     <div class="panel">
       <div class="box">
@@ -232,7 +243,7 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.05
           <button id="waitBtn">Ждать<kbd>W</kbd></button>
           <button id="endBtn" class="primary">Конец хода<kbd>Space</kbd></button>
           <button id="dangerBtn" aria-pressed="false">Угрозы<kbd>T</kbd></button>
-          <button id="resetBtn">Новая карта</button>
+          <button id="resetBtn">Меню</button>
         </div>
       </div>
       <div class="box">
@@ -258,6 +269,8 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.05
             <li><b>Угрозы:</b> красный уголок на зелёной клетке значит, что видимые враги смогут ударить туда в свой ход (цифра — сколько врагов). Кнопка «Угрозы» (T) показывает всю опасную зону. Враги в тумане не учитываются.</li>
             <li>Уничтожение всех врагов — победа в любой миссии. Гибель всего отряда — поражение.</li>
             <li>Каждая новая карта и цель создаются случайно.</li>
+            <li><b>Кампания:</b> серия боёв одним отрядом. Здоровье переходит из боя в бой, на привале каждый восстанавливает 3 HP. Павшие не возвращаются; после победы, если в отряде меньше 4 бойцов, приходит новобранец. Каждые два боя врагов становится на одного больше (до 7). Поражение в любом бою заканчивает кампанию.</li>
+            <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
           </ul>
         </details>
         <details>
@@ -308,7 +321,7 @@ const inside = (x,y) => x >= 0 && y >= 0 && x < W && y < H;
 let S;
 
 /* ---------- map generation ---------- */
-function generate(){
+function generate(np = 4, ne = 4){
   let last;
   for (let attempt = 0; attempt < 200; attempt++){
     const T = Array.from({length:H}, () => Array(W).fill('plain'));
@@ -339,9 +352,9 @@ function generate(){
     }
     const free = (xs) => { const c = []; for (const x of xs) for (let y = 0; y < H; y++){
       const t = get(x,y); if (t !== 'rock' && t !== 'swamp' && !exits.has(key(x,y)) && !(point && point.x===x && point.y===y)) c.push({x,y}); } return shuffle(c); };
-    const pSpawn = free([0,1]).slice(0,4);
-    const eSpawn = free(obj === 'exit' ? [W-5,W-4,W-3,W-2] : [W-2,W-1]).slice(0,4);
-    if (pSpawn.length < 4 || eSpawn.length < 4) continue;
+    const pSpawn = free([0,1]).slice(0,np);
+    const eSpawn = free(obj === 'exit' ? [W-5,W-4,W-3,W-2] : ne > 5 ? [W-3,W-2,W-1] : [W-2,W-1]).slice(0,ne);
+    if (pSpawn.length < np || eSpawn.length < ne) continue;
 
     // every important cell must be reachable over passable ground
     const seen = new Set([key(pSpawn[0].x,pSpawn[0].y)]); const q = [pSpawn[0]];
@@ -354,18 +367,25 @@ function generate(){
   return last;
 }
 
-function newGame(){
-  const m = generate();
+// camp = null for a single battle, or the saved campaign (its squad carries names and HP)
+function newGame(camp = null){
+  const squad = camp ? camp.squad : null;
+  const m = generate(squad ? squad.length : 4, camp ? enemiesFor(camp.battle) : 4);
   let id = 0;
-  const mk = (side, c) => ({ id: id++, side, x: c.x, y: c.y, hp: BASE.hp, moved: false, acted: false, vip: false, name: 'Боец' });
-  const units = [...m.pSpawn.map(c => mk('p', c)), ...m.eSpawn.map(c => mk('e', c))];
-  if (m.obj === 'vip'){ units[0].vip = true; units[0].name = 'Командир'; }
-  S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units,
+  const mk = (side, c, f) => ({ id: id++, side, x: c.x, y: c.y, hp: f ? f.hp : BASE.hp, cid: f ? f.cid : null,
+    moved: false, acted: false, vip: false, name: f ? f.name : side === 'p' ? 'Боец' : 'Орк' });
+  const units = [...m.pSpawn.map((c, i) => mk('p', c, squad && squad[i])), ...m.eSpawn.map(c => mk('e', c))];
+  if (m.obj === 'vip'){
+    // the healthiest fighter takes command
+    const cmd = units.filter(u => u.side === 'p').sort((a,b) => b.hp - a.hp)[0];
+    cmd.vip = true; cmd.name = squad ? `Командир ${cmd.name}` : 'Командир';
+  }
+  S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units, camp,
         terr: m.T, obj: m.obj, point: m.point, exits: m.exits, hold: 0,
         alert: ['kill','timed','vip','exit'].includes(m.obj), result: null, reason: '' };
   if (m.obj === 'exit') units.filter(u => u.side === 'e').slice(0, 2).forEach(u => { u.guard = true; });
   updateVis();
-  addLog('sys', `Миссия: ${OBJ[S.obj].name}. Ход 1.`);
+  addLog('sys', (camp ? `Кампания, бой ${camp.battle}. ` : '') + `Миссия: ${OBJ[S.obj].name}. Ход 1.`);
   if (S.alert) addLog('sys', S.obj === 'vip' ? 'Противник знает, где командир, и идёт в атаку.' : S.obj === 'exit' ? 'Двое врагов охраняют выход, остальные выдвигаются навстречу.' : 'Противник выдвигается навстречу.');
   render(); renderHover();
 }
@@ -439,7 +459,7 @@ function attack(a, t){
   if (p.flank) notes.push(`фланг +${p.flank}`);
   if (p.forge) notes.push('кузня +1');
   if (p.cover) notes.push('лес −1');
-  addLog(a.side, `${a.name} ${coord(a.x,a.y)} бьёт ${t.name.toLowerCase()} ${coord(t.x,t.y)}: −${p.d}` +
+  addLog(a.side, `${a.name} ${coord(a.x,a.y)} бьёт ${t.side === 'e' ? 'орка' : t.name} ${coord(t.x,t.y)}: −${p.d}` +
     (notes.length ? ` (${notes.join(', ')})` : '') + (t.hp === 0 ? ' — уничтожен' : ` → ${t.hp} HP`));
   if (t.side === 'p') updateVis();
 }
@@ -689,6 +709,113 @@ async function enemyAct(e){
   return shown;
 }
 
+/* ---------- saving ----------
+   One place for all persistence. Today it writes to this browser (localStorage);
+   later the same three calls can talk to a server without touching the game. */
+const Store = {
+  async load(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
+  async save(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+  async remove(k){ try { localStorage.removeItem(k); } catch {} },
+};
+const SAVE_KEY = 'bg.campaign.v1', RECORD_KEY = 'bg.record.v1';
+
+/* ---------- campaign ---------- */
+const NAMES = ['Ярослав','Мирон','Тарас','Глеб','Всеволод','Добрыня','Ратибор','Остап','Елисей','Святослав','Борис','Матвей','Радим','Лука','Демид','Захар','Ростислав','Игнат','Савва','Платон'];
+const REST_HEAL = 3, SQUAD_MAX = 4;
+const enemiesFor = battle => Math.min(7, 4 + Math.floor((battle - 1) / 2));
+function recruit(c){
+  const used = new Set(c.squad.map(f => f.name).concat(c.fallen || []));
+  const name = NAMES.find(n => !used.has(n)) || `Боец ${c.nextCid}`;
+  const f = { cid: c.nextCid++, name, hp: BASE.hp };
+  c.squad.push(f);
+  return f;
+}
+function newCampaign(){
+  const c = { v: 1, battle: 1, wins: 0, nextCid: 1, squad: [], fallen: [] };
+  shuffle(NAMES);
+  for (let i = 0; i < SQUAD_MAX; i++) recruit(c);
+  return c;
+}
+async function startCampaign(c){
+  await Store.save(SAVE_KEY, c);
+  hideOverlay();
+  newGame(c);
+}
+// After a won battle: carry HP over, bury the fallen, rest, recruit one if the squad is short
+async function afterVictory(){
+  const c = S.camp, report = [];
+  const byCid = new Map(S.units.filter(u => u.side === 'p').map(u => [u.cid, u]));
+  const next = [];
+  for (const f of c.squad){
+    const u = byCid.get(f.cid);
+    if (!u || u.hp <= 0){ c.fallen.push(f.name); report.push({ name: f.name, dead: true }); continue; }
+    const before = u.hp, hp = Math.min(BASE.hp, u.hp + REST_HEAL);
+    next.push({ cid: f.cid, name: f.name, hp });
+    report.push({ name: f.name, hp, healed: hp - before });
+  }
+  c.squad = next;
+  if (c.squad.length < SQUAD_MAX){ const f = recruit(c); report.push({ name: f.name, hp: f.hp, recruit: true }); }
+  c.wins++; c.battle++;
+  await Store.save(SAVE_KEY, c);
+  showCamp(c, report);
+}
+async function afterDefeat(){
+  const c = S.camp;
+  const rec = (await Store.load(RECORD_KEY)) || 0;
+  const best = Math.max(rec, c.wins);
+  await Store.save(RECORD_KEY, best);
+  await Store.remove(SAVE_KEY);
+  showOverlay(`<div class="eyebrow">Кампания окончена</div>
+    <h2 class="loss">Отряд разбит</h2>
+    <p>${S.reason} Выиграно боёв: <b>${c.wins}</b>. Рекорд: <b>${best}</b>.</p>
+    ${c.fallen.length ? `<p>Павшие за кампанию: ${c.fallen.join(', ')}.</p>` : ''}
+    <div class="ov-btns"><button class="primary" data-act="new-camp">Новая кампания</button><button data-act="menu">В меню</button></div>`);
+}
+
+/* ---------- overlay screens ---------- */
+function showOverlay(html){ overlay.innerHTML = `<div class="ov-card">${html}</div>`; overlay.hidden = false; }
+function hideOverlay(){ overlay.hidden = true; overlay.innerHTML = ''; }
+async function showMenu(){
+  const c = await Store.load(SAVE_KEY), rec = await Store.load(RECORD_KEY);
+  showOverlay(`<div class="eyebrow">Пошаговая тактика</div>
+    <h2>Тактика на клетках</h2>
+    <div class="ov-btns">
+      ${c ? `<button class="primary" data-act="continue">Продолжить кампанию <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
+      <button ${c ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
+      <button data-act="skirmish">Одиночный бой <small>случайная карта</small></button>
+    </div>
+    ${c ? '<p>Новая кампания сотрёт текущую.</p>' : ''}
+    ${rec ? `<p>Рекорд: ${rec} ${rec === 1 ? 'победа' : rec < 5 ? 'победы' : 'побед'} подряд.</p>` : ''}`);
+}
+function showResult(){
+  const win = S.result === 'Победа';
+  if (S.camp && !win){ afterDefeat(); return; }
+  const btns = S.camp
+    ? '<button class="primary" data-act="camp-next">К привалу</button>'
+    : '<button class="primary" data-act="skirmish">Новая карта</button><button data-act="menu">В меню</button>';
+  showOverlay(`${S.camp ? `<div class="eyebrow">Бой ${S.camp.battle}</div>` : ''}
+    <h2 class="${win ? 'win' : 'loss'}">${S.result}</h2><p>${S.reason}</p><div class="ov-btns">${btns}</div>`);
+}
+function showCamp(c, report){
+  const rows = report.map(r => r.dead
+    ? `<li><span class="nm dead">${r.name}</span><span class="note">пал в бою</span></li>`
+    : `<li><span class="nm">${r.name}</span>${heartsHTML(r.hp, true)}<span class="note">${r.recruit ? 'новобранец присоединился к отряду' : r.healed ? `отдых: +${r.healed} HP` : 'здоров'}</span></li>`).join('');
+  showOverlay(`<div class="eyebrow">Привал · побед: ${c.wins}</div>
+    <h2>Отряд отдыхает</h2>
+    <ul class="squad">${rows}</ul>
+    <p>Следующий бой ${c.battle}: врагов ${enemiesFor(c.battle)}.</p>
+    <div class="ov-btns"><button class="primary" data-act="fight">В бой</button><button data-act="menu">В меню</button></div>`);
+}
+overlay.addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-act]'); if (!b) return;
+  const act = b.dataset.act;
+  if (act === 'menu') return showMenu();
+  if (act === 'skirmish'){ hideOverlay(); return newGame(); }
+  if (act === 'new-camp') return startCampaign(newCampaign());
+  if (act === 'continue' || act === 'fight'){ const c = await Store.load(SAVE_KEY); if (c) return startCampaign(c); return showMenu(); }
+  if (act === 'camp-next') return afterVictory();
+});
+
 /* ---------- rendering ---------- */
 const heartsHTML = (hp, big) => `<div class="hearts${big ? ' big' : ''}" aria-hidden="true">` +
   Array.from({length: BASE.hp}, (_, i) => `<svg><use href="#hp-${i < hp ? 'full' : 'empty'}"/></svg>`).join('') + '</div>';
@@ -727,13 +854,13 @@ function render(){
       if (tgt.has(u.id)) inner += `<span class="pv">−${dmgParts(sel,u).d}</span>`;
     }
     if (isHit && S.vis.has(k)) inner += `<span class="dmg">−${S.hit.dmg}</span>`;
-    html += `<div class="${cls.join(' ')}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш ' : 'враг ') + u.name.toLowerCase() + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
+    html += `<div class="${cls.join(' ')}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
   }
   board.innerHTML = html;
 
   const side = S.phase === 'enemy' ? '<span class="side-e">Ход противника</span>' : S.phase === 'over' ? 'Бой окончен' : '<span class="side-p">Ваш ход</span>';
   const seenE = alive('e').filter(known).length;
-  document.getElementById('status').innerHTML = `Ход ${S.turn} · ${side} · Ваших ${alive('p').length} · Врагов видно ${seenE}`;
+  document.getElementById('status').innerHTML = (S.camp ? `Бой ${S.camp.battle} · ` : '') + `Ход ${S.turn} · ${side} · Ваших ${alive('p').length} · Врагов видно ${seenE}`;
 
   objName.textContent = OBJ[S.obj].name;
   objDesc.textContent = OBJ[S.obj].desc;
@@ -760,8 +887,7 @@ function render(){
   endBtn.disabled = S.phase !== 'player';
   log.innerHTML = S.log.map(l => `<li class="${l.cls}">${l.text}</li>`).join('');
 
-  overlay.hidden = S.phase !== 'over';
-  if (S.phase === 'over'){ ovText.textContent = S.result; ovReason.textContent = S.reason; }
+  if (S.phase === 'over' && !S.resultShown){ S.resultShown = true; showResult(); }
 }
 
 function renderHover(){
@@ -777,7 +903,7 @@ function renderHover(){
     const n = (S.dz || dangerMap()).get(k) || 0;
     if (n) s += ` <span class="warn">Под ударом: ${n} ${n === 1 ? 'враг может' : 'врага могут'} атаковать эту клетку в свой ход.</span>`;
   }
-  if (u) s += `<br>${u.side === 'p' ? 'Ваш' : 'Враг:'} ${u.name.toLowerCase()}, ${u.hp}/${BASE.hp} HP` + (abilitiesOf(u).length ? `, способность: ${abilitiesOf(u).join(', ')}` : '');
+  if (u) s += `<br>${u.side === 'p' ? 'Ваш боец ' + u.name : 'Враг: орк'}, ${u.hp}/${BASE.hp} HP` + (abilitiesOf(u).length ? `, способность: ${abilitiesOf(u).join(', ')}` : '');
   hover.innerHTML = s;
 }
 
@@ -802,11 +928,11 @@ board.addEventListener('mouseover', ev => {
 board.addEventListener('mouseleave', () => { S.hover = null; renderHover(); });
 waitBtn.onclick = waitUnit;
 endBtn.onclick = endTurn;
-resetBtn.onclick = newGame;
+resetBtn.onclick = () => showMenu();
 const toggleDanger = () => { S.showDanger = !S.showDanger; render(); renderHover(); };
 dangerBtn.onclick = toggleDanger;
-ovBtn.onclick = newGame;
 document.addEventListener('keydown', ev => {
+  if (!overlay.hidden) return;
   if (ev.target.closest('button,summary') && (ev.key === ' ' || ev.key === 'Enter')) return;
   if (ev.key === ' '){ ev.preventDefault(); endTurn(); }
   else if ('wWцЦ'.includes(ev.key)) waitUnit();
@@ -815,6 +941,7 @@ document.addEventListener('keydown', ev => {
 });
 buildRefs();
 newGame();
+showMenu();
 </script>
 
 </body>
