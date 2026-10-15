@@ -276,7 +276,7 @@ summary{cursor:pointer;font-family:var(--display);font-weight:600;font-size:1.05
             <li>Способности даёт только местность: боец получает их, пока стоит на нужной клетке.</li>
             <li><b>Фланг:</b> +1 к урону за каждого другого союзника атакующего, стоящего рядом с целью.</li>
             <li>Свои бойцы не мешают движению: сквозь союзника можно пройти, но остановиться на его клетке нельзя.</li>
-            <li><b>Зона контроля:</b> войдя на клетку рядом с врагом, боец останавливается. Пройти мимо нельзя.</li>
+            <li><b>Зона контроля:</b> войдя на клетку рядом с врагом, боец останавливается. Пройти мимо нельзя. Исключение: клетка, на которой стоит союзник, — он прикрывает, и через него можно пройти дальше.</li>
             <li><b>Туман войны:</b> врагов видно только в радиусе обзора ваших бойцов. Невидимый враг может остановить движение засадой.</li>
             <li>Поведение противника зависит от миссии. В миссиях «Уничтожить всех», «Блицкриг» и «Защитить командира» он сразу идёт в атаку (на командира в первую очередь). В «Удержать точку» он занимает точку. В «Прорыве к выходу» двое врагов идут навстречу, а двое охраняют выход и атакуют, когда вы подходите ближе чем на 4 клетки.</li>
             <li><b>Угрозы:</b> красный уголок на зелёной клетке значит, что видимые враги смогут ударить туда в свой ход (цифра — сколько врагов). Кнопка «Угрозы» (T) показывает всю опасную зону. Враги в тумане не учитываются.</li>
@@ -463,7 +463,8 @@ function reach(u){
   while (q.length){
     const [x,y] = q.shift(); const k = key(x,y), n = d.get(k).n;
     if (n >= moveOf(u)) continue;
-    if (k !== start && (zoc.has(k) || terr(x,y) === 'swamp')) continue;
+    // an ally standing here screens the enemy's zone of control, so you can walk on through
+    if (k !== start && ((zoc.has(k) && !d.get(k).occ) || terr(x,y) === 'swamp')) continue;
     for (const [dx,dy] of DIRS){
       const nx = x+dx, ny = y+dy, nk = key(nx,ny);
       if (!inside(nx,ny) || d.has(nk) || terr(nx,ny) === 'rock' || blocked(nx,ny)) continue;
@@ -595,7 +596,8 @@ function movePlayer(sel, d, k){
     const blocker = unitAt(nx,ny);
     if (blocker && blocker.side !== sel.side){ ambush = true; break; }
     sel.x = nx; sel.y = ny; updateVis(); steps.push([nx,ny]);
-    if (i < path.length - 1 && alive('e').some(e => dist(e,sel) === 1)){ ambush = true; break; }
+    const screened = S.units.some(o => o !== sel && o.hp > 0 && o.side === sel.side && o.x === nx && o.y === ny);
+    if (i < path.length - 1 && !screened && alive('e').some(e => dist(e,sel) === 1)){ ambush = true; break; }
   }
   sel.moved = true;
   addLog('p', `${sel.name} ${from} → ${coord(sel.x,sel.y)}`);
