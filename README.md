@@ -7,4 +7,4 @@
 ## Ресурсы и лицензии
 - Иконки: [game-icons.net](https://game-icons.net) — Delapouite, Lorc, Sbed, Willdabeast (CC BY 3.0).
 - Текстура равнины: набор «Backgrounds and Textures» by Morain (morain.itch.io), встроена в игру; сам набор в репозиторий не выкладывается.
-- Шрифт: Barlow (Google Fonts).
+- Шрифт: Inter (Google Fonts).
