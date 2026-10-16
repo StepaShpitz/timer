@@ -422,6 +422,23 @@ button.node{cursor:pointer}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .branch{--card:#364153}}
 :root[data-theme="dark"] .branch{--card:#364153}
 @media (prefers-reduced-motion:reduce){.node.open .ico{animation:none}}
+
+/* ---------- tooltip rows like the terrain legend ---------- */
+.tip{max-width:320px;padding:10px 12px}
+.tip .trow{display:flex;align-items:center;gap:10px}
+.tip .trow + .trow{margin-top:7px}
+.tip .trow p{margin:0;color:#d1d5dc;font-weight:400;line-height:1.35}
+.tip .trow b{color:#fff;font-weight:600}
+.tip .tsw{width:30px;height:30px;flex:none;border-radius:5px;display:grid;place-items:center;position:relative;
+  background:color-mix(in srgb,var(--b,#99a1af) 25%,#1e2939);border:1px solid color-mix(in srgb,var(--b,#99a1af) 55%,#1e2939);color:color-mix(in srgb,var(--b,#99a1af) 40%,#fff)}
+.tip .tsw svg{width:20px;height:20px}
+.tip .tsw.sw{position:relative!important;left:auto!important;top:auto!important;clip-path:none!important;transform:none!important;border:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.tip .tsw.sw .ticon{width:22px;height:22px;position:static}
+.tip .tsw.tok{border-radius:50%;border:2px solid var(--team-p);background:color-mix(in srgb,var(--team-p) 35%,#1e2939);color:#fff}
+.tip .tsw.tok.e{border-color:var(--team-e,#c0392b);background:color-mix(in srgb,var(--team-e,#c0392b) 35%,#1e2939)}
+.tip .tsw.tok.hero{border-color:#f0b100}
+.tip .tnote{margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12);color:#99a1af;font-size:.78rem}
+.tip .tnote.danger{color:#ff6467}
 </style>
 </head>
 <body>
@@ -1441,21 +1458,28 @@ function renderHover(){
   const cell = board.querySelector(`.cell[data-x="${h.x}"][data-y="${h.y}"]`); if (!cell){ hideTip(); return; }
   const tid = terr(h.x,h.y), t = TERRAIN[tid], k = key(h.x,h.y);
   const raw = unitAt(h.x,h.y), u = raw && known(raw) ? raw : null;
-  const tags = [];
-  const who = u && (u.side === 'e' ? 'Орк' : u.hero ? `${u.name} · ур. ${u.lvl}` : u.name === 'Боец' ? 'Ваш боец' : u.name);
-  let s = u ? `<b>${who} · ${coord(h.x,h.y)}</b><span class="sub">${u.hp}/${maxHp(u)} HP · ${t.name}</span>`
-            : `<b>${t.name} · ${coord(h.x,h.y)}</b><span class="sub">${t.effect}</span>`;
-  if (S.point && S.point.x === h.x && S.point.y === h.y) s += '<span class="sub">Точка удержания.</span>';
-  if (S.exits.has(k)) s += '<span class="sub">Клетка выхода.</span>';
-  if (S.chests && S.chests.has(k) && S.vis.has(k)) s += '<span class="sub">Сундук: закончите здесь ход, чтобы открыть.</span>';
-  if (t.ability) tags.push(abilityHTML(tid));
-  if (u && (u.items || []).length) u.items.forEach(i => tags.push(itemHTML(i)));
-  if (!S.vis.has(k)) tags.push('<span class="badge muted">Вне поля зрения</span>');
+  // rows in the same look as the terrain legend: icon tile + bold name + text
+  const row = (tile, name, text) => `<div class="trow">${tile}<p><b>${name}.</b> ${text}</p></div>`;
+  const ic = (sym, tint) => `<span class="tsw" style="--b:${tint}"><svg aria-hidden="true" viewBox="0 0 512 512"><use href="#${sym}"/></svg></span>`;
+  const rows = [];
+  if (u){
+    const who = u.side === 'e' ? 'Орк' : u.hero ? `${u.name}, ур. ${u.lvl}` : u.name === 'Боец' ? 'Ваш боец' : u.name;
+    const tok = `<span class="tsw tok ${u.side}${u.hero ? ' hero' : ''}"><svg aria-hidden="true" viewBox="0 0 512 512"><use href="#u-${u.side}"/></svg></span>`;
+    rows.push(row(tok, `${who} · ${coord(h.x,h.y)}`, `${u.hp}/${maxHp(u)} HP`));
+  }
+  const sw = `<span class="tsw sw cell t-${tid}">${tid === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${tid}"/></svg>`}</span>`;
+  rows.push(row(sw, u ? t.name : `${t.name} · ${coord(h.x,h.y)}`, t.effect));
+  if (u) (u.items || []).forEach(i => rows.push(row(ic('i-' + i, ITEM_TINT[i]), ITEMS[i].name, ITEMS[i].desc)));
+  if (u && u.perks) u.perks.forEach(p => rows.push(row(ic('s-' + p, 'var(--goal)'), UPGRADES[p].name, UPGRADES[p].desc)));
+  if (S.point && S.point.x === h.x && S.point.y === h.y) rows.push(row(ic('u-crown', 'var(--goal)'), 'Точка удержания', 'держите здесь бойца.'));
+  if (S.exits.has(k)) rows.push(row(ic('u-crown', 'var(--goal)'), 'Выход', 'доведите сюда бойцов.'));
+  if (S.chests && S.chests.has(k) && S.vis.has(k)) rows.push(row(ic('i-chest', 'var(--ic-forge)'), 'Сундук', 'закончите здесь ход, чтобы открыть.'));
+  if (!S.vis.has(k)) rows.push('<div class="tnote">Вне поля зрения</div>');
   else if (S.phase === 'player'){
     const n = (S.dz || dangerMap()).get(k) || 0;
-    if (n) tags.push(`<span class="badge danger">Под ударом: ${n}</span>`);
+    if (n) rows.push(`<div class="tnote danger">Под ударом: ${n}</div>`);
   }
-  tipEl.innerHTML = s + (tags.length ? `<div class="tags">${tags.join('')}</div>` : '');
+  tipEl.innerHTML = rows.join('');
   tipEl.classList.add('show');
   const r = cell.getBoundingClientRect(), tr = tipEl.getBoundingClientRect();
   const side = r.top - tr.height - 10 < 0 ? 'bottom' : 'top';
