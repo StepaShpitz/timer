@@ -273,7 +273,8 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 /* ===== Hex board: pointy-top hexes, odd rows shifted half a cell right ===== */
 :root{--g:3px;--hh:calc(var(--c) * 1.1547)}
 .board{display:block;position:relative;padding:0;background:transparent;border-radius:0;
-  width:calc(12.5 * (var(--c) + var(--g)));height:calc(8 * (var(--hh) * .75 + var(--g)) + var(--hh))}
+  width:calc(11.5 * (var(--c) + var(--g)));height:calc(10 * (var(--hh) * .75 + var(--g)) + var(--hh))}
+.axis-x,.axis-y{display:none}
 .cell{position:absolute;width:var(--c);height:var(--hh);
   left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)));
   clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
@@ -405,7 +406,8 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 </div>
 
 <script>
-const W = 12, H = 9, COLS = 'ABCDEFGHIJKL';
+// The map is one big hexagon of radius RAD, stored in an 11×11 offset grid; cells outside it are void
+const RAD = 5, W = 2 * RAD + 1, H = 2 * RAD + 1, CX = RAD, CY = RAD, COLS = 'ABCDEFGHIJK';
 const BASE = { hp: 9, atk: 3, move: 2, range: 1, vision: 3 };
 const HOLD_N = 3, TIMED_N = 12, VIP_N = 10;
 const TERRAIN = {
@@ -421,7 +423,7 @@ const TERRAIN = {
 const OBJ = {
   kill:  { name: 'Уничтожить всех', desc: 'Победа, когда на карте не останется врагов.' },
   hold:  { name: 'Удержать точку',  desc: `Держите бойца на отмеченной точке ${HOLD_N} хода подряд. Если точка пуста или на ней враг, отсчёт сбрасывается.` },
-  exit:  { name: 'Прорыв к выходу', desc: 'Доведите любого бойца до клетки выхода на правом краю карты.' },
+  exit:  { name: 'Прорыв к выходу', desc: 'Доведите любого бойца до клетки выхода на дальнем (верхнем) краю карты.' },
   vip:   { name: 'Защитить командира', desc: `Командир (жетон с короной) должен продержаться ${VIP_N} ходов. Его гибель — поражение.` },
   timed: { name: 'Блицкриг', desc: `Уничтожьте всех врагов за ${TIMED_N} ходов.` },
 };
@@ -448,7 +450,7 @@ const hd = (x1,y1,x2,y2) => {
   return (Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr)) / 2;
 };
 // all cells at hex distance 1..r from (x,y)
-const ring = (x,y,r) => { const out = []; for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++){ const d = hd(x,y,xx,yy); if (d > 0 && d <= r) out.push([xx,yy]); } return out; };
+const ring = (x,y,r) => { const out = []; for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++){ const d = hd(x,y,xx,yy); if (d > 0 && d <= r && inside(xx,yy)) out.push([xx,yy]); } return out; };
 const key = (x,y) => x + ',' + y;
 const coord = (x,y) => COLS[x] + (y + 1);
 const dist = (a,b) => hd(a.x,a.y,b.x,b.y);
@@ -456,7 +458,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const rnd = n => Math.floor(Math.random() * n);
 const pick = a => a[rnd(a.length)];
 const shuffle = a => { for (let i = a.length-1; i > 0; i--){ const j = rnd(i+1); [a[i],a[j]] = [a[j],a[i]]; } return a; };
-const inside = (x,y) => x >= 0 && y >= 0 && x < W && y < H;
+const inside = (x,y) => x >= 0 && y >= 0 && x < W && y < H && hd(x,y,CX,CY) <= RAD;
 
 let S;
 
@@ -466,13 +468,16 @@ function generate(np = 4, ne = 4){
   for (let attempt = 0; attempt < 200; attempt++){
     const T = Array.from({length:H}, () => Array(W).fill('plain'));
     const get = (x,y) => T[y][x];
-    const inner = x => x >= 2 && x <= W-3;
-    for (let i = 0; i < 13; i++){ const x = 1 + rnd(W-2), y = rnd(H); T[y][x] = 'rock'; }
+    // terrain stays out of the two spawn rows at the bottom (player) and top (enemy)
+    const inner = (x,y) => y >= 2 && y <= H-3;
+    const cells = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (inside(x,y)) cells.push([x,y]);
+    const mid = cells.filter(([x,y]) => y >= 1 && y <= H-2);
+    for (let i = 0; i < 11; i++){ const [x,y] = pick(mid); T[y][x] = 'rock'; }
     const cluster = (type, n, minS, maxS) => {
       for (let i = 0; i < n; i++){
-        let x = 2 + rnd(W-4), y = rnd(H), size = minS + rnd(maxS-minS+1);
+        let [x, y] = pick(cells.filter(([a,b]) => inner(a,b))), size = minS + rnd(maxS-minS+1);
         for (let s = 0; s < size; s++){
-          if (inside(x,y) && inner(x) && get(x,y) === 'plain') T[y][x] = type;
+          if (inside(x,y) && inner(x,y) && get(x,y) === 'plain') T[y][x] = type;
           [x, y] = pick(nbrAll(x,y));
         }
       }
@@ -483,17 +488,21 @@ function generate(np = 4, ne = 4){
     const obj = pick(Object.keys(OBJ));
     let point = null; const exits = new Set();
     if (obj === 'hold'){
-      const opts = []; for (let y = 1; y < H-1; y++) for (let x = 4; x <= W-5; x++) if (get(x,y) !== 'rock') opts.push({x,y});
+      const opts = cells.filter(([x,y]) => hd(x,y,CX,CY) <= 2 && get(x,y) !== 'rock').map(([x,y]) => ({x,y}));
       point = pick(opts); T[point.y][point.x] = 'plain';
     }
     if (obj === 'exit'){
-      const cy = 1 + rnd(H-2);
-      for (let y = cy-1; y <= cy+1; y++){ T[y][W-1] = 'plain'; exits.add(key(W-1,y)); }
+      // exit: the three middle cells of the far (top) edge, behind the enemy
+      const top = cells.filter(([x,y]) => y === 0).sort((a,b) => a[0] - b[0]);
+      const m0 = Math.floor((top.length - 3) / 2);
+      for (const [x,y] of top.slice(m0, m0 + 3)){ T[y][x] = 'plain'; exits.add(key(x,y)); }
     }
-    const free = (xs) => { const c = []; for (const x of xs) for (let y = 0; y < H; y++){
+    const free = (ys) => { const c = []; for (const y of ys) for (let x = 0; x < W; x++){
+      if (!inside(x,y)) continue;
       const t = get(x,y); if (t !== 'rock' && t !== 'swamp' && !exits.has(key(x,y)) && !(point && point.x===x && point.y===y)) c.push({x,y}); } return shuffle(c); };
-    const pSpawn = free([0,1]).slice(0,np);
-    const eSpawn = free(obj === 'exit' ? [W-5,W-4,W-3,W-2] : ne > 5 ? [W-3,W-2,W-1] : [W-2,W-1]).slice(0,ne);
+    // player starts at the bottom edge (6 o'clock), the enemy at the top (12 o'clock)
+    const pSpawn = free([H-1,H-2]).slice(0,np);
+    const eSpawn = free(obj === 'exit' ? [1,2,3] : ne > 5 ? [0,1,2] : [0,1]).slice(0,ne);
     if (pSpawn.length < np || eSpawn.length < ne) continue;
 
     // every important cell must be reachable over passable ground
@@ -522,8 +531,8 @@ function newGame(camp = null){
   }
   // chests: on open ground in the middle of the map, away from both spawns
   const spots = [];
-  for (let y = 0; y < H; y++) for (let x = 3; x <= W-4; x++)
-    if (m.T[y][x] === 'plain' && !(m.point && m.point.x === x && m.point.y === y)) spots.push(key(x,y));
+  for (let y = 3; y <= H-4; y++) for (let x = 0; x < W; x++)
+    if (inside(x,y) && m.T[y][x] === 'plain' && !(m.point && m.point.x === x && m.point.y === y)) spots.push(key(x,y));
   const chests = new Set(shuffle(spots).slice(0, 2 + (camp && camp.battle >= 3 ? 1 : 0)));
   S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units, camp, chests,
         terr: m.T, obj: m.obj, point: m.point, exits: m.exits, hold: 0,
@@ -951,7 +960,7 @@ async function showMenu(resumable = false){
   showOverlay(`<div class="eyebrow">Пошаговая тактика</div>
     <h2>Тактика на клетках</h2>
     <div class="ov-btns">
-      ${resumable ? '<button class="primary" data-act="resume">Вернуться к бою <small>Esc</small></button>' : ''}
+      ${resumable && (S.turn > 1 || S.units.some(u => u.moved || u.acted)) ? '<button class="primary" data-act="resume">Вернуться к бою <small>Esc</small></button>' : ''}
       ${c ? `<button ${resumable ? '' : 'class="primary"'} data-act="continue">${S && S.camp && resumable ? 'Начать бой заново' : 'Продолжить кампанию'} <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
       <button ${c || resumable ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
       <button data-act="skirmish">Одиночный бой <small>случайная карта</small></button>
@@ -1004,6 +1013,7 @@ function render(){
   const tgt = sel && !sel.acted ? new Set(targetsOf(sel).map(t => t.id)) : new Set();
   let html = '';
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+    if (!inside(x,y)) continue;
     const k = key(x,y), t = terr(x,y), raw = unitAt(x,y), u = raw && known(raw) ? raw : null;
     const cls = ['cell', 't-' + t];
     if (t === 'plain' && (x+y) % 2) cls.push('alt');
@@ -1147,7 +1157,7 @@ document.addEventListener('keydown', ev => {
 });
 buildRefs();
 newGame();
-showMenu();
+showMenu(true);
 </script>
 
 </body>
