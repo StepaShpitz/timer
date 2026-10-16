@@ -1489,6 +1489,8 @@ function render(){
 }
 
 /* Tooltip over the hovered (or long-pressed) cell */
+// the board column is sticky (its own stacking layer), so popups live at the page level to cover everything
+document.body.appendChild(overlay);
 const tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.setAttribute('role','tooltip'); document.body.appendChild(tipEl);
 const tipProbe = document.createElement('div'); tipProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;pointer-events:none'; document.body.appendChild(tipProbe);
 // tooltips for elements inside popups (skill tree): data-tip="icon|name|text|note"
