@@ -443,6 +443,14 @@ button.node{cursor:pointer}
 .islot.swap{position:relative}
 .islot.swap .ico{outline:2px dashed #7ccf00;outline-offset:2px}
 .islot .swapmark{position:absolute;top:-6px;right:2px;width:18px;height:18px;border-radius:50%;background:#7ccf00;color:#1e2939;font:700 .75rem/18px var(--body);text-align:center}
+
+.node .eff{font-size:.66rem;color:#99a1af;font-weight:400;text-align:center;line-height:1.15}
+.node.done .eff{color:#d1d5dc}
+.node.open .eff{color:#bbf451}
+.node.locked .eff{color:#99a1af}
+.node[data-tip]{cursor:help}
+button.node[data-tip]{cursor:pointer}
+.tip .tsw svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -1100,16 +1108,16 @@ const orcAtk = b => 2 + Math.floor((b - 1) / 4);                // 2 ×4, then 3
 const xpNeed = lvl => 4 + 2 * lvl;                              // to reach the next level
 const XP_KILL = 2, XP_WIN = 3;
 const UPGRADES = {
-  hp:     { name: 'Закалка',        desc: '+3 к макс. здоровью',                     apply: h => { h.st.hp += 3; h.hp += 3; } },
-  atk:    { name: 'Сила',           desc: '+1 к урону',                              apply: h => { h.st.atk++; } },
-  armor:  { name: 'Броня',          desc: 'входящий урон −1',          max: 2,       apply: h => { h.st.armor++; } },
-  move:   { name: 'Быстрые ноги',   desc: '+1 клетка хода',            max: 1,       apply: h => { h.st.move++; } },
-  vision: { name: 'Зоркость',       desc: '+1 к обзору',               max: 2,       apply: h => { h.st.vision++; } },
-  vamp:   { name: 'Жажда крови',    desc: '+1 HP за каждый свой удар', perk: true },
-  cleave: { name: 'Размах',         desc: 'удар задевает ещё одного врага рядом с целью (−1)', perk: true },
-  regen:  { name: 'Второе дыхание', desc: '+1 HP в начале каждого своего хода', perk: true },
-  spear:  { name: 'Копьё',          desc: 'дальность атаки 2',         perk: true },
-  leader: { name: 'Вожак',          desc: 'наёмники рядом с героем бьют на +1', perk: true, needsMercs: true },
+  hp:     { name: 'Закалка',        short: '+3 макс. HP', desc: '+3 к макс. здоровью',                     apply: h => { h.st.hp += 3; h.hp += 3; } },
+  atk:    { name: 'Сила',           short: '+1 к урону', desc: '+1 к урону',                              apply: h => { h.st.atk++; } },
+  armor:  { name: 'Броня',          short: 'урон по вам −1', desc: 'входящий урон −1',          max: 2,       apply: h => { h.st.armor++; } },
+  move:   { name: 'Быстрые ноги',   short: '+1 клетка хода', desc: '+1 клетка хода',            max: 1,       apply: h => { h.st.move++; } },
+  vision: { name: 'Зоркость',       short: '+1 к обзору', desc: '+1 к обзору',               max: 2,       apply: h => { h.st.vision++; } },
+  vamp:   { name: 'Жажда крови',    short: '+1 HP за удар', desc: '+1 HP за каждый свой удар', perk: true },
+  cleave: { name: 'Размах',         short: 'задевает соседа', desc: 'удар задевает ещё одного врага рядом с целью (−1)', perk: true },
+  regen:  { name: 'Второе дыхание', short: '+1 HP каждый ход', desc: '+1 HP в начале каждого своего хода', perk: true },
+  spear:  { name: 'Копьё',          short: 'атака на 2 клетки', desc: 'дальность атаки 2',         perk: true },
+  leader: { name: 'Вожак',          short: 'наёмники +1 урон', desc: 'наёмники рядом с героем бьют на +1', perk: true, needsMercs: true },
 };
 const skillIcon = k => `<svg viewBox="0 0 512 512" aria-hidden="true"><use href="#s-${k}"/></svg>`;
 const perkHTML = k => `<span class="badge tint" style="--b:var(--goal)" title="${UPGRADES[k].desc}">${skillIcon(k)}${UPGRADES[k].name}</span>`;
@@ -1289,7 +1297,7 @@ async function afterDefeat(){
 }
 
 /* ---------- overlay screens ---------- */
-function showOverlay(html){ overlay.innerHTML = `<div class="ov-card">${html}</div>`; overlay.hidden = false; hideTip(); }
+function showOverlay(html){ hideTip(); overlay.innerHTML = `<div class="ov-card">${html}</div>`; overlay.hidden = false; hideTip(); }
 let menuResumable = false; // true while the menu was opened on top of a battle in progress
 function hideOverlay(){ overlay.hidden = true; overlay.innerHTML = ''; menuResumable = false; }
 function resumeGame(){ hideOverlay(); render(); }
@@ -1330,10 +1338,11 @@ function showCamp(c){
   const tree = TREE.map(br => `<div class="branch" style="--b:${br.tint}"><div class="bh">${br.name}</div>${br.nodes.map((k, i) => {
       const u = UPGRADES[k], done = i < t[br.id], next = i === t[br.id], blocked = next && u.needsMercs && !c.mercs.length;
       const cls = done ? 'done' : next ? (c.pending && !blocked ? 'open' : 'next') : 'locked';
-      const tip = `${u.name}: ${u.desc}${blocked ? ' (нужен наёмник)' : ''}`;
-      const inner = `<span class="ico">${skillIcon(k)}</span><span class="cap">${u.name}</span>`;
-      return cls === 'open' ? `<button class="node open" data-act="pick" data-up="${br.id}" title="${tip}">${inner}</button>`
-                            : `<span class="node ${cls}" title="${tip}">${inner}</span>`;
+      const state = done ? 'изучено' : cls === 'open' ? 'нажмите, чтобы изучить' : blocked ? 'нужен наёмник в отряде' : next ? 'следующий в ветке' : 'откроется после навыков выше';
+      const tip = `${skillIcon(k)}|${u.name}|${u.desc}.|${state}`;
+      const inner = `<span class="ico">${skillIcon(k)}</span><span class="cap">${u.name}</span><span class="eff">${u.short}</span>`;
+      return cls === 'open' ? `<button class="node open" data-act="pick" data-up="${br.id}" data-tip="${tip.replace(/"/g,'&quot;')}">${inner}</button>`
+                            : `<span class="node ${cls}" data-tip="${tip.replace(/"/g,'&quot;')}">${inner}</span>`;
     }).join('')}</div>`).join('');
   const choice = `<div class="eyebrow">Навыки${c.pending ? ` · очков: ${c.pending}` : ''}</div>
     <div class="tree">${tree}</div>
@@ -1463,6 +1472,21 @@ function render(){
 /* Tooltip over the hovered (or long-pressed) cell */
 const tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.setAttribute('role','tooltip'); document.body.appendChild(tipEl);
 const tipProbe = document.createElement('div'); tipProbe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;pointer-events:none'; document.body.appendChild(tipProbe);
+// tooltips for elements inside popups (skill tree): data-tip="icon|name|text|note"
+function showElTip(el){
+  const [icon, name, text, note] = el.dataset.tip.split('|');
+  tipEl.innerHTML = `<div class="trow"><span class="tsw" style="--b:var(--goal)">${icon}</span><p><b>${name}.</b> ${text}</p></div>${note ? `<div class="tnote">${note}</div>` : ''}`;
+  tipEl.classList.add('show');
+  const r = el.getBoundingClientRect(), tr = tipEl.getBoundingClientRect(), o = tipProbe.getBoundingClientRect();
+  const side = r.top - tr.height - 10 < 0 ? 'bottom' : 'top';
+  const x = Math.min(Math.max(8, r.left + r.width/2 - tr.width/2), innerWidth - tr.width - 8);
+  tipEl.style.left = (x - o.left) + 'px';
+  tipEl.style.top = ((side === 'top' ? r.top - tr.height - 8 : r.bottom + 8) - o.top) + 'px';
+  tipEl.style.setProperty('--ax', (r.left + r.width/2 - x) + 'px');
+  tipEl.dataset.side = side;
+}
+overlay.addEventListener('mouseover', ev => { const el = ev.target.closest('[data-tip]'); if (el) showElTip(el); else hideTip(); });
+overlay.addEventListener('mouseleave', hideTip);
 function hideTip(){ tipEl.classList.remove('show'); }
 function renderHover(){
   const h = S.hover;
