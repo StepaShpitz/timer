@@ -269,6 +269,28 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 .ov-card .ov-btns{margin:4px -20px 0;padding:14px 20px;border-top:1px solid var(--line);position:sticky;bottom:0;background:var(--surface)}
 @keyframes mfade{from{opacity:0}} @keyframes mpop{from{opacity:0;transform:translateY(8px) scale(.98)}}
 @media (prefers-reduced-motion:reduce){.overlay,.ov-card{animation:none}}
+
+/* ===== Hex board: pointy-top hexes, odd rows shifted half a cell right ===== */
+:root{--g:3px;--hh:calc(var(--c) * 1.1547)}
+.board{display:block;position:relative;padding:0;background:transparent;border-radius:0;
+  width:calc(12.5 * (var(--c) + var(--g)));height:calc(8 * (var(--hh) * .75 + var(--g)) + var(--hh))}
+.cell{position:absolute;width:var(--c);height:var(--hh);
+  left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)));
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%)}
+.axis-x{grid-template-columns:repeat(12,calc(var(--c) + var(--g)));gap:0;padding:0}
+.axis-y{grid-template-rows:repeat(9,calc(var(--hh) * .75 + var(--g)));gap:0;padding:calc(var(--hh) * .125) 0 0}
+.cell.reach::before{background:color-mix(in srgb,var(--team-p) 34%,transparent);box-shadow:none}
+.cell.reach:hover{outline:none}
+.cell.reach:hover::after,.cell.sel::after{z-index:3;background:var(--ring);
+  clip-path:polygon(evenodd,50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%,50% 0,50% 7%,7% 28.5%,7% 71.5%,50% 93%,93% 71.5%,93% 28.5%,50% 7%)}
+.cell.occ .ticon{left:3%;top:36%;right:auto;width:26%;height:26%}
+.unit{width:74%;height:74%;margin-bottom:14%}
+.hearts{left:20%;right:20%;bottom:15%}
+.pv{top:16%;right:12%}
+.dmg{top:12%;right:14%}
+.dz{left:4%;bottom:auto;top:38%;border-left-width:12px;border-top-width:12px}
+.mark{inset:14% 10%}
+.chest{top:20%}
 </style>
 </head>
 <body>
@@ -415,10 +437,21 @@ const ITEM_SLOTS = 2;
 const ITEM_TINT = { sword:'var(--red)', shield:'var(--blue)', boots:'var(--ic-hill)', scope:'var(--ic-tower)', amulet:'var(--ic-spring)', potion:'var(--hp-ok)' };
 const itemHTML = it => `<span class="badge tint" style="--b:${ITEM_TINT[it]}" title="${ITEMS[it].desc}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#i-${it}"/></svg>${ITEMS[it].name}</span>`;
 const abilityHTML = t => TERRAIN[t].ability ? `<span class="badge tint" style="--b:var(--ic-${t})" title="${TERRAIN[t].effect}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#t-${t}"/></svg>${TERRAIN[t].ability}</span>` : '';
-const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+// Hex grid, pointy-top, "odd-r" layout: odd rows are shifted half a cell to the right
+const HEX_EVEN = [[1,0],[-1,0],[0,-1],[-1,-1],[0,1],[-1,1]];
+const HEX_ODD  = [[1,0],[-1,0],[1,-1],[0,-1],[1,1],[0,1]];
+const nbrAll = (x,y) => ((y & 1) ? HEX_ODD : HEX_EVEN).map(([dx,dy]) => [x+dx, y+dy]);
+const nbr = (x,y) => nbrAll(x,y).filter(([a,b]) => inside(a,b));
+const hd = (x1,y1,x2,y2) => {
+  const q1 = x1 - (y1 - (y1 & 1)) / 2, q2 = x2 - (y2 - (y2 & 1)) / 2;
+  const dq = q1 - q2, dr = y1 - y2;
+  return (Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr)) / 2;
+};
+// all cells at hex distance 1..r from (x,y)
+const ring = (x,y,r) => { const out = []; for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++){ const d = hd(x,y,xx,yy); if (d > 0 && d <= r) out.push([xx,yy]); } return out; };
 const key = (x,y) => x + ',' + y;
 const coord = (x,y) => COLS[x] + (y + 1);
-const dist = (a,b) => Math.abs(a.x-b.x) + Math.abs(a.y-b.y);
+const dist = (a,b) => hd(a.x,a.y,b.x,b.y);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const rnd = n => Math.floor(Math.random() * n);
 const pick = a => a[rnd(a.length)];
@@ -440,7 +473,7 @@ function generate(np = 4, ne = 4){
         let x = 2 + rnd(W-4), y = rnd(H), size = minS + rnd(maxS-minS+1);
         for (let s = 0; s < size; s++){
           if (inside(x,y) && inner(x) && get(x,y) === 'plain') T[y][x] = type;
-          const [dx,dy] = pick(DIRS); x += dx; y += dy;
+          [x, y] = pick(nbrAll(x,y));
         }
       }
     };
@@ -465,8 +498,8 @@ function generate(np = 4, ne = 4){
 
     // every important cell must be reachable over passable ground
     const seen = new Set([key(pSpawn[0].x,pSpawn[0].y)]); const q = [pSpawn[0]];
-    while (q.length){ const c = q.shift(); for (const [dx,dy] of DIRS){ const nx=c.x+dx, ny=c.y+dy, k=key(nx,ny);
-      if (inside(nx,ny) && !seen.has(k) && get(nx,ny) !== 'rock'){ seen.add(k); q.push({x:nx,y:ny}); } } }
+    while (q.length){ const c = q.shift(); for (const [nx,ny] of nbr(c.x,c.y)){ const k=key(nx,ny);
+      if (!seen.has(k) && get(nx,ny) !== 'rock'){ seen.add(k); q.push({x:nx,y:ny}); } } }
     const must = [...pSpawn, ...eSpawn, ...(point ? [point] : []), ...[...exits].map(k => { const [x,y]=k.split(',').map(Number); return {x,y}; })];
     last = { T, obj, point, exits, pSpawn, eSpawn };
     if (must.every(c => seen.has(key(c.x,c.y)))) return last;
@@ -521,7 +554,7 @@ function updateVis(){
   for (const p of alive('p')){
     const v = visionOf(p);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++)
-      if (Math.abs(x-p.x) + Math.abs(y-p.y) <= v) S.vis.add(key(x,y));
+      if (hd(x,y,p.x,p.y) <= v) S.vis.add(key(x,y));
   }
 }
 
@@ -538,7 +571,7 @@ function reach(u){
   const isP = u.side === 'p';
   const opp = alive(isP ? 'e' : 'p').filter(o => !isP || S.vis.has(key(o.x,o.y)));
   const zoc = new Set();
-  opp.forEach(o => DIRS.forEach(([dx,dy]) => zoc.add(key(o.x+dx,o.y+dy))));
+  opp.forEach(o => nbr(o.x,o.y).forEach(([nx,ny]) => zoc.add(key(nx,ny))));
   // own fighters can be walked through (but not stopped on); enemies block if you can see them
   const blocked = (x,y) => { const o = unitAt(x,y); return o && o.side !== u.side && (!isP || S.vis.has(key(x,y))); };
   const start = key(u.x,u.y);
@@ -547,9 +580,9 @@ function reach(u){
     const [x,y] = q.shift(); const k = key(x,y), n = d.get(k).n;
     if (n >= moveOf(u)) continue;
     if (k !== start && (zoc.has(k) || terr(x,y) === 'swamp')) continue;
-    for (const [dx,dy] of DIRS){
-      const nx = x+dx, ny = y+dy, nk = key(nx,ny);
-      if (!inside(nx,ny) || d.has(nk) || terr(nx,ny) === 'rock' || blocked(nx,ny)) continue;
+    for (const [nx,ny] of nbr(x,y)){
+      const nk = key(nx,ny);
+      if (d.has(nk) || terr(nx,ny) === 'rock' || blocked(nx,ny)) continue;
       const o = unitAt(nx,ny);
       d.set(nk, { n: n+1, prev: k, occ: !!(o && o.side === u.side) }); q.push([nx,ny]);
     }
@@ -625,10 +658,7 @@ function dangerMap(){
       if (v.occ) continue;
       const [x,y] = k.split(',').map(Number);
       const r = BASE.range + (terr(x,y) === 'hill' ? 1 : 0);
-      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++){
-        const s = Math.abs(dx) + Math.abs(dy);
-        if (s > 0 && s <= r && inside(x+dx,y+dy)) hit.add(key(x+dx,y+dy));
-      }
+      for (const [hx,hy] of ring(x,y,r)) hit.add(key(hx,hy));
     }
     hit.forEach(k => m.set(k, (m.get(k) || 0) + 1));
   }
@@ -762,8 +792,7 @@ function threatMap(){
       if (v.occ) continue;
       const [x,y] = k.split(',').map(Number);
       const r = BASE.range + (terr(x,y) === 'hill' ? 1 : 0);
-      for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++)
-        if (Math.abs(dx) + Math.abs(dy) <= r && Math.abs(dx) + Math.abs(dy) > 0 && inside(x+dx,y+dy)) hit.add(key(x+dx,y+dy));
+      for (const [hx,hy] of ring(x,y,r)) hit.add(key(hx,hy));
     }
     hit.forEach(k => m.set(k, (m.get(k) || 0) + 1));
   }
@@ -816,7 +845,7 @@ async function enemyAct(e){
       }
       if (S.obj === 'hold'){ const dp = dist(e, S.point); score = Math.max(score, -2*dp + (dp === 0 ? 8 : 0)); }
       if (S.obj === 'exit' && e.guard && !players.some(p => dist(p, {x:ox, y:oy}) <= 4)){
-        score = -2 * Math.min(...[...S.exits].map(k => { const [ex,ey] = k.split(',').map(Number); return Math.abs(ex-x) + Math.abs(ey-y); }));
+        score = -2 * Math.min(...[...S.exits].map(k => { const [ex,ey] = k.split(',').map(Number); return hd(ex,ey,x,y); }));
       }
     }
     const t = terr(x,y);
@@ -1001,7 +1030,7 @@ function render(){
       if (tgt.has(u.id)) inner += `<span class="pv">−${dmgParts(sel,u).d}</span>`;
     }
     if (isHit && S.vis.has(k)) inner += `<span class="dmg">−${S.hit.dmg}</span>`;
-    html += `<div class="${cls.join(' ')}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
+    html += `<div class="${cls.join(' ')}" style="--x:${x};--y:${y};--o:${y & 1}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
   }
   board.innerHTML = html;
 
