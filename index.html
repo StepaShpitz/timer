@@ -451,6 +451,25 @@ button.node{cursor:pointer}
 .node[data-tip]{cursor:help}
 button.node[data-tip]{cursor:pointer}
 .tip .tsw svg{width:20px;height:20px}
+
+/* ---------- info box on the right (replaces the floating tooltip over the board) ---------- */
+.hinfo{display:flex;flex-direction:column;gap:8px;margin-top:8px;font-size:.88rem}
+.hinfo .trow{display:flex;align-items:center;gap:10px}
+.hinfo .trow p{margin:0;color:var(--muted);line-height:1.35}
+.hinfo .trow b{color:var(--ink);font-weight:600}
+.hinfo .tsw{width:34px;height:34px;flex:none;border-radius:6px;display:grid;place-items:center;position:relative;
+  background:color-mix(in srgb,var(--b,#99a1af) 18%,var(--surface));border:1px solid color-mix(in srgb,var(--b,#99a1af) 45%,var(--surface));color:var(--b,#99a1af)}
+.hinfo .tsw svg{width:22px;height:22px}
+.hinfo .tsw.sw{position:relative!important;left:auto!important;top:auto!important;clip-path:none!important;transform:none!important;border:0;box-shadow:inset 0 0 0 1px var(--line);cursor:default}
+.hinfo .tsw.sw .ticon{width:24px;height:24px;position:static}
+.hinfo .tsw.tok{border:2px solid var(--team-p);background:var(--team-p);color:#fff}
+.hinfo .tsw.tok.e{border-color:var(--team-e);background:var(--team-e)}
+.hinfo .tsw.tok.hero{border-color:#f0b100}
+.hinfo .tnote{padding-top:6px;border-top:1px solid var(--line);color:var(--muted);font-size:.8rem}
+.hinfo .tnote.danger{color:var(--red)}
+.hinfo .hint{margin:2px 0 0;color:var(--muted);font-size:.8rem}
+.hinfo .tsw svg.unit{width:28px;height:28px;margin:0;position:static}
+.hinfo .tsw.sw:has(svg.unit) .ticon{display:none}
 </style>
 </head>
 <body>
@@ -538,6 +557,10 @@ button.node[data-tip]{cursor:pointer}
           <button id="resetBtn">Меню</button>
         </div>
       </div>
+      <div class="box">
+        <div class="label" id="infoLabel">Местность и способности</div>
+        <div class="hinfo" id="hinfo" aria-live="polite"></div>
+      </div>
       <div class="box acc">
         <details>
           <summary><span>Правила</span><svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M9 5 5 1 1 5"/></svg></summary>
@@ -553,15 +576,11 @@ button.node[data-tip]{cursor:pointer}
             <li><b>Угрозы:</b> красный уголок на зелёной клетке значит, что видимые враги смогут ударить туда в свой ход (цифра — сколько врагов). Кнопка «Угрозы» (T) показывает всю опасную зону. Враги в тумане не учитываются.</li>
             <li>Уничтожение всех врагов — победа в любой миссии. Гибель всего отряда — поражение.</li>
             <li>Каждая новая карта и цель создаются случайно.</li>
-            <li><b>Инвентарь:</b> в кампании лишние находки (когда у бойца заняты обе ячейки) попадают в мешок. На привале кнопка «Инвентарь» позволяет переложить вещи: снять с бойца в мешок или отдать из мешка любому бойцу со свободной ячейкой. Во время боя инвентарь можно только посмотреть.</li>
-            <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. На новом уровне выберите одно из трёх улучшений: характеристику (здоровье, урон, броня, ход, обзор) или особый навык (вампиризм, размах, регенерация, копьё, вожак). После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
+            <li><b>Инвентарь:</b> в кампании лишние находки (когда у бойца заняты обе ячейки) попадают в мешок. На привале в «Инвентаре» выберите вещь в мешке и нажмите на ячейку бойца: свободную — чтобы надеть, занятую — чтобы поменять. Два одинаковых предмета на одного бойца надеть нельзя. Во время боя инвентарь можно только посмотреть.</li>
+            <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. Каждый уровень даёт очко навыка: в дереве три ветки (Воин, Страж, Следопыт), каждая открывается сверху вниз. После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
             <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
             <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP.</li>
           </ul>
-        </details>
-        <details>
-          <summary><span>Местность и способности</span><svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M9 5 5 1 1 5"/></svg></summary>
-          <div class="ref" id="terrRef"></div>
         </details>
         <details>
           <summary><span>Цели миссий</span><svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M9 5 5 1 1 5"/></svg></summary>
@@ -1490,8 +1509,7 @@ overlay.addEventListener('mouseleave', hideTip);
 function hideTip(){ tipEl.classList.remove('show'); }
 function renderHover(){
   const h = S.hover;
-  if (!h || !overlay.hidden){ hideTip(); return; }
-  const cell = board.querySelector(`.cell[data-x="${h.x}"][data-y="${h.y}"]`); if (!cell){ hideTip(); return; }
+  if (!h || !overlay.hidden){ showInfo(null); return; }
   const tid = terr(h.x,h.y), t = TERRAIN[tid], k = key(h.x,h.y);
   const raw = unitAt(h.x,h.y), u = raw && known(raw) ? raw : null;
   // rows in the same look as the terrain legend: icon tile + bold name + text
@@ -1500,7 +1518,7 @@ function renderHover(){
   const rows = [];
   if (u){
     const who = u.side === 'e' ? 'Орк' : u.hero ? `${u.name}, ур. ${u.lvl}` : u.name === 'Боец' ? 'Ваш боец' : u.name;
-    const tok = `<span class="tsw tok ${u.side}${u.hero ? ' hero' : ''}"><svg aria-hidden="true" viewBox="0 0 512 512"><use href="#u-${u.side}"/></svg></span>`;
+    const tok = `<span class="tsw sw cell t-${tid}"><svg class="unit ${u.side}${u.hero ? ' hero' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip ? '<use href="#u-crown"/>' : ''}</svg></span>`;
     rows.push(row(tok, `${who} · ${coord(h.x,h.y)}`, `${u.hp}/${maxHp(u)} HP`));
   }
   const sw = `<span class="tsw sw cell t-${tid}">${tid === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${tid}"/></svg>`}</span>`;
@@ -1515,23 +1533,21 @@ function renderHover(){
     const n = (S.dz || dangerMap()).get(k) || 0;
     if (n) rows.push(`<div class="tnote danger">Под ударом: ${n}</div>`);
   }
-  tipEl.innerHTML = rows.join('');
-  tipEl.classList.add('show');
-  const r = cell.getBoundingClientRect(), tr = tipEl.getBoundingClientRect();
-  const side = r.top - tr.height - 10 < 0 ? 'bottom' : 'top';
-  const x = Math.min(Math.max(8, r.left + r.width/2 - tr.width/2), innerWidth - tr.width - 8);
-  // if the page sits inside a transformed container, "fixed" is relative to it — measure its origin
-  const o = tipProbe.getBoundingClientRect();
-  tipEl.style.left = (x - o.left) + 'px';
-  tipEl.style.top = ((side === 'top' ? r.top - tr.height - 10 : r.bottom + 10) - o.top) + 'px';
-  tipEl.style.setProperty('--ax', (r.left + r.width/2 - x) + 'px');
-  tipEl.dataset.side = side;
+  showInfo(rows.join(''), `Клетка ${coord(h.x,h.y)}`);
+}
+// The info box on the right: the hovered cell, or the terrain legend when nothing is hovered
+function showInfo(html, label){
+  if (!html){
+    html = Object.entries(TERRAIN).map(([id,t]) => `<div class="trow"><span class="tsw sw cell t-${id}">${id === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${id}"/></svg>`}</span><p><b>${t.name}.</b> ${t.effect}</p></div>`).join('')
+      + '<p class="hint">Наведите на клетку или жетон, чтобы увидеть подробности.</p>';
+    label = 'Местность и способности';
+  }
+  hinfo.innerHTML = html; infoLabel.textContent = label;
 }
 addEventListener('scroll', hideTip, true);
 
 function buildRefs(){
-  terrRef.innerHTML = Object.entries(TERRAIN).map(([id,t]) =>
-    `<div class="sw cell t-${id}" style="width:30px;height:30px;cursor:default">${id === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${id}"/></svg>`}</div><p><b>${t.name}.</b> ${t.effect}</p>`).join('');
+  showInfo(null);
   axisX.innerHTML = [...COLS].map(c => `<span>${c}</span>`).join('');
   axisY.innerHTML = Array.from({length: H}, (_, i) => `<span>${i + 1}</span>`).join('');
   objRef.innerHTML = Object.entries(OBJ).map(([id,o]) =>
@@ -1551,7 +1567,7 @@ board.addEventListener('touchstart', ev => {
   pressT = setTimeout(() => { pressed = true; S.hover = { x: +c.dataset.x, y: +c.dataset.y }; renderHover(); }, 450);
 }, { passive: true });
 board.addEventListener('touchmove', () => clearTimeout(pressT), { passive: true });
-board.addEventListener('touchend', () => { clearTimeout(pressT); if (pressed) setTimeout(() => { S.hover = null; hideTip(); }, 1600); });
+board.addEventListener('touchend', () => { clearTimeout(pressT); if (pressed) setTimeout(() => { S.hover = null; renderHover(); }, 1600); });
 board.addEventListener('contextmenu', ev => { if (pressed) ev.preventDefault(); });
 board.addEventListener('mouseover', ev => {
   const c = ev.target.closest('.cell'); if (!c) return;
