@@ -273,7 +273,9 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 /* ===== Hex board: pointy-top hexes, odd rows shifted half a cell right ===== */
 :root{--g:3px;--hh:calc(var(--c) * 1.1547)}
 .board{display:block;position:relative;padding:0;background:transparent;border-radius:0;
-  width:calc(11.5 * (var(--c) + var(--g)));height:calc(10 * (var(--hh) * .75 + var(--g)) + var(--hh))}
+  width:calc(13.5 * (var(--c) + var(--g)));height:calc(12 * (var(--hh) * .75 + var(--g)) + var(--hh))}
+/* the board sits a little lower and stays in view while the side panel scrolls */
+.board-wrap{margin-top:24px;position:sticky;top:24px;align-self:start}
 .axis-x,.axis-y{display:none}
 .cell{position:absolute;width:var(--c);height:var(--hh);
   left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)));
@@ -388,7 +390,7 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
             <li>Каждая новая карта и цель создаются случайно.</li>
             <li><b>Кампания:</b> серия боёв одним отрядом. Здоровье переходит из боя в бой, на привале каждый восстанавливает 3 HP. Павшие не возвращаются; после победы, если в отряде меньше 4 бойцов, приходит новобранец. Каждые два боя врагов становится на одного больше (до 7). Поражение в любом бою заканчивает кампанию.</li>
             <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
-            <li><b>Сундуки:</b> на карте 2–3 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP.</li>
+            <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP.</li>
           </ul>
         </details>
         <details>
@@ -407,7 +409,7 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 
 <script>
 // The map is one big hexagon of radius RAD, stored in an 11×11 offset grid; cells outside it are void
-const RAD = 5, W = 2 * RAD + 1, H = 2 * RAD + 1, CX = RAD, CY = RAD, COLS = 'ABCDEFGHIJK';
+const RAD = 6, W = 2 * RAD + 1, H = 2 * RAD + 1, CX = RAD, CY = RAD, COLS = 'ABCDEFGHIJKLM';
 const BASE = { hp: 9, atk: 3, move: 2, range: 1, vision: 3 };
 const HOLD_N = 3, TIMED_N = 12, VIP_N = 10;
 const TERRAIN = {
@@ -472,7 +474,7 @@ function generate(np = 4, ne = 4){
     const inner = (x,y) => y >= 2 && y <= H-3;
     const cells = []; for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (inside(x,y)) cells.push([x,y]);
     const mid = cells.filter(([x,y]) => y >= 1 && y <= H-2);
-    for (let i = 0; i < 11; i++){ const [x,y] = pick(mid); T[y][x] = 'rock'; }
+    for (let i = 0; i < 15; i++){ const [x,y] = pick(mid); T[y][x] = 'rock'; }
     const cluster = (type, n, minS, maxS) => {
       for (let i = 0; i < n; i++){
         let [x, y] = pick(cells.filter(([a,b]) => inner(a,b))), size = minS + rnd(maxS-minS+1);
@@ -482,8 +484,8 @@ function generate(np = 4, ne = 4){
         }
       }
     };
-    cluster('forest', 4, 2, 4); cluster('swamp', 2, 2, 3); cluster('hill', 3, 1, 2);
-    cluster('tower', 1, 1, 1); cluster('forge', 2, 1, 1); cluster('spring', 1, 1, 1);
+    cluster('forest', 6, 2, 4); cluster('swamp', 3, 2, 3); cluster('hill', 4, 1, 2);
+    cluster('tower', 2, 1, 1); cluster('forge', 2, 1, 1); cluster('spring', 2, 1, 1);
 
     const obj = pick(Object.keys(OBJ));
     let point = null; const exits = new Set();
@@ -533,7 +535,7 @@ function newGame(camp = null){
   const spots = [];
   for (let y = 3; y <= H-4; y++) for (let x = 0; x < W; x++)
     if (inside(x,y) && m.T[y][x] === 'plain' && !(m.point && m.point.x === x && m.point.y === y)) spots.push(key(x,y));
-  const chests = new Set(shuffle(spots).slice(0, 2 + (camp && camp.battle >= 3 ? 1 : 0)));
+  const chests = new Set(shuffle(spots).slice(0, 3 + (camp && camp.battle >= 3 ? 1 : 0)));
   S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units, camp, chests,
         terr: m.T, obj: m.obj, point: m.point, exits: m.exits, hold: 0,
         alert: ['kill','timed','vip','exit'].includes(m.obj), result: null, reason: '' };
