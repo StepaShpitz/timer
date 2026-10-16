@@ -294,11 +294,29 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 .dz{left:4%;bottom:auto;top:38%;border-left-width:12px;border-top-width:12px}
 .mark{inset:14% 10%}
 .chest{top:20%}
+
+/* ===== Accordion (Flowbite style): full-width rows, chevron on the right ===== */
+.box.acc{padding:0;gap:0;overflow:hidden}
+.box.acc::before,.box.acc::after{display:none}
+.acc details{border:0;border-bottom:1px solid var(--line);padding:0;margin:0}
+.acc details:last-of-type{border-bottom:0}
+.acc summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px 20px;font-family:var(--body);font-weight:500;font-size:.95rem;letter-spacing:0;color:var(--muted);transition:background-color .15s,color .15s}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::marker{content:""}
+.acc summary:hover{background:color-mix(in srgb,var(--ink) 5%,transparent);color:var(--ink)}
+.acc details[open] > summary{color:var(--ink);background:color-mix(in srgb,var(--team-p) 10%,transparent);border-bottom:1px solid var(--line)}
+.acc .chev{width:12px;height:12px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transform:rotate(180deg);transition:transform .2s}
+.acc details[open] .chev{transform:rotate(0deg)}
+.acc details > :not(summary){margin:0;padding:14px 20px 16px}
+.acc .rules{padding-left:38px}
+@media (prefers-reduced-motion:reduce){.acc summary,.acc .chev{transition:none}}
 </style>
 </head>
 <body>
 
 
+<!-- Icons: game-icons.net — Delapouite, Lorc, Sbed, Willdabeast (CC BY 3.0). Font: Inter (Google Fonts). -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <!-- fighters: player = heater shield + knight helm, enemy = angular shield + horned helm -->
   <symbol id="u-p" viewBox="0 0 512 512">
@@ -369,13 +387,9 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
           <button id="resetBtn">Меню</button>
         </div>
       </div>
-      <div class="box">
-        <div class="label">Журнал</div>
-        <ul class="log" id="log"></ul>
-      </div>
-      <div class="box">
+      <div class="box acc">
         <details>
-          <summary>Правила</summary>
+          <summary><span>Правила</span><svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M9 5 5 1 1 5"/></svg></summary>
           <ul class="rules">
             <li>Все бойцы одинаковы: 9 HP, урон 3, ход 2 клетки, атака по соседней клетке, обзор 3 клетки.</li>
             <li>За ход каждый боец может переместиться и затем атаковать. Атаковать можно и без движения.</li>
@@ -394,14 +408,13 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
           </ul>
         </details>
         <details>
-          <summary>Местность и способности</summary>
+          <summary><span>Местность и способности</span><svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M9 5 5 1 1 5"/></svg></summary>
           <div class="ref" id="terrRef"></div>
         </details>
         <details>
-          <summary>Цели миссий</summary>
+          <summary><span>Цели миссий</span><svg class="chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M9 5 5 1 1 5"/></svg></summary>
           <div class="ref" id="objRef"></div>
         </details>
-        <p class="credit">Иконки: <a href="https://game-icons.net" target="_blank" rel="noopener">game-icons.net</a> — Delapouite, Lorc, Sbed, Willdabeast (CC BY 3.0). Шрифт: Inter (Google Fonts).</p>
       </div>
     </div>
   </div>
@@ -1075,7 +1088,8 @@ function render(){
   }
   waitBtn.disabled = !sel;
   endBtn.disabled = S.phase !== 'player';
-  log.innerHTML = S.log.map(l => `<li class="${l.cls}">${l.text}</li>`).join('');
+  const logEl = document.getElementById('log');
+  if (logEl) logEl.innerHTML = S.log.map(l => `<li class="${l.cls}">${l.text}</li>`).join('');
 
   if (S.phase === 'over' && !S.resultShown){ S.resultShown = true; showResult(); }
   if (S.hover && overlay.hidden) renderHover();
