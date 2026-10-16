@@ -374,7 +374,7 @@ button.slot:hover .badge{outline:2px solid color-mix(in srgb,var(--team-p) 45%,t
 .islots{display:flex;gap:8px;flex:none}
 .islot{width:62px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0;border:0;background:none;color:#d1d5dc;font:500 .7rem/1.2 var(--body);cursor:default}
 .islot .ico,.bitem .ico{width:44px;height:44px;flex:none;border-radius:8px;display:grid;place-items:center;font-size:1.3rem;color:#fff}
-.islot .cap{max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.islot .cap{max-width:66px;text-align:center;line-height:1.15}
 .islot.full .ico,.bitem .ico{background:color-mix(in srgb,var(--b) 28%,var(--card));border:1px solid color-mix(in srgb,var(--b) 60%,var(--card));color:color-mix(in srgb,var(--b) 40%,#fff)}
 .islot .ico svg,.bitem .ico svg{width:28px;height:28px}
 .islot.empty .ico{border:1.5px dashed rgba(255,255,255,.25)}
@@ -439,6 +439,10 @@ button.node{cursor:pointer}
 .tip .tsw.tok.hero{border-color:#f0b100}
 .tip .tnote{margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,.12);color:#99a1af;font-size:.78rem}
 .tip .tnote.danger{color:#ff6467}
+
+.islot.swap{position:relative}
+.islot.swap .ico{outline:2px dashed #7ccf00;outline-offset:2px}
+.islot .swapmark{position:absolute;top:-6px;right:2px;width:18px;height:18px;border-radius:50%;background:#7ccf00;color:#1e2939;font:700 .75rem/18px var(--body);text-align:center}
 </style>
 </head>
 <body>
@@ -1212,8 +1216,11 @@ function showInventory(c, inBattle){
       const it = its[i];
       if (it){
         const inner = `<span class="ico" style="--b:${ITEM_TINT[it]}">${itemIcon(it)}</span><span class="cap">${ITEMS[it].name}</span>`;
-        return inBattle ? `<span class="islot full" title="${ITEMS[it].desc}">${inner}</span>`
-          : `<button class="islot full" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="${ITEMS[it].name}: ${ITEMS[it].desc}. Нажмите, чтобы снять в мешок">${inner}</button>`;
+        if (inBattle) return `<span class="islot full" title="${ITEMS[it].desc}">${inner}</span>`;
+        const nb = invSel != null ? bag[invSel] : null;
+        if (nb && nb !== it && !its.includes(nb))
+          return `<button class="islot full swap" data-act="swap" data-cid="${f.cid}" data-i="${i}" title="Заменить: ${ITEMS[it].name} → ${ITEMS[nb].name}">${inner}<span class="swapmark">⇄</span></button>`;
+        return `<button class="islot full" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="${ITEMS[it].name}: ${ITEMS[it].desc}. Нажмите, чтобы снять в мешок">${inner}</button>`;
       }
       const dup = room && invSel != null && its.includes(bag[invSel]);
       if (dup) return `<span class="islot empty dup" title="Два одинаковых предмета надеть нельзя"><span class="ico">×</span><span class="cap">уже есть</span></span>`;
@@ -1234,9 +1241,9 @@ function showInventory(c, inBattle){
     }).join('')
     : '<li class="note">Мешок пуст. Лишние находки из сундуков попадают сюда.</li>';
   const free = invFighters(c).some(f => (f.items || []).length < ITEM_SLOTS && (invSel == null || !(f.items || []).includes(bag[invSel])));
-  const hint = inBattle ? 'Менять снаряжение можно на привале.'
-    : invSel != null ? (free ? `Выбран предмет «${ITEMS[bag[invSel]].name}» — нажмите на свободную ячейку бойца. Два одинаковых предмета на одного бойца надеть нельзя.` : 'Некуда надеть: ячейки заняты или такой предмет уже есть.')
-    : 'Нажмите на предмет в мешке, затем на свободную ячейку. Нажатие на надетый предмет снимает его в мешок.';
+  const hint = inBattle ? 'В бою снаряжение не меняется — переодеться можно на привале после победы (кнопка «Инвентарь»).'
+    : invSel != null ? `Выбран «${ITEMS[bag[invSel]].name}»: нажмите на свободную ячейку, чтобы надеть, или на надетый предмет (⇄), чтобы поменять местами с мешком.`
+    : 'Нажмите на предмет в мешке, затем на ячейку бойца — свободную или занятую (заменит). Нажатие на надетый предмет без выбора снимает его в мешок.';
   showOverlay(`<div class="eyebrow">Инвентарь</div>
     <h2>Снаряжение отряда</h2>
     <ul class="icards">${fighters.map(card).join('')}</ul>
@@ -1250,7 +1257,12 @@ async function invChange(kind, cid, i){
   const c = await Store.load(SAVE_KEY); if (!c || !c.atCamp) return;
   const f = invFighters(c).find(f => String(f.cid) === String(cid)); if (!f) return;
   f.items = f.items || []; c.bag = c.bag || [];
-  if (kind === 'equip'){
+  if (kind === 'swap'){
+    const nb = c.bag[invSel]; if (invSel == null || !nb || !f.items[i] || f.items.includes(nb)) return;
+    const old = f.items[i]; f.items[i] = nb; c.bag.splice(invSel, 1); c.bag.push(old);
+    const mx = f.hero ? heroMax(f) : BASE.hp + 2 * f.items.filter(x => x === 'amulet').length;
+    f.hp = Math.min(f.hp, mx);
+  } else if (kind === 'equip'){
     if (f.items.length >= ITEM_SLOTS || !c.bag[i] || f.items.includes(c.bag[i])) return;
     f.items.push(c.bag.splice(i, 1)[0]);
   } else {
@@ -1357,7 +1369,7 @@ overlay.addEventListener('click', async ev => {
   if (act === 'inv'){ const c = await Store.load(SAVE_KEY); return c ? showInventory(c, false) : null; }
   if (act === 'to-camp'){ const c = await Store.load(SAVE_KEY); return c ? showCamp(c) : showMenu(); }
   if (act === 'bag-sel'){ invSel = invSel === +b.dataset.i ? null : +b.dataset.i; return invC && showInventory(invC, false); }
-  if (act === 'equip' || act === 'unequip') return invChange(act, b.dataset.cid, +b.dataset.i);
+  if (act === 'equip' || act === 'unequip' || act === 'swap') return invChange(act, b.dataset.cid, +b.dataset.i);
   if (act === 'hire') return hireMerc();
   if (act === 'continue' || act === 'fight'){
     const c = await Store.load(SAVE_KEY); if (!c) return showMenu();
