@@ -311,6 +311,13 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 .acc details > :not(summary){margin:0;padding:14px 20px 16px}
 .acc .rules{padding-left:38px}
 @media (prefers-reduced-motion:reduce){.acc summary,.acc .chev{transition:none}}
+
+/* ===== Menu buttons: soft tint like the open accordion row instead of solid blue ===== */
+.ov-card .ov-btns button{background:transparent;color:var(--ink);border:1px solid var(--line);transition:background-color .15s,border-color .15s}
+.ov-card .ov-btns button:hover:not(:disabled){background:color-mix(in srgb,var(--team-p) 10%,transparent);border-color:color-mix(in srgb,var(--team-p) 30%,var(--line))}
+.ov-card .ov-btns button.primary{background:color-mix(in srgb,var(--team-p) 14%,transparent);border-color:color-mix(in srgb,var(--team-p) 38%,var(--line));color:var(--ink)}
+.ov-card .ov-btns button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--team-p) 22%,transparent)}
+.ov-card .ov-btns button small{color:var(--muted);opacity:1}
 </style>
 </head>
 <body>
@@ -973,12 +980,14 @@ function hideOverlay(){ overlay.hidden = true; overlay.innerHTML = ''; menuResum
 function resumeGame(){ hideOverlay(); render(); }
 async function showMenu(resumable = false){
   const c = await Store.load(SAVE_KEY), rec = await Store.load(RECORD_KEY);
+  // the first button is the highlighted one: back to the battle if it has started, otherwise the campaign
+  const showResume = resumable && (S.turn > 1 || S.units.some(u => u.moved || u.acted));
   showOverlay(`<div class="eyebrow">Пошаговая тактика</div>
     <h2>Тактика на клетках</h2>
     <div class="ov-btns">
-      ${resumable && (S.turn > 1 || S.units.some(u => u.moved || u.acted)) ? '<button class="primary" data-act="resume">Вернуться к бою <small>Esc</small></button>' : ''}
-      ${c ? `<button ${resumable ? '' : 'class="primary"'} data-act="continue">${S && S.camp && resumable ? 'Начать бой заново' : 'Продолжить кампанию'} <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
-      <button ${c || resumable ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
+      ${showResume ? '<button class="primary" data-act="resume">Вернуться к бою <small>Esc</small></button>' : ''}
+      ${c ? `<button ${showResume ? '' : 'class="primary"'} data-act="continue">${S && S.camp && showResume ? 'Начать бой заново' : 'Продолжить кампанию'} <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
+      <button ${c || showResume ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
       <button data-act="skirmish">Одиночный бой <small>случайная карта</small></button>
     </div>
     ${c ? '<p>Новая кампания сотрёт текущую.</p>' : ''}
