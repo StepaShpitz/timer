@@ -921,6 +921,7 @@ async function startCampaign(c){
 }
 // After a won battle: carry HP over, bury the fallen, rest, recruit one if the squad is short
 async function afterVictory(){
+  if (S.campDone) return; S.campDone = true;
   const c = S.camp, report = [];
   const byCid = new Map(S.units.filter(u => u.side === 'p').map(u => [u.cid, u]));
   const next = [];
@@ -989,7 +990,7 @@ function showCamp(c, report){
     <div class="ov-btns"><button class="primary" data-act="fight">В бой</button><button data-act="menu">В меню</button></div>`);
 }
 overlay.addEventListener('click', async ev => {
-  if (ev.target === overlay && menuResumable) return resumeGame(); // click outside the card
+  if (ev.target === overlay) return resumeGame(); // any popup closes on a click outside the card
   const b = ev.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act;
   if (act === 'resume') return resumeGame();
@@ -1144,11 +1145,14 @@ board.addEventListener('mouseover', ev => {
 board.addEventListener('mouseleave', () => { S.hover = null; renderHover(); });
 waitBtn.onclick = waitUnit;
 endBtn.onclick = endTurn;
-resetBtn.onclick = () => showMenu(!!S && S.phase !== 'over');
+resetBtn.onclick = () => {
+  if (S && S.phase === 'over' && S.camp && S.result === 'Победа' && !S.campDone) return showResult();
+  showMenu(!!S && S.phase !== 'over');
+};
 const toggleDanger = () => { S.showDanger = !S.showDanger; render(); renderHover(); };
 dangerBtn.onclick = toggleDanger;
 document.addEventListener('keydown', ev => {
-  if (!overlay.hidden){ if (ev.key === 'Escape' && menuResumable) resumeGame(); return; }
+  if (!overlay.hidden){ if (ev.key === 'Escape') resumeGame(); return; }
   if (ev.target.closest('button,summary') && (ev.key === ' ' || ev.key === 'Enter')) return;
   if (ev.key === ' '){ ev.preventDefault(); endTurn(); }
   else if ('wWцЦ'.includes(ev.key)) waitUnit();
