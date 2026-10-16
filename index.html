@@ -357,6 +357,41 @@ button.slot:hover .badge{outline:2px solid color-mix(in srgb,var(--team-p) 45%,t
 .toast.out{opacity:0;transform:translateY(6px)}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.toast{animation:none;transition:none}}
+
+/* ---------- inventory: tooltip-style cards ---------- */
+.ov-card.wide{max-width:560px}
+.icards,.ibag{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-direction:column;gap:8px}
+.ibag{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.icard,.bitem{--card:#1e2939;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--card);color:#fff;
+  font:500 .85rem/1.35 var(--body);box-shadow:0 4px 12px rgba(3,7,18,.18);text-align:left}
+.icard b,.bitem b{font-weight:600;display:block}
+.icard .sub,.bitem .sub{display:block;color:#d1d5dc;font-weight:400;font-size:.8rem}
+.icard .who,.bitem .who{flex:1;min-width:0}
+.icard.dead{opacity:.5}.icard.dead b{text-decoration:line-through}
+.icard .tok{width:38px;height:38px;flex:none;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--team-p) 30%,var(--card));border:2px solid var(--team-p)}
+.icard.hero .tok{border-color:var(--gold,#f0b100)}
+.icard .tok svg{width:24px;height:24px;color:#fff}
+.islots{display:flex;gap:8px;flex:none}
+.islot{width:62px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:0;border:0;background:none;color:#d1d5dc;font:500 .7rem/1.2 var(--body);cursor:default}
+.islot .ico,.bitem .ico{width:44px;height:44px;flex:none;border-radius:8px;display:grid;place-items:center;font-size:1.3rem;color:#fff}
+.islot .cap{max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.islot.full .ico,.bitem .ico{background:color-mix(in srgb,var(--b) 28%,var(--card));border:1px solid color-mix(in srgb,var(--b) 60%,var(--card));color:color-mix(in srgb,var(--b) 40%,#fff)}
+.islot .ico svg,.bitem .ico svg{width:28px;height:28px}
+.islot.empty .ico{border:1.5px dashed rgba(255,255,255,.25)}
+.islot.empty .cap{color:#99a1af}
+button.islot,button.islot:hover{cursor:pointer;background:none!important;box-shadow:none!important;min-height:0;transform:none}
+button.islot.full:hover .ico{outline:2px solid rgba(255,255,255,.5);outline-offset:1px}
+.islot.target .ico{border-color:#7ccf00;color:#7ccf00;background:rgba(124,207,0,.1);animation:slotPulse 1.2s ease-in-out infinite}
+.islot.target .cap{color:#bbf451}
+@keyframes slotPulse{50%{background:rgba(124,207,0,.25)}}
+button.bitem,button.bitem:hover{width:100%;min-height:0;border:2px solid transparent;cursor:pointer;background:var(--card)!important;color:#fff!important;transform:none}
+button.bitem:hover{border-color:rgba(255,255,255,.25)}
+button.bitem.sel{border-color:#7ccf00}
+.ov-card p.note{color:var(--muted);font-size:.85rem}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) :is(.icard,.bitem){--card:#364153}}
+:root[data-theme="dark"] :is(.icard,.bitem){--card:#364153}
+@media (prefers-reduced-motion:reduce){.islot.target .ico{animation:none}}
+@media (max-width:520px){.icard{flex-wrap:wrap}.islots{width:100%;justify-content:flex-start;padding-left:50px}}
 </style>
 </head>
 <body>
@@ -1093,29 +1128,51 @@ async function hireMerc(){
 /* ---------- inventory ---------- */
 // At the camp: equip from the bag or take items off. In battle: view only.
 function invFighters(c){ return [c.hero, ...c.mercs]; }
+let invSel = null, invC = null; // selected bag item (camp only)
+function invFighterMax(f, inBattle){ return inBattle ? maxHp(f) : f.hero ? heroMax(f) : BASE.hp + 2 * (f.items || []).filter(x => x === 'amulet').length; }
+const itemIcon = it => `<svg viewBox="0 0 512 512" aria-hidden="true"><use href="#i-${it}"/></svg>`;
 function showInventory(c, inBattle){
-  const live = inBattle && S ? S.units.filter(u => u.side === 'p') : null;
-  const fighters = inBattle ? live : invFighters(c);
+  invC = c; if (inBattle) invSel = null;
+  const fighters = inBattle ? S.units.filter(u => u.side === 'p') : invFighters(c);
   const bag = inBattle ? [...(c.bag || []), ...(S.loot || [])] : (c.bag || []);
-  const row = f => {
-    const its = f.items || [], dead = inBattle && f.hp <= 0;
-    const slots = Array.from({length: ITEM_SLOTS}, (_, i) => its[i]
-      ? (inBattle ? `<span class="slot">${itemHTML(its[i])}</span>` : `<button class="slot" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="Снять в мешок">${itemHTML(its[i])}</button>`)
-      : '<span class="slot empty">пусто</span>').join('');
-    return `<li class="${dead ? 'dead' : ''}"><span class="nm">${f.name}${f.hero ? ` · ур. ${f.level || f.lvl}` : ''}</span><span class="slots">${slots}</span></li>`;
+  if (invSel != null && !bag[invSel]) invSel = null;
+  const card = f => {
+    const its = f.items || [], dead = inBattle && f.hp <= 0, room = !inBattle && its.length < ITEM_SLOTS;
+    const slots = Array.from({length: ITEM_SLOTS}, (_, i) => {
+      const it = its[i];
+      if (it){
+        const inner = `<span class="ico" style="--b:${ITEM_TINT[it]}">${itemIcon(it)}</span><span class="cap">${ITEMS[it].name}</span>`;
+        return inBattle ? `<span class="islot full" title="${ITEMS[it].desc}">${inner}</span>`
+          : `<button class="islot full" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="${ITEMS[it].name}: ${ITEMS[it].desc}. Нажмите, чтобы снять в мешок">${inner}</button>`;
+      }
+      const target = room && invSel != null;
+      return target ? `<button class="islot empty target" data-act="equip" data-cid="${f.cid}" data-i="${invSel}" title="Надеть сюда"><span class="ico">+</span><span class="cap">надеть</span></button>`
+                    : `<span class="islot empty"><span class="ico"></span><span class="cap">пусто</span></span>`;
+    }).join('');
+    const lvl = f.hero ? ` · ур. ${f.level || f.lvl}` : '';
+    return `<li class="icard${dead ? ' dead' : ''}${f.hero ? ' hero' : ''}">
+      <span class="tok"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#u-p"/></svg></span>
+      <span class="who"><b>${f.name}${lvl}</b><span class="sub">${dead ? 'пал в бою' : `${Math.max(0, f.hp)}/${invFighterMax(f, inBattle)} HP`}${f.hero ? ' · герой' : ' · наёмник'}</span></span>
+      <span class="islots">${slots}</span></li>`;
   };
-  const free = invFighters(c).filter(f => (f.items || []).length < ITEM_SLOTS);
-  const bagHTML = bag.length ? bag.map((it, i) => inBattle
-      ? `<li><span>${itemHTML(it)}</span><span class="note">${ITEMS[it].desc}</span></li>`
-      : `<li><span>${itemHTML(it)}</span><span class="give">${free.length ? free.map(f => `<button data-act="equip" data-i="${i}" data-cid="${f.cid}">${f.name}</button>`).join('') : '<span class="note">все ячейки заняты</span>'}</span></li>`).join('')
+  const bagHTML = bag.length ? bag.map((it, i) => {
+      const inner = `<span class="ico" style="--b:${ITEM_TINT[it]}">${itemIcon(it)}</span><span class="who"><b>${ITEMS[it].name}</b><span class="sub">${ITEMS[it].desc}</span></span>`;
+      return inBattle ? `<li><span class="bitem">${inner}</span></li>`
+        : `<li><button class="bitem${invSel === i ? ' sel' : ''}" data-act="bag-sel" data-i="${i}" aria-pressed="${invSel === i}">${inner}</button></li>`;
+    }).join('')
     : '<li class="note">Мешок пуст. Лишние находки из сундуков попадают сюда.</li>';
+  const free = invFighters(c).some(f => (f.items || []).length < ITEM_SLOTS);
+  const hint = inBattle ? 'Менять снаряжение можно на привале.'
+    : invSel != null ? (free ? `Выбран предмет «${ITEMS[bag[invSel]].name}» — нажмите на свободную ячейку бойца.` : 'Все ячейки заняты — сначала снимите что-нибудь.')
+    : 'Нажмите на предмет в мешке, затем на свободную ячейку. Нажатие на надетый предмет снимает его в мешок.';
   showOverlay(`<div class="eyebrow">Инвентарь</div>
     <h2>Снаряжение отряда</h2>
-    <ul class="inv">${fighters.map(row).join('')}</ul>
-    <div class="eyebrow">Мешок</div>
-    <ul class="bag">${bagHTML}</ul>
-    <p>${inBattle ? 'Менять снаряжение можно на привале.' : 'Нажмите на предмет бойца, чтобы снять его в мешок; на имя под предметом в мешке — чтобы отдать.'}</p>
+    <ul class="icards">${fighters.map(card).join('')}</ul>
+    <div class="eyebrow">Мешок · ${bag.length}</div>
+    <ul class="ibag">${bagHTML}</ul>
+    <p class="note">${hint}</p>
     <div class="ov-btns">${inBattle ? '<button class="primary" data-act="resume">Вернуться к бою</button>' : '<button class="primary" data-act="to-camp">Назад к привалу</button>'}</div>`);
+  overlay.querySelector('.ov-card').classList.add('wide');
 }
 async function invChange(kind, cid, i){
   const c = await Store.load(SAVE_KEY); if (!c || !c.atCamp) return;
@@ -1130,6 +1187,7 @@ async function invChange(kind, cid, i){
     const mx = f.hero ? heroMax(f) : BASE.hp + 2 * f.items.filter(x => x === 'amulet').length;
     f.hp = Math.min(f.hp, mx); // taking an amulet off lowers max HP
   }
+  invSel = null;
   await Store.save(SAVE_KEY, c);
   showInventory(c, false);
 }
@@ -1217,6 +1275,7 @@ overlay.addEventListener('click', async ev => {
   if (act === 'pick') return pickUpgrade(b.dataset.up);
   if (act === 'inv'){ const c = await Store.load(SAVE_KEY); return c ? showInventory(c, false) : null; }
   if (act === 'to-camp'){ const c = await Store.load(SAVE_KEY); return c ? showCamp(c) : showMenu(); }
+  if (act === 'bag-sel'){ invSel = invSel === +b.dataset.i ? null : +b.dataset.i; return invC && showInventory(invC, false); }
   if (act === 'equip' || act === 'unequip') return invChange(act, b.dataset.cid, +b.dataset.i);
   if (act === 'hire') return hireMerc();
   if (act === 'continue' || act === 'fight'){
@@ -1318,8 +1377,9 @@ function renderHover(){
   const tid = terr(h.x,h.y), t = TERRAIN[tid], k = key(h.x,h.y);
   const raw = unitAt(h.x,h.y), u = raw && known(raw) ? raw : null;
   const tags = [];
-  let s = u ? `<b>${u.side === 'p' ? u.name : 'Орк'} · ${coord(h.x,h.y)}</b><span class="sub">${u.side === 'p' ? 'Ваш отряд' : 'Противник'} · ${u.hp}/${maxHp(u)} HP · ${t.name}</span>`
-            : `<b>${coord(h.x,h.y)} · ${t.name}</b><span class="sub">${t.effect}</span>`;
+  const who = u && (u.side === 'e' ? 'Орк' : u.hero ? `${u.name} · ур. ${u.lvl}` : u.name === 'Боец' ? 'Ваш боец' : u.name);
+  let s = u ? `<b>${who} · ${coord(h.x,h.y)}</b><span class="sub">${u.hp}/${maxHp(u)} HP · ${t.name}</span>`
+            : `<b>${t.name} · ${coord(h.x,h.y)}</b><span class="sub">${t.effect}</span>`;
   if (S.point && S.point.x === h.x && S.point.y === h.y) s += '<span class="sub">Точка удержания.</span>';
   if (S.exits.has(k)) s += '<span class="sub">Клетка выхода.</span>';
   if (S.chests && S.chests.has(k) && S.vis.has(k)) s += '<span class="sub">Сундук: закончите здесь ход, чтобы открыть.</span>';
