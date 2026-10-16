@@ -318,6 +318,13 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 .ov-card .ov-btns button.primary{background:color-mix(in srgb,var(--team-p) 14%,transparent);border-color:color-mix(in srgb,var(--team-p) 38%,var(--line));color:var(--ink)}
 .ov-card .ov-btns button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--team-p) 22%,transparent)}
 .ov-card .ov-btns button small{color:var(--muted);opacity:1}
+
+/* ===== Panel buttons: same soft style as the menu ===== */
+.btns button{background:transparent;color:var(--ink);border:1px solid var(--line);transition:background-color .15s,border-color .15s}
+.btns button:hover:not(:disabled){background:color-mix(in srgb,var(--team-p) 10%,transparent);border-color:color-mix(in srgb,var(--team-p) 30%,var(--line))}
+.btns button.primary{background:color-mix(in srgb,var(--team-p) 14%,transparent);border-color:color-mix(in srgb,var(--team-p) 38%,var(--line));color:var(--ink)}
+.btns button.primary:hover:not(:disabled){background:color-mix(in srgb,var(--team-p) 22%,transparent)}
+.btns button.on,.btns button.on:hover:not(:disabled){background:color-mix(in srgb,var(--red) 14%,transparent);border-color:color-mix(in srgb,var(--red) 45%,var(--line));color:var(--ink)}
 </style>
 </head>
 <body>
@@ -388,9 +395,9 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
         <div class="label">Выбранный боец</div>
         <div id="card"></div>
         <div class="btns">
-          <button id="waitBtn">Ждать<kbd>W</kbd></button>
-          <button id="endBtn" class="primary">Конец хода<kbd>Space</kbd></button>
-          <button id="dangerBtn" aria-pressed="false">Угрозы<kbd>T</kbd></button>
+          <button id="waitBtn" title="Клавиша W">Ждать</button>
+          <button id="endBtn" class="primary" title="Клавиша Space">Конец хода</button>
+          <button id="dangerBtn" aria-pressed="false" title="Клавиша T">Угрозы</button>
           <button id="resetBtn">Меню</button>
         </div>
       </div>
@@ -985,7 +992,7 @@ async function showMenu(resumable = false){
   showOverlay(`<div class="eyebrow">Пошаговая тактика</div>
     <h2>Тактика на клетках</h2>
     <div class="ov-btns">
-      ${showResume ? '<button class="primary" data-act="resume">Вернуться к бою <small>Esc</small></button>' : ''}
+      ${showResume ? '<button class="primary" data-act="resume">Вернуться к бою</button>' : ''}
       ${c ? `<button ${showResume ? '' : 'class="primary"'} data-act="continue">${S && S.camp && showResume ? 'Начать бой заново' : 'Продолжить кампанию'} <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
       <button ${c || showResume ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
       <button data-act="skirmish">Одиночный бой <small>случайная карта</small></button>
