@@ -914,18 +914,22 @@ async function afterDefeat(){
 
 /* ---------- overlay screens ---------- */
 function showOverlay(html){ overlay.innerHTML = `<div class="ov-card">${html}</div>`; overlay.hidden = false; hideTip(); }
-function hideOverlay(){ overlay.hidden = true; overlay.innerHTML = ''; }
-async function showMenu(){
+let menuResumable = false; // true while the menu was opened on top of a battle in progress
+function hideOverlay(){ overlay.hidden = true; overlay.innerHTML = ''; menuResumable = false; }
+function resumeGame(){ hideOverlay(); render(); }
+async function showMenu(resumable = false){
   const c = await Store.load(SAVE_KEY), rec = await Store.load(RECORD_KEY);
   showOverlay(`<div class="eyebrow">Пошаговая тактика</div>
     <h2>Тактика на клетках</h2>
     <div class="ov-btns">
-      ${c ? `<button class="primary" data-act="continue">Продолжить кампанию <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
-      <button ${c ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
+      ${resumable ? '<button class="primary" data-act="resume">Вернуться к бою <small>Esc</small></button>' : ''}
+      ${c ? `<button ${resumable ? '' : 'class="primary"'} data-act="continue">${S && S.camp && resumable ? 'Начать бой заново' : 'Продолжить кампанию'} <small>бой ${c.battle} · бойцов ${c.squad.length}</small></button>` : ''}
+      <button ${c || resumable ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>серия боёв</small></button>
       <button data-act="skirmish">Одиночный бой <small>случайная карта</small></button>
     </div>
     ${c ? '<p>Новая кампания сотрёт текущую.</p>' : ''}
     ${rec ? `<p>Рекорд: ${rec} ${rec === 1 ? 'победа' : rec < 5 ? 'победы' : 'побед'} подряд.</p>` : ''}`);
+  menuResumable = resumable;
 }
 function showResult(){
   const win = S.result === 'Победа';
@@ -947,8 +951,10 @@ function showCamp(c, report){
     <div class="ov-btns"><button class="primary" data-act="fight">В бой</button><button data-act="menu">В меню</button></div>`);
 }
 overlay.addEventListener('click', async ev => {
+  if (ev.target === overlay && menuResumable) return resumeGame(); // click outside the card
   const b = ev.target.closest('[data-act]'); if (!b) return;
   const act = b.dataset.act;
+  if (act === 'resume') return resumeGame();
   if (act === 'menu') return showMenu();
   if (act === 'skirmish'){ hideOverlay(); return newGame(); }
   if (act === 'new-camp') return startCampaign(newCampaign());
@@ -1099,11 +1105,11 @@ board.addEventListener('mouseover', ev => {
 board.addEventListener('mouseleave', () => { S.hover = null; renderHover(); });
 waitBtn.onclick = waitUnit;
 endBtn.onclick = endTurn;
-resetBtn.onclick = () => showMenu();
+resetBtn.onclick = () => showMenu(!!S && S.phase !== 'over');
 const toggleDanger = () => { S.showDanger = !S.showDanger; render(); renderHover(); };
 dangerBtn.onclick = toggleDanger;
 document.addEventListener('keydown', ev => {
-  if (!overlay.hidden) return;
+  if (!overlay.hidden){ if (ev.key === 'Escape' && menuResumable) resumeGame(); return; }
   if (ev.target.closest('button,summary') && (ev.key === ' ' || ev.key === 'Enter')) return;
   if (ev.key === ' '){ ev.preventDefault(); endTurn(); }
   else if ('wWцЦ'.includes(ev.key)) waitUnit();
