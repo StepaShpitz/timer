@@ -336,6 +336,27 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
 .ov-card .ov-btns.ups{border-top:0;position:static;padding-top:0;margin-top:0}
 .ov-card .ov-btns.ups button{align-items:center}
 .ov-card .ov-btns.ups small{text-align:right}
+
+/* ===== Inventory and toasts ===== */
+.inv,.bag{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.inv li{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.inv li.dead{opacity:.45;text-decoration:line-through}
+.inv .slots{display:flex;gap:6px;flex-wrap:wrap}
+.slot{display:inline-flex;align-items:center;min-height:30px;padding:0;border:0;background:none;cursor:pointer}
+button.slot:hover .badge{outline:2px solid color-mix(in srgb,var(--team-p) 45%,transparent)}
+.slot.empty{padding:4px 10px;border:1px dashed var(--line);border-radius:999px;color:var(--muted);font-size:.8rem;cursor:default}
+.bag li{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bag .give{display:flex;gap:6px;flex-wrap:wrap}
+.bag .give button{padding:4px 10px;font-size:.82rem;min-height:0;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:8px}
+.bag .give button:hover{background:color-mix(in srgb,var(--team-p) 10%,transparent)}
+.bag .note,.inv .note{color:var(--muted);font-size:.85rem}
+.rest{color:var(--hp-ok)!important;font-weight:600}
+#toasts{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:10px;max-width:340px;padding:10px 14px;border-radius:10px;background:var(--surface);color:var(--ink);border:1px solid var(--line);box-shadow:0 8px 24px rgba(3,7,18,.25);font-size:.9rem;animation:tin .2s ease-out;transition:opacity .3s,transform .3s}
+.toast svg{width:22px;height:22px;flex:none;fill:currentColor}
+.toast.out{opacity:0;transform:translateY(6px)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none;transition:none}}
 </style>
 </head>
 <body>
@@ -409,6 +430,7 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
           <button id="waitBtn" title="Клавиша W">Ждать</button>
           <button id="endBtn" class="primary" title="Клавиша Space">Конец хода</button>
           <button id="dangerBtn" aria-pressed="false" title="Клавиша T">Угрозы</button>
+          <button id="invBtn" hidden>Инвентарь</button>
           <button id="resetBtn">Меню</button>
         </div>
       </div>
@@ -427,7 +449,8 @@ button:focus-visible,summary:focus-visible{outline:none;box-shadow:0 0 0 4px col
             <li><b>Угрозы:</b> красный уголок на зелёной клетке значит, что видимые враги смогут ударить туда в свой ход (цифра — сколько врагов). Кнопка «Угрозы» (T) показывает всю опасную зону. Враги в тумане не учитываются.</li>
             <li>Уничтожение всех врагов — победа в любой миссии. Гибель всего отряда — поражение.</li>
             <li>Каждая новая карта и цель создаются случайно.</li>
-            <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. На новом уровне выберите одно из трёх улучшений: характеристику (здоровье, урон, броня, ход, обзор) или особый навык (вампиризм, размах, регенерация, копьё, вожак). После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 4 HP, наёмники — 3. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
+            <li><b>Инвентарь:</b> в кампании лишние находки (когда у бойца заняты обе ячейки) попадают в мешок. На привале кнопка «Инвентарь» позволяет переложить вещи: снять с бойца в мешок или отдать из мешка любому бойцу со свободной ячейкой. Во время боя инвентарь можно только посмотреть.</li>
+            <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. На новом уровне выберите одно из трёх улучшений: характеристику (здоровье, урон, броня, ход, обзор) или особый навык (вампиризм, размах, регенерация, копьё, вожак). После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
             <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
             <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP.</li>
           </ul>
@@ -786,6 +809,16 @@ function movePlayer(sel, d, k){
 }
 
 // A fighter that ends its move on a chest opens it
+// short message in the corner; the battle log is no longer on screen
+function toast(it, text){
+  if (typeof document === 'undefined' || !document.body || !document.body.insertAdjacentHTML) return;
+  let box = document.getElementById('toasts');
+  if (!box){ document.body.insertAdjacentHTML('beforeend', '<div id="toasts" aria-live="polite"></div>'); box = document.getElementById('toasts'); }
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = (it ? `<svg viewBox="0 0 512 512" style="color:${ITEM_TINT[it]}" aria-hidden="true"><use href="#i-${it}"/></svg>` : '') + `<span>${text}</span>`;
+  box.appendChild(el);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 2600);
+}
 function openChest(u){
   const k = key(u.x,u.y);
   if (!S.chests || !S.chests.has(k)) return;
@@ -795,14 +828,21 @@ function openChest(u){
     const before = u.hp; u.hp = Math.min(maxHp(u), u.hp + 4);
     S.chests.delete(k);
     addLog('p', `${u.name} открывает сундук: ${ITEMS[it].name}, +${u.hp - before} HP`);
+    toast(it, `${u.name}: ${ITEMS[it].name}, +${u.hp - before} HP`);
     return;
   }
   u.items = u.items || [];
-  if (u.items.length >= ITEM_SLOTS){ addLog('sys', `${u.name}: обе ячейки заняты, сундук остаётся на месте`); return; }
+  if (u.items.length >= ITEM_SLOTS){
+    if (!S.camp){ addLog('sys', `${u.name}: обе ячейки заняты, сундук остаётся на месте`); toast(null, `${u.name}: обе ячейки заняты`); return; }
+    S.loot = S.loot || []; S.loot.push(it); S.chests.delete(k);
+    toast(it, `${ITEMS[it].name} — в мешок (ячейки ${u.name} заняты)`);
+    return;
+  }
   u.items.push(it);
   if (it === 'amulet') u.hp = Math.min(maxHp(u), u.hp + 2);
   S.chests.delete(k);
   addLog('p', `${u.name} находит в сундуке: ${ITEMS[it].name} (${ITEMS[it].desc})`);
+  toast(it, `${u.name} берёт: ${ITEMS[it].name} — ${ITEMS[it].desc}`);
   if (it === 'scope') updateVis();
 }
 
@@ -956,7 +996,7 @@ const SAVE_KEY = 'bg.hero.v1', RECORD_KEY = 'bg.hero-record.v1';
 
 /* ---------- campaign: one hero who levels up ---------- */
 const NAMES = ['Ярослав','Мирон','Тарас','Глеб','Всеволод','Добрыня','Ратибор','Остап','Елисей','Святослав','Борис','Матвей','Радим','Лука','Демид','Захар','Ростислав','Игнат','Савва','Платон'];
-const HERO_HP = 12, HERO_REST = 4, MERC_REST = 3, MERC_MAX = 2;
+const HERO_HP = 12, HERO_REST = 5, MERC_REST = 4, MERC_MAX = 2;
 const enemiesFor = b => Math.min(6, 1 + Math.ceil(b / 2));      // 2, 2, 3, 3, 4, 4, 5…
 const orcHp  = b => 6 + Math.floor((b - 1) / 2);                // 6, 6, 7, 7, 8…
 const orcAtk = b => 2 + Math.floor((b - 1) / 4);                // 2 ×4, then 3…
@@ -989,7 +1029,7 @@ function rollUpgrades(c){
 }
 function newCampaign(){
   shuffle(NAMES);
-  return { v: 2, battle: 1, wins: 0, nextCid: 2, fallen: [], mercs: [], atCamp: false,
+  return { v: 2, battle: 1, wins: 0, nextCid: 2, fallen: [], mercs: [], atCamp: false, bag: [],
     hero: { cid: 1, hero: true, name: NAMES[0], level: 1, xp: 0, bhp: HERO_HP, hp: HERO_HP, items: [],
             st: { hp: 0, atk: 0, armor: 0, move: 0, vision: 0 }, perks: [] } };
 }
@@ -1008,6 +1048,8 @@ async function afterVictory(){
   h.items = [...(hu.items || [])];
   h.hp = Math.min(heroMax(h), hu.hp + HERO_REST);
   report.heroHealed = h.hp - hu.hp;
+  c.bag = [...(c.bag || []), ...(S.loot || [])];
+  report.found = [...(S.loot || [])];
   const gain = S.kills * XP_KILL + XP_WIN;
   report.xp = gain; report.kills = S.kills;
   h.xp += gain;
@@ -1048,6 +1090,50 @@ async function hireMerc(){
   c.hireOffer = null;
   await Store.save(SAVE_KEY, c); showCamp(c);
 }
+/* ---------- inventory ---------- */
+// At the camp: equip from the bag or take items off. In battle: view only.
+function invFighters(c){ return [c.hero, ...c.mercs]; }
+function showInventory(c, inBattle){
+  const live = inBattle && S ? S.units.filter(u => u.side === 'p') : null;
+  const fighters = inBattle ? live : invFighters(c);
+  const bag = inBattle ? [...(c.bag || []), ...(S.loot || [])] : (c.bag || []);
+  const row = f => {
+    const its = f.items || [], dead = inBattle && f.hp <= 0;
+    const slots = Array.from({length: ITEM_SLOTS}, (_, i) => its[i]
+      ? (inBattle ? `<span class="slot">${itemHTML(its[i])}</span>` : `<button class="slot" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="Снять в мешок">${itemHTML(its[i])}</button>`)
+      : '<span class="slot empty">пусто</span>').join('');
+    return `<li class="${dead ? 'dead' : ''}"><span class="nm">${f.name}${f.hero ? ` · ур. ${f.level || f.lvl}` : ''}</span><span class="slots">${slots}</span></li>`;
+  };
+  const free = invFighters(c).filter(f => (f.items || []).length < ITEM_SLOTS);
+  const bagHTML = bag.length ? bag.map((it, i) => inBattle
+      ? `<li><span>${itemHTML(it)}</span><span class="note">${ITEMS[it].desc}</span></li>`
+      : `<li><span>${itemHTML(it)}</span><span class="give">${free.length ? free.map(f => `<button data-act="equip" data-i="${i}" data-cid="${f.cid}">${f.name}</button>`).join('') : '<span class="note">все ячейки заняты</span>'}</span></li>`).join('')
+    : '<li class="note">Мешок пуст. Лишние находки из сундуков попадают сюда.</li>';
+  showOverlay(`<div class="eyebrow">Инвентарь</div>
+    <h2>Снаряжение отряда</h2>
+    <ul class="inv">${fighters.map(row).join('')}</ul>
+    <div class="eyebrow">Мешок</div>
+    <ul class="bag">${bagHTML}</ul>
+    <p>${inBattle ? 'Менять снаряжение можно на привале.' : 'Нажмите на предмет бойца, чтобы снять его в мешок; на имя под предметом в мешке — чтобы отдать.'}</p>
+    <div class="ov-btns">${inBattle ? '<button class="primary" data-act="resume">Вернуться к бою</button>' : '<button class="primary" data-act="to-camp">Назад к привалу</button>'}</div>`);
+}
+async function invChange(kind, cid, i){
+  const c = await Store.load(SAVE_KEY); if (!c || !c.atCamp) return;
+  const f = invFighters(c).find(f => String(f.cid) === String(cid)); if (!f) return;
+  f.items = f.items || []; c.bag = c.bag || [];
+  if (kind === 'equip'){
+    if (f.items.length >= ITEM_SLOTS || !c.bag[i]) return;
+    f.items.push(c.bag.splice(i, 1)[0]);
+  } else {
+    if (!f.items[i]) return;
+    c.bag.push(f.items.splice(i, 1)[0]);
+    const mx = f.hero ? heroMax(f) : BASE.hp + 2 * f.items.filter(x => x === 'amulet').length;
+    f.hp = Math.min(f.hp, mx); // taking an amulet off lowers max HP
+  }
+  await Store.save(SAVE_KEY, c);
+  showInventory(c, false);
+}
+
 async function afterDefeat(){
   const c = S.camp;
   const rec = (await Store.load(RECORD_KEY)) || 0;
@@ -1111,12 +1197,14 @@ function showCamp(c){
       <div class="hero-row">${xpBar}<span>опыт ${h.xp} / ${xpNeed(h.level)}</span></div>
       <div class="hero-row muted">${stats}</div>
       ${h.perks.length || h.items.length ? `<div class="items">${h.perks.map(perkHTML).join('')}${h.items.map(itemHTML).join('')}</div>` : ''}
-      ${r.xp ? `<p>За бой: +${r.xp} опыта${r.kills ? ` (убито орков: ${r.kills})` : ''}${r.heroHealed ? `, отдых +${r.heroHealed} HP` : ''}.</p>` : ''}
+      ${r.xp ? `<p>За бой: +${r.xp} опыта${r.kills ? ` (убито орков: ${r.kills})` : ''}.</p>` : ''}
+      ${r.heroHealed ? `<p class="rest">Отдых на привале: +${r.heroHealed} HP</p>` : ''}
+      ${(r.found || []).length ? `<p>В мешок: ${r.found.map(i => ITEMS[i].name).join(', ')}.</p>` : ''}
     </div>
     ${mercRows ? `<ul class="squad">${mercRows}</ul>` : ''}
     ${choice}${hire}
     <p>Следующий бой ${c.battle}: орков ${enemiesFor(c.battle)}, у каждого ${orcHp(c.battle)} HP и урон ${orcAtk(c.battle)}.</p>
-    <div class="ov-btns">${c.pending ? '<button disabled>Сначала выберите улучшение</button>' : '<button class="primary" data-act="fight">В бой</button>'}<button data-act="menu">В меню</button></div>`);
+    <div class="ov-btns">${c.pending ? '<button disabled>Сначала выберите улучшение</button>' : '<button class="primary" data-act="fight">В бой</button>'}<button data-act="inv">Инвентарь <small>${(c.bag || []).length ? `в мешке: ${c.bag.length}` : 'снаряжение'}</small></button><button data-act="menu">В меню</button></div>`);
 }
 overlay.addEventListener('click', async ev => {
   if (ev.target === overlay) return resumeGame(); // any popup closes on a click outside the card
@@ -1127,6 +1215,9 @@ overlay.addEventListener('click', async ev => {
   if (act === 'skirmish'){ hideOverlay(); return newGame(); }
   if (act === 'new-camp') return startCampaign(newCampaign());
   if (act === 'pick') return pickUpgrade(b.dataset.up);
+  if (act === 'inv'){ const c = await Store.load(SAVE_KEY); return c ? showInventory(c, false) : null; }
+  if (act === 'to-camp'){ const c = await Store.load(SAVE_KEY); return c ? showCamp(c) : showMenu(); }
+  if (act === 'equip' || act === 'unequip') return invChange(act, b.dataset.cid, +b.dataset.i);
   if (act === 'hire') return hireMerc();
   if (act === 'continue' || act === 'fight'){
     const c = await Store.load(SAVE_KEY); if (!c) return showMenu();
@@ -1208,6 +1299,7 @@ function render(){
     card.innerHTML = `<p class="empty">${S.phase === 'player' ? `Нажмите на своего бойца. Готовы действовать: ${left}.` : S.phase === 'enemy' ? 'Противник действует…' : 'Начните новую карту.'}</p>`;
   }
   waitBtn.disabled = !sel;
+  const invB = document.getElementById('invBtn'); if (invB) invB.hidden = !S.camp;
   endBtn.disabled = S.phase !== 'player';
   const logEl = document.getElementById('log');
   if (logEl) logEl.innerHTML = S.log.map(l => `<li class="${l.cls}">${l.text}</li>`).join('');
@@ -1288,6 +1380,7 @@ resetBtn.onclick = () => {
 };
 const toggleDanger = () => { S.showDanger = !S.showDanger; render(); renderHover(); };
 dangerBtn.onclick = toggleDanger;
+{ const ib = document.getElementById('invBtn'); if (ib) ib.onclick = () => { if (S.camp) showInventory(S.camp, true); }; }
 document.addEventListener('keydown', ev => {
   if (!overlay.hidden){ if (ev.key === 'Escape') resumeGame(); return; }
   if (ev.target.closest('button,summary') && (ev.key === ' ' || ev.key === 'Enter')) return;
