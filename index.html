@@ -688,7 +688,7 @@ const OBJ = {
   timed: { name: 'Блицкриг', desc: `Уничтожьте всех врагов за ${TIMED_N} ходов.` },
 };
 // shown next to the title and in the menu; bump on every release to the site
-const VERSION = '0.11', VERSION_DATE = '21.10.2026';
+const VERSION = '0.12', VERSION_DATE = '21.10.2026';
 const ITEMS = {
   sword:  { name: 'Меч',             desc: '+1 к урону' },
   shield: { name: 'Щит',             desc: 'входящий урон −1' },
@@ -1449,18 +1449,18 @@ async function afterDefeat(){
 function showOverlay(html){ hideTip(); overlay.innerHTML = `<div class="ov-card">${html}</div>`; overlay.hidden = false; hideTip(); }
 let menuResumable = false; // true while the menu was opened on top of a battle in progress
 function hideOverlay(){ overlay.hidden = true; overlay.innerHTML = ''; menuResumable = false; }
-function resumeGame(){ hideOverlay(); render(); }
+// only the campaign is playable for now: the map behind the start menu is just scenery, so the menu stays until a choice is made
+function resumeGame(){ if (!S || !S.camp) return; hideOverlay(); render(); }
 async function showMenu(resumable = false){
   const c = await Store.load(SAVE_KEY), rec = await Store.load(RECORD_KEY);
   // the first button is the highlighted one: back to the battle if it has started, otherwise the campaign
-  const showResume = resumable && (S.turn > 1 || S.units.some(u => u.moved || u.acted));
+  const showResume = resumable && S.camp && (S.turn > 1 || S.units.some(u => u.moved || u.acted));
   showOverlay(`<div class="eyebrow">Пошаговая тактика · версия ${VERSION}</div>
     <h2>Тактика на клетках</h2>
     <div class="ov-btns">
       ${showResume ? '<button class="primary" data-act="resume">Вернуться к бою</button>' : ''}
       ${c ? `<button ${showResume ? '' : 'class="primary"'} data-act="continue">${S && S.camp && showResume ? 'Начать бой заново' : c.atCamp ? 'Вернуться на привал' : 'Продолжить кампанию'} <small>${c.hero.name} · ур. ${c.hero.level} · бой ${c.battle}</small></button>` : ''}
       <button ${c || showResume ? '' : 'class="primary"'} data-act="new-camp">Новая кампания <small>один герой, прокачка</small></button>
-      <button data-act="skirmish">Одиночный бой <small>случайная карта</small></button>
     </div>
     ${c ? '<p>Новая кампания сотрёт текущую.</p>' : ''}
     ${rec ? `<p>Рекорд: ${rec} ${rec === 1 ? 'победа' : rec < 5 ? 'победы' : 'побед'} подряд.</p>` : ''}`);
