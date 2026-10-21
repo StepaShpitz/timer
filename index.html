@@ -543,6 +543,39 @@ button.bitem.sel{border-color:#7ccf00!important}
 .board .unit.hero{filter:drop-shadow(0 0 2px var(--goal)) drop-shadow(0 2px 1.5px rgba(0,0,0,.4))}
 
 h1 .ver{font:500 .75rem/1 var(--body);color:var(--muted);letter-spacing:0;vertical-align:middle;margin-left:6px;padding:3px 7px;border:1px solid var(--line);border-radius:999px}
+
+/* ===== Run map on the left ===== */
+.wrap{max-width:1440px}
+.layout{grid-template-columns:auto auto minmax(300px,1fr)}
+.layout:has(.runmap[hidden]){grid-template-columns:auto minmax(300px,1fr)}
+@media (max-width:1100px){.layout,.layout:has(.runmap[hidden]){grid-template-columns:minmax(0,1fr)}.runmap{order:3}}
+.runmap{position:sticky;top:24px;margin-top:24px;align-self:start;width:188px;box-sizing:border-box;padding:12px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.runmap .label{margin:0 0 6px 4px}
+.mapsvg{display:block;margin:0 auto;overflow:visible}
+.mapsvg line{stroke:var(--line);stroke-width:2;stroke-dasharray:3 4}
+.mapsvg line.on{stroke:var(--goal);stroke-dasharray:none;stroke-width:2.5}
+.mn circle{fill:var(--surface);stroke:color-mix(in srgb,var(--b) 45%,var(--line));stroke-width:2}
+.mn svg{color:color-mix(in srgb,var(--b) 75%,var(--ink))}
+.mn.skip{opacity:.3}
+.mn.done circle{fill:color-mix(in srgb,var(--b) 22%,var(--surface));stroke:var(--goal)}
+.mn.done svg{opacity:.55}
+.mn.next circle{stroke:#7ccf00;stroke-width:3;fill:color-mix(in srgb,#7ccf00 14%,var(--surface))}
+.mn.next{animation:mnPulse 1.4s ease-in-out infinite}
+.mn.cur circle{fill:color-mix(in srgb,var(--b) 35%,var(--surface));stroke:var(--ink);stroke-width:3}
+@keyframes mnPulse{50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){.mn.next{animation:none}}
+.maplegend{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:10px;font-size:.72rem;color:var(--muted)}
+.maplegend span{display:flex;align-items:center;gap:4px}
+.maplegend svg{width:14px;height:14px;color:var(--b)}
+/* path choice at the camp */
+.ov-btns.path button{align-items:center}
+.ov-btns.path .pn{display:inline-flex;align-items:center;gap:8px;font-weight:600}
+.ov-btns.path .pn svg{width:22px;height:22px;color:var(--b)}
+.ov-card p.event{color:var(--goal);font-weight:500}
+/* ===== Right panel keeps its shape: fixed-height boxes, no jumping on hover/selection ===== */
+.panel .box:has(#card){height:400px;overflow:auto;box-sizing:border-box}
+.panel .box:has(#hinfo){height:490px;overflow:hidden;box-sizing:border-box}
+.ov-btns.path .lane{font-weight:400;font-size:.78rem;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -589,6 +622,11 @@ h1 .ver{font:500 .75rem/1 var(--body);color:var(--muted);letter-spacing:0;vertic
   <symbol id="s-move" viewBox="0 0 512 512" fill="currentColor"><path d="M169.53 16.344 259.345 88 337 92.28l-1.03 18.657-161.376-8.906-118.78-4.905 227.28 68.03-197.72 246.75-14.53-17.655-49.22 96.625 248.69-202.78 51.81 11.592-38.78 40.594L270.5 329.5l-57.28 84.125L444.843 273.47 328 241.06l100.22-81.718c1.132.46 2.3.898 3.5 1.22 23.324 6.248 49.764-16.835 59.06-51.533 9.298-34.695-2.08-67.874-25.405-74.124-23.325-6.25-49.765 16.802-59.063 51.5a95.43 95.43 0 0 0-2.875 16.22L169.53 16.343z"/></symbol>
   <symbol id="s-vision" viewBox="0 0 512 512" fill="currentColor"><path d="M256 105c-60.25 0-124.749 38.39-167.945 77.66-34.931 31.756-58.722 62.36-66.88 73.34 8.158 10.98 31.949 41.584 66.88 73.34C131.25 368.61 195.75 407 256 407s124.749-38.39 167.945-77.66c34.931-31.756 58.722-62.36 66.88-73.34-8.158-10.98-31.949-41.584-66.88-73.34C380.75 143.39 316.25 105 256 105zm0 23a128 128 0 0 1 63.486 16.969A48 48 0 0 0 288 190a48 48 0 0 0 .023.453A72.362 72.362 0 0 0 265 183.576V160h-18v23.576c-33.034 4.095-59.33 30.39-63.424 63.424H160v18h23.576c4.095 33.034 30.39 59.33 63.424 63.424V352h18v-23.576c33.034-4.095 59.33-30.39 63.424-63.424H352v-18h-23.576a72.33 72.33 0 0 0-1.98-10.014A48 48 0 0 0 336 238a48 48 0 0 0 41.023-23.195A128 128 0 0 1 384 256a128 128 0 0 1-128 128 128 128 0 0 1-128-128 128 128 0 0 1 128-128zm-9 73.738V224h18v-22.262c23.237 3.792 41.47 22.025 45.262 45.262H288v18h22.262c-3.792 23.237-22.025 41.47-45.262 45.262V288h-18v22.262c-23.237-3.792-41.47-22.025-45.262-45.262H224v-18h-22.262c3.792-23.237 22.025-41.47 45.262-45.262z"/></symbol>
   <symbol id="s-spear" viewBox="0 0 512 512" fill="currentColor"><path d="m433.877 19.855-78.62 158.668 47.82 53.934-15.673 260.824h38.79l15.697-261.233 51.04-45.25-59.053-166.942zm-130.48 20.598L216.073 152.55l28.397 49.186-28.616 106.387-.102-.176-9.545 35.62.076.134-40.234 149.58h32.68l29.676-111.186.026.045 9.527-35.556-.054-.09L274.56 209.15l48.415-27.95L303.4 40.452h-.002zM111.632 153.21l14.48 116.54 44.42 11.904L193 320.648l9.555-35.66-9.256-16.1 12.022-44.87-93.69-70.81zm-49.357 74.31-42.68 79.31 23.57 28.455L30.786 493.28h18.746L61.83 336.26l27.608-22.865-27.163-85.875h-.002zm257.06 10.878-22.354 87.248 29.686 21.932L345.04 493.28h18.84l-18.823-149.235 21.293-28.824-47.016-76.822zm175.103 28.614-40.108 226.27h18.98l21.128-119.188V267.012zm-339.903 38.886-55.35 71.05 18.618 32.247-20.41 84.086h19.233l19.51-80.385 30.81-17.788-12.408-89.21h-.002zm96.623 63.645-9.517 35.516 50.837 88.22h29.8l-71.12-123.737z"/></symbol>
+  <symbol id="m-battle" viewBox="0 0 512 512" fill="currentColor"><path d="M19.75 14.438c59.538 112.29 142.51 202.35 232.28 292.718l3.626 3.75.063-.062c21.827 21.93 44.04 43.923 66.405 66.25-18.856 14.813-38.974 28.2-59.938 40.312l28.532 28.53 68.717-68.717c42.337 27.636 76.286 63.646 104.094 105.81l28.064-28.06c-42.47-27.493-79.74-60.206-106.03-103.876l68.936-68.938-28.53-28.53c-11.115 21.853-24.413 42.015-39.47 60.593-43.852-43.8-86.462-85.842-130.125-125.47-.224-.203-.432-.422-.656-.625C183.624 122.75 108.515 63.91 19.75 14.437zm471.875 0c-83.038 46.28-154.122 100.78-221.97 161.156l22.814 21.562 56.81-56.812 13.22 13.187-56.438 56.44 24.594 23.186c61.802-66.92 117.6-136.92 160.97-218.72zm-329.53 125.906 200.56 200.53a402.965 402.965 0 0 1-13.405 13.032L148.875 153.53l13.22-13.186zm-76.69 113.28-28.5 28.532 68.907 68.906c-26.29 43.673-63.53 76.414-106 103.907l28.063 28.06c27.807-42.164 61.758-78.174 104.094-105.81l68.718 68.717 28.53-28.53c-20.962-12.113-41.08-25.5-59.937-40.313 17.865-17.83 35.61-35.433 53.157-52.97l-24.843-25.655-55.47 55.467c-4.565-4.238-9.014-8.62-13.374-13.062l55.844-55.844-24.53-25.374c-18.28 17.856-36.602 36.06-55.158 54.594-15.068-18.587-28.38-38.758-39.5-60.625z"/></symbol>
+  <symbol id="m-elite" viewBox="0 0 512 512" fill="currentColor"><path d="m206.875 27.03-3 2.064c-14.3 9.87-22.835 28.048-25.344 52.375-19.293 11.407-37.976 13.766-50.843 10.905-4.06 4.988-6.62 10.712-8.937 16.938 20.462 6.71 47.52 2.697 73.688-14.344l3.906-2.532.312-4.657c1.392-21.138 7.59-34.313 15.25-41.186l22.344 3.093c-1.668 18.234-1.372 38.198 7.53 60.376l2.657 6.562 7.032-.78c23.817-2.638 31.686-3.652 54.81.405l7.533 1.313 2.78-7.126c3.936-10.084 7.778-18.638 12.376-25.968 6.878 6.72 15.8 12.09 25.31 16.093 11.845 4.985 24.8 8.13 36.595 5.093-3.235-5.86-7.044-12.416-10.97-18-5.35-.25-11.948-1.607-18.374-4.312-11.263-4.742-21.638-13.227-24.686-18.75L330.47 53.03l-8.783 9.876c-8.824 9.927-14.54 21.44-19.687 33.907-16.88-2.398-28.733-2-45.188-.282-6.25-19.213-5.357-36.077-3.156-53.75l1.125-9.124-9.124-1.28-35.187-4.845-3.595-.5zm171.094 6.845L367.686 49.78c17.986 12.885 30.035 27.273 40.375 47.814l3.282 6.53-4.28 5.94c-6.31 8.73-11.433 19.695-15.908 32.374 4.09 11.243 6.268 24.716 6.28 35.968l.033 14.188-14.033-2.28L354 185.5l-26.594 29.188-11.97 13.125-7.78-15.938-16.594-34.03c-10.396 12.86-19.287 23.182-30.593 30.936-15.34 10.52-34.276 14.385-61 12.564l-8.126-.563-2.5-7.75L177.78 179l-40.624 7.844-11.937 2.344-2.19-12s-2.258-12.142-6.31-25.532c-2.028-6.695-4.507-13.658-7.157-19.156-2.65-5.498-5.83-9.36-6.75-10.03l-6.47-4.72 1.876-7.813c4.586-19.172 17.198-36 37.218-50.374l-10.72-19.813C56.08 95.554 25.5 197.82 24.095 296.344c43.835 22.98 73.8 47.83 92.28 74.844 17.738 25.923 24.46 53.747 23.407 81.562 11.497 6.293 22.977 11.934 35.69 15.344 21.81 5.85 45.39 8.69 69.78 8.687 24.396-.003 49.41-2.844 72.375-8.717 18.33-4.69 35.105-11.838 50.656-20.47 1.95-55.263 35.304-110.082 118.814-151.468-1.55-97.394-34.025-206.568-109.125-262.25zM202.436 250.063c6.002 3.154 11.246 7.896 14.625 13.75 12.22 21.162-.962 51.59-29.218 67.906-28.256 16.313-61.282 12.128-73.5-9.033-6.974-12.077-5.45-27.048 2.156-40.812 12.835-.22 27.956-2.805 44.25-9.03 15.522-5.93 30.078-14.063 41.688-22.783zm106.22 0c11.61 8.72 26.164 16.852 41.687 22.78 16.294 6.227 31.415 8.812 44.25 9.032 7.607 13.764 9.13 28.735 2.156 40.813-12.218 21.16-45.213 25.346-73.47 9.03-28.255-16.314-41.436-46.743-29.217-67.906 3.38-5.853 8.592-10.595 14.593-13.75zm-53.063 75.625c18.53 36.128 33.233 72.246 40.53 108.375-27.02-8.244-54.042-9.343-81.062 0 9.866-36.13 21.727-72.247 40.532-108.375z"/></symbol>
+  <symbol id="m-boss" viewBox="0 0 512 512" fill="currentColor"><path d="m92.406 13.02-.164 156.353c3.064.507 6.208 1.38 9.39 2.627 36.496 14.306 74.214 22.435 111.864 25.473l43.402-60.416 42.317 58.906c36.808-4.127 72.566-12.502 105.967-24.09 3.754-1.302 7.368-2.18 10.818-2.6l1.523-156.252-75.82 95.552-34.084-95.55-53.724 103.74-53.722-103.74-35.442 95.55-72.32-95.55h-.006zm164.492 156.07-28.636 39.86 28.634 39.86 28.637-39.86-28.635-39.86zM86.762 187.55c-2.173-.08-3.84.274-5.012.762-2.345.977-3.173 2.19-3.496 4.196-.645 4.01 2.825 14.35 23.03 21.36 41.7 14.468 84.262 23.748 126.778 26.833l-17.75-24.704c-38.773-3.285-77.69-11.775-115.5-26.596-3.197-1.253-5.877-1.77-8.05-1.85zm333.275.19c-2.156.052-5.048.512-8.728 1.79-33.582 11.65-69.487 20.215-106.523 24.646l-19.264 26.818c40.427-2.602 80.433-11.287 119.22-26.96 15.913-6.43 21.46-17.81 21.36-22.362-.052-2.276-.278-2.566-1.753-3.274-.738-.353-2.157-.71-4.313-.658zm-18.117 47.438c-42.5 15.87-86.26 23.856-130.262 25.117l-14.76 20.547-14.878-20.71c-44.985-1.745-89.98-10.23-133.905-24.306-12.78 28.51-18.94 61.14-19.603 93.44 37.52 17.497 62.135 39.817 75.556 64.63C177 417.8 179.282 443.62 174.184 467.98c7.72 5.007 16.126 9.144 24.98 12.432l5.557-47.89 18.563 2.154-5.935 51.156c9.57 2.21 19.443 3.53 29.377 3.982v-54.67h18.69v54.49c9.903-.638 19.705-2.128 29.155-4.484l-5.857-50.474 18.564-2.155 5.436 46.852c8.747-3.422 17.004-7.643 24.506-12.69-5.758-24.413-3.77-49.666 9.01-72.988 13.28-24.234 37.718-46 74.803-64.29-.62-33.526-6.687-66.122-19.113-94.23zm-266.733 47.006c34.602.23 68.407 12.236 101.358 36.867-46.604 33.147-129.794 34.372-108.29-36.755 2.315-.09 4.626-.127 6.933-.11zm242.825 0c2.307-.016 4.617.022 6.93.11 21.506 71.128-61.684 69.903-108.288 36.757 32.95-24.63 66.756-36.637 101.358-36.866zM255.164 332.14c11.77 21.725 19.193 43.452 25.367 65.178h-50.737c4.57-21.726 13.77-43.45 25.37-65.18z"/></symbol>
+  <symbol id="m-rest" viewBox="0 0 512 512" fill="currentColor"><path d="M281.53 23.438c48.44 71.504-18.447 145.556-63.655 58.968 27.295 144.502-65.22 166.347-74.75 74.75-73.554 65.057-59.358 147.17-20.438 210.75l45.844-26.344c-12.004-18.318-17.995-42.502-15.31-66.218 25.688 39.43 106.855 10.088 97.124-59.938 10.695 32.074 37.802 28.97 65.78-20.5C278.07 297.622 337.95 364.248 378.032 333.5c1.47 11.97-2.95 25.657-10.592 38.063l46.968 12.53c55.122-47.503 79.71-135.97-3.812-175.53 39.08 60.478-13.1 105.064-60.72 41.468-38.546-72.133 82.366-113.394-68.343-226.593zM173.876 48.124c-64.128 32.333-14.642 60.51-14.03 92.344 44.122-38.935-3.722-53.508 14.03-92.345zm74.47 269.094L75 416.874c2.71 18.39 8.98 34.417 18.813 48.5l92-44.063-78.688 59.875c3.39 3.38 7.033 6.62 10.938 9.75L192.78 448c-.023-.738-.06-1.475-.06-2.22 0-37.22 30.495-67.56 67.81-67.56a67.554 67.554 0 0 1 29.44 6.717c-2.323-13.414-7.28-27.104-14.72-39.28l-94.938 40.124 82.47-56.467c-4.34-4.55-9.166-8.64-14.438-12.094zm58.874 57.624c1.61 7.148 2.6 14.315 2.967 21.312l.22 3.938c11.13 12.042 17.937 28.09 17.937 45.687a66.814 66.814 0 0 1-3.813 22.25l91.345 24.376c4.642-6.327 8.588-12.768 11.844-19.375l-63.158-24.686 70.125 6.844c.866-2.948 1.61-5.923 2.22-8.938l-97.063-34.22L439 427.5c.156-5.772-.103-11.67-.813-17.72L307.22 374.845zm-46.69 22.062c-27.26 0-49.124 21.8-49.124 48.875 0 27.078 21.864 48.876 49.125 48.876 27.263 0 49.126-21.798 49.126-48.875 0-27.075-21.863-48.874-49.125-48.874zm-4.936 11.78c43.778.002 58.435 71.595 0 71.595 26.622-23.113 29.81-46.888 0-71.592zm.187 9.845c-21.616 17.916-19.304 35.177 0 51.94-42.375 0-31.745-51.94 0-51.94z"/></symbol>
+  <symbol id="m-tavern" viewBox="0 0 512 512" fill="currentColor"><path d="M252.094 19.438c-18.092-.063-35.548 9.82-43.125 28.437v9.688l-11.376-2.5c-14.316-3.17-25.792-1.15-33.375 3.843-7.585 4.994-12.174 12.898-12.345 25.438-.13 9.54 1.93 15.82 4.813 20 2.882 4.18 6.673 6.672 11.906 8.062 10.465 2.78 26.67-.357 41.094-8.75l5.968-3.47 5.063 4.658c8.405 7.744 14.51 11.07 20.56 12.25 6.052 1.18 13.046.318 23.44-2.875l9.842-3.032 2.063 10.093c2.695 13.158 14.91 23.407 29.125 23.407 13.237 0 23.67-9.028 27.313-21.468l2.218-7.532 7.783.843c8.855.99 19.41-4.045 25-10.343l6-6.75 6.968 5.782c18.61 15.487 35.46 16.96 47.283 11.468 11.82-5.494 20.18-18.602 19.25-38.782-.88-18.827-10.97-30.448-25.5-35.812-14.532-5.364-33.76-3.61-51.282 8.218l-7.436 5.032-5.344-7.25c-7.038-9.585-17.09-15.485-26.72-17-9.628-1.516-18.487.928-25.374 8.406l-7.406 8.03-6.78-8.56c-10.443-13.165-25.214-19.482-39.626-19.532zM65.22 119.968C37.8 203.65 25.784 289.07 28.812 376.19c39.55 17.23 81.422 18.105 123.437 18a956.588 956.588 0 0 0 6.594-34.22c-32.102 1.678-64.094 2.52-94.313-9.124-2.33-66.88 6.917-121.622 28-187.03 27.318 6.5 55.01 8.61 83.25 7.467-.07-11.715-.387-22.556-1.03-32.31-37.168-1.726-73.593-8.642-109.53-19zm148 2.97c-6.57 3.29-13.37 5.82-20.19 7.406 3.092 33.456 1.947 78.392-2.186 127.094-4.777 56.28-13.866 116.5-26.438 166.718H434.25c-9.932-52.565-18.812-111.61-23.594-166.72-3.87-44.618-5.233-86.115-2.03-119.717-10.777-1.282-22.047-5.642-32.938-13.22-7.498 5.988-16.954 10.145-27.25 10.75-7.46 16.247-23.42 28.125-42.688 28.125-19.644 0-36.84-11.86-44.344-28.938-8.26 1.885-15.993 2.507-23.72 1-8.57-1.67-16.468-6.014-24.467-12.5zm-78.376 319.906L116.22 491.25h358.686l-21.72-48.406h-318.34z"/></symbol>
   <symbol id="t-forest" viewBox="0 0 512 512" fill="currentColor"><path d="M169.92 15.654c-10.512 16.697-22.392 34.058-41.688 50.473.46.447.934.89 1.405 1.336l23.55-.406-3.527 10.7a71.131 71.131 0 0 1-1.678 4.552 183.485 183.485 0 0 0 8.872 5.788l25.052 15.33-45.99-.793c-1.954 2.474-4.06 4.9-6.305 7.275 8.8 11.517 22.045 22.713 38.675 32.766l-12.404-.365-.015 5.678c8.53 6.358 17.792 12.448 27.162 18.48 18.11-11.568 31.79-24.5 39.51-37.616l-57.353.99 25.052-15.33c8.97-5.488 16.525-11.115 23.082-16.867-5.098-5.475-9-10.962-11.257-16.69l-4.04-10.246 29.742-1.823C205.14 54.41 182.44 38.31 169.92 15.654zm234.605 13.223c-6.537 12.962-13.88 29.016-23.638 44.63 10.927 18.367 24.428 35.997 46.773 52.382l20.42 14.97-52.51-1.085c6.956 12.136 19.936 26.858 34.58 40.047 19.157 17.254 40.928 32.572 53.907 39.914l11.34 6.418c.005-4.163.005-7.382.015-13.972-17.176-11.938-29.767-25.795-36.322-42.2l-4.115-10.298 43.605-2.58c-9.91-4.358-19.747-8.263-28.723-12.06-8.498-3.594-16.23-7.107-22.724-11.23-6.495-4.122-12.102-8.954-14.858-15.943l-3.93-9.962 36.077-3.178c-24.245-20.226-47.223-48.756-59.897-75.853zM84.027 34.62c-12.52 22.656-35.22 38.757-57.843 53.234l29.738 1.822-4.037 10.244c-4.78 12.125-16.815 24.123-33.182 36.873-.295 11.21-.392 17.66-.385 17.732.005.044.19 1.1.29 3.127.038.742.04 3.177.066 4.358l13.828.797-.004.55-3.906 9.778c-1.18 2.955-2.498 6.07-4.16 9.232l11.525-7.05c37.376-22.87 50.42-48.163 67.395-74.833l-.233 6.366 4.474-1.875a72.336 72.336 0 0 1-3.305-8.25l-3.528-10.7 26.582.46C107.068 69.66 94.836 51.787 84.027 34.618zM263.06 61.036c-10.808 17.168-23.04 35.04-43.314 51.86l26.582-.458-3.527 10.7c-6.657 20.188-22.772 37.89-44.874 52.91l17.916 11.573 18.273.688-4.127 10.5c-2.305 5.863-5.355 11.4-9.01 16.65l8.737-6.19c17.913-12.69 36.773-27.495 51.8-41.534 10.026-9.365 17.978-18.52 23.083-25.914l-50.537-3.715 16.5-12.773c10.37-8.027 20.973-15.94 30.924-24.178-15.49-11.246-29.53-24.024-38.423-40.12zm93.07.68c-12.76 26.805-36.227 46.04-59.107 63.506l31.39 2.306-3.194 9.726c-4.503 13.7-16.983 27.412-32.783 42.172-10.794 10.083-23.245 20.29-35.896 29.926l49.278 3.494-3.26 9.78c-11.273 33.806-46.845 56.924-75.816 75.597 13.487 8.056 27.67 15.44 39.813 22.318 68.34 18.82 147.594 6.972 200.924-16-13.19-7.554-23.844-14.547-32.748-23.006-11.805-11.216-20.072-24.96-26.377-44.183l-3.017-9.208 51.97-6.61c-11.874-8.21-25.17-18.39-37.867-29.825-20.11-18.113-38.394-38.003-43.915-58.067L372.68 123.3l27.867.577c-21.174-20.07-33.542-41.485-44.416-62.16zM108.78 121.84c-10.807 17.168-23.038 35.04-43.313 51.86l26.582-.456-3.53 10.697c-8.24 24.998-30.974 46.186-61.625 63.185l52.94 1.99-4.126 10.496c-11.05 28.11-29.76 52.974-61.038 71.585 73.885 22.566 156.574 31.568 231.582-3.572-12.908-7.055-26.9-14.653-40.33-23.56-18.07-11.983-34.525-25.736-41.71-43.713l-4.116-10.3 48.4-2.864c-11.828-7.625-23.415-15.48-33.557-23.383-16.245-12.663-29.06-24.086-34.02-36.664l-4.04-10.247 29.74-1.823c-22.62-14.476-45.318-30.576-57.84-53.23zm-40.52 67.816-49.016.844c-.168.218-.32.44-.492.656-.276 21.495-.448 33.384-.502 42.38 23.342-13.057 40.863-28.338 50.01-43.88zm105.674 12.403a189.592 189.592 0 0 0 10.845 9.124 360.036 360.036 0 0 0 11.14 8.308c5.44-5.177 10.084-10.545 13.692-16.092l-35.678-1.34zm41.658 20.428a112.599 112.599 0 0 1-5.947 6.504 619.186 619.186 0 0 0 28.38 17.815l17.645 10.427c11.34-9.42 21.135-19.423 27.215-29.972l-67.293-4.774zm279.803 10.334-68.383 8.698c4.666 11.45 10.047 19.75 17.28 26.992l-.21-9.6c17.455-.996 34.705-3.352 51.4-7.363-.065-7.174-.084-12.42-.087-18.728zm-243.96 27.852-66.394 3.928c3.903 5.187 9.085 10.326 15.097 15.314a495.837 495.837 0 0 0 19.455 3.504c10.638-7.12 21.72-14.713 31.842-22.746zm-219.744 2.64-.29 35.618c10.746-10.37 18.692-21.97 24.83-34.694l-24.54-.924zm413.947 66.534c-14.262 4.577-29.517 8.396-45.38 11.222l5.55 132.18h42.978l-3.148-143.402zm-181.83 7.002a257.23 257.23 0 0 1-8.018 4.046l-.927 114.274h52.682l-2.426-110.496c-13.946-1.552-27.788-4.123-41.313-7.824zm120.54 6.693c-15.085 1.992-30.582 3.05-46.18 2.994l-.386 139.742h52.56l-5.994-142.737zm-353.38 9.146-.924 114.04H74.31l1.975-104.398c-15.362-2.464-30.51-5.75-45.318-9.643zm174.72 6.27c-11.576 2.87-23.226 4.935-34.898 6.284l3.915 66.195h33.065l-2.084-72.48zm-113.443 5.628-2.508 132.56 72.692-2.287-7.584-128.21c-20.97 1.29-41.936.424-62.6-2.062z"/></symbol>
   <symbol id="t-hill" viewBox="0 0 512 512" fill="currentColor"><path d="m245.795 19.12-52.363 153.513 26.67 61.937 38.884-52.37 53.217 67.493 11.682-40.486-78.09-190.086zM101.172 193.69l-29.06 80.222 24.54-12.715 24.803 14.33 11.64-48.013-31.923-33.825zm83.267 5.308-20.776 60.904-15.27-16.177-14.662 60.48-37.568-21.707-33.44 17.324L19.04 420.42l84.884 30.937 73.418-22.437 73.935 19.47 71.66-21.536 91.973 25.226 77.28-31.66-48.44-89.006-39.045 26.664-38.892-27.576-27.153 42.79-15.78-10.013 39.032-61.51-26.6-64.752-15.246 52.83-60.634-76.9-43.664 58.81-31.33-72.76zm223.06 65.81L375.84 314.7l29.066 20.61 29.865-20.394-27.27-50.11z"/></symbol>
   <symbol id="t-swamp" viewBox="0 0 512 512" fill="currentColor"><path d="M199.188 19.97a9.5 9.5 0 0 0-8.407 4.843 907.166 907.166 0 0 0-10.843 19.156c-6.34-1.118-12.595-.258-16.406 3.53-24.12 23.98-59.702 101.133-45.31 111.688 1.968 1.444 4.086 2.64 6.31 3.656-16.64 42.836-30.184 86.292-40.124 128.562-1.928-65.01-14.337-127.164-62.22-162.937 44.087 58.265 48.88 155.865 41.877 236.405-11.69.81-23.34 1.66-34.97 2.53l1.407 18.94a6141.72 6141.72 0 0 1 31.656-2.283c-5.404 47.895-14.473 87.508-20.718 105.47l28.28-7.782 19.844 3.906c3.195-33.745 7.683-68.574 16.47-104.437 104.756-6.35 212.06-8.943 325.124-.814 9.21 20.087 7.668 38.25 2.563 64.156-.69-30.596-32.682-59.164-127.25-57.718-37.285.583-99.973 24.92-93.345 61.594 10.04 55.48 93.935 63.74 164.875 37.75l-32.78-43.72 76.467 37.75c7.045-10.18 11.56-21.598 12-32.843 14.556 1.83 29.126 3.61 43.625 5.875 20.6-36.8 25.25-154.36-88-314.47 39.61 88.105 71.88 190.382 63.157 224.22-2.253-.186-4.504-.385-6.75-.563-28.424-38.034-94.285-80.812-127.814-97.562C370.742 309.23 401.776 337.56 419 360.53c-38.743-2.512-76.81-3.813-114.313-4.155-66.03-.6-130.31 1.732-193.5 5.47 14.246-49.464 37.544-100.834 77.75-153.97-51.342 38.358-77.508 85.502-95.406 134.72 9.764-55.987 26.784-116.065 49.69-174.908 1.743.234 3.47.45 5.186.625 23.065 2.38 49.024-68.143 52.688-105.343.375-3.812-1.312-7.414-4.188-10.44 3.37-6.11 6.79-12.172 10.28-18.155a9.5 9.5 0 0 0-8-14.406z"/></symbol>
@@ -604,6 +642,7 @@ h1 .ver{font:500 .75rem/1 var(--body);color:var(--muted);letter-spacing:0;vertic
     <div class="status" id="status"></div>
   </header>
   <div class="layout">
+    <aside class="runmap" id="runmap" aria-label="Карта кампании" hidden></aside>
     <div class="board-wrap">
       <div class="board-frame">
         <div class="axis-x" id="axisX" aria-hidden="true"></div>
@@ -651,7 +690,7 @@ h1 .ver{font:500 .75rem/1 var(--body);color:var(--muted);letter-spacing:0;vertic
             <li>Уничтожение всех врагов — победа в любой миссии. Гибель всего отряда — поражение.</li>
             <li>Каждая новая карта и цель создаются случайно.</li>
             <li><b>Инвентарь:</b> в кампании лишние находки (когда у бойца заняты обе ячейки) попадают в мешок. На привале в «Инвентаре» выберите вещь в мешке и нажмите на ячейку бойца: свободную — чтобы надеть, занятую — чтобы поменять. Два одинаковых предмета на одного бойца надеть нельзя. Во время боя инвентарь можно только посмотреть.</li>
-            <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. Каждый уровень даёт очко навыка: в дереве три ветки (Воин, Страж, Следопыт), каждая открывается сверху вниз. После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
+            <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. Каждый уровень даёт очко навыка: в дереве три ветки (Воин, Страж, Следопыт), каждая открывается сверху вниз. Слева — карта кампании: после каждого узла выбираете следующий по связям — бой, элита (сильнее, в награду редкий предмет), тайник, костёр (лечение), таверна (наёмник до двух и зелье). Наверху — вождь орков, победа над ним завершает кампанию. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
             <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
             <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье +4 HP — копится в сумке, выпить можно в бою (кнопка «Зелье», ход не тратится) или на привале. Предметы бывают обычные, <b style="color:var(--r1)">редкие</b> и <b style="color:var(--r2)">эпические</b> — у редких эффект сильнее или добавлен второй; чем дальше в кампании, тем чаще они выпадают. Один предмет каждого вида на бойца, но его можно заменить лучшим.</li>
           </ul>
@@ -688,7 +727,7 @@ const OBJ = {
   timed: { name: 'Блицкриг', desc: `Уничтожьте всех врагов за ${TIMED_N} ходов.` },
 };
 // shown next to the title and in the menu; bump on every release to the site
-const VERSION = '0.12', VERSION_DATE = '21.10.2026';
+const VERSION = '0.13', VERSION_DATE = '21.10.2026';
 const ITEMS = {
   sword:  { name: 'Меч',             desc: '+1 к урону' },
   shield: { name: 'Щит',             desc: 'входящий урон −1' },
@@ -752,7 +791,7 @@ const inside = (x,y) => x >= 0 && y >= 0 && x < W && y < H && hd(x,y,CX,CY) <= R
 let S;
 
 /* ---------- map generation ---------- */
-function generate(np = 4, ne = 4){
+function generate(np = 4, ne = 4, force = null){
   let last;
   for (let attempt = 0; attempt < 200; attempt++){
     const T = Array.from({length:H}, () => Array(W).fill('plain'));
@@ -774,7 +813,7 @@ function generate(np = 4, ne = 4){
     cluster('forest', 6, 2, 4); cluster('swamp', 3, 2, 3); cluster('hill', 4, 1, 2);
     cluster('tower', 2, 1, 1); cluster('forge', 2, 1, 1); cluster('spring', 2, 1, 1);
 
-    const obj = pick(Object.keys(OBJ));
+    const obj = force || pick(Object.keys(OBJ));
     let point = null; const exits = new Set();
     if (obj === 'hold'){
       const opts = cells.filter(([x,y]) => hd(x,y,CX,CY) <= 2 && get(x,y) !== 'rock').map(([x,y]) => ({x,y}));
@@ -808,13 +847,21 @@ function generate(np = 4, ne = 4){
 // camp = null for a single battle, or the saved campaign (its squad carries names and HP)
 function newGame(camp = null){
   const squad = camp ? [camp.hero, ...camp.mercs] : null;
-  const m = generate(squad ? squad.length : 4, camp ? enemiesFor(camp.battle) : 4);
+  const nt = camp && camp.map && camp.cur ? camp.map[camp.cur.r][camp.cur.i].t : 'battle';
+  const extra = nt === 'elite' ? 1 : 0;
+  // the boss fight is always "destroy all"; elite fights never use the timer or the escort mission
+  const m = generate(squad ? squad.length : 4, camp ? enemiesFor(camp.battle) + extra : 4,
+    nt === 'boss' ? 'kill' : nt === 'elite' ? pick(['kill', 'hold', 'exit']) : null);
   let id = 0;
   const mk = (side, c, f) => ({ id: id++, side, x: c.x, y: c.y, hp: f ? f.hp : BASE.hp, cid: f ? f.cid : null, items: f && f.items ? [...f.items] : [],
     hero: !!(f && f.hero), bhp: f && f.bhp, st: f && f.st ? { ...f.st } : null, perks: f && f.perks ? [...f.perks] : null, lvl: f && f.level,
     moved: false, acted: false, vip: false, name: f ? f.name : side === 'p' ? 'Боец' : 'Орк' });
   const units = [...m.pSpawn.map((c, i) => mk('p', c, squad && squad[i])), ...m.eSpawn.map(c => mk('e', c))];
-  if (camp) units.filter(u => u.side === 'e').forEach(u => { u.bhp = u.hp = orcHp(camp.battle); u.batk = orcAtk(camp.battle); });
+  if (camp) units.filter(u => u.side === 'e').forEach(u => { u.bhp = u.hp = orcHp(camp.battle) + 2 * extra; u.batk = orcAtk(camp.battle); });
+  if (camp && nt === 'boss'){ // the warchief: big, hits harder, wears a crown
+    const b = units.find(u => u.side === 'e'); b.boss = true; b.name = 'Вождь';
+    b.bhp = b.hp = 2 * orcHp(camp.battle) + 6; b.batk = orcAtk(camp.battle) + 1;
+  }
   if (m.obj === 'vip'){
     // in a campaign the hero is the commander; in a single battle, the first fighter
     const cmd = units.find(u => u.hero) || units.find(u => u.side === 'p');
@@ -830,6 +877,7 @@ function newGame(camp = null){
         alert: ['kill','timed','vip','exit'].includes(m.obj), result: null, reason: '' };
   if (m.obj === 'exit') units.filter(u => u.side === 'e').slice(0, 2).forEach(u => { u.guard = true; });
   updateVis();
+  if (camp) renderMap(camp);
   addLog('sys', (camp ? `Кампания, бой ${camp.battle}. ` : '') + `Миссия: ${OBJ[S.obj].name}. Ход 1.`);
   if (S.alert) addLog('sys', S.obj === 'vip' ? 'Противник знает, где командир, и идёт в атаку.' : S.obj === 'exit' ? 'Двое врагов охраняют выход, остальные выдвигаются навстречу.' : 'Противник выдвигается навстречу.');
   render(); renderHover();
@@ -1270,13 +1318,59 @@ function rollUpgrades(c){
   });
   return shuffle(pool).slice(0, 3);
 }
+/* ---------- run map: a branching path of nodes from the first fight (bottom) to the boss (top) ---------- */
+const MAP_ROWS = 9; // row 0 = first fight, row 8 = boss
+const NODE = {
+  battle: { name: 'Бой',      sym: 'm-battle', tint: 'var(--team-e)',    desc: 'обычная стычка с орками' },
+  elite:  { name: 'Элита',    sym: 'm-elite',  tint: '#c27aff',          desc: 'орков больше и они крепче; в награду редкий предмет' },
+  chest:  { name: 'Тайник',   sym: 'i-chest',  tint: 'var(--goal)',      desc: 'предмет без боя, часто редкий' },
+  rest:   { name: 'Костёр',   sym: 'm-rest',   tint: 'var(--hp-ok)',     desc: 'отдых: герой +6 HP, наёмники полностью' },
+  tavern: { name: 'Таверна',  sym: 'm-tavern', tint: 'var(--ic-hill)',   desc: 'можно нанять наёмника, плюс зелье' },
+  boss:   { name: 'Вождь',    sym: 'm-boss',   tint: 'var(--red)',       desc: 'вождь орков с охраной — финал кампании' },
+};
+const FIGHT = new Set(['battle', 'elite', 'boss']);
+function genMap(){
+  const rows = [];
+  for (let r = 0; r < MAP_ROWS; r++){
+    let lanes;
+    if (r === 0 || r === MAP_ROWS - 1) lanes = [1];
+    else lanes = Math.random() < .55 ? [0, 1, 2] : pick([[0, 1], [1, 2], [0, 2]]);
+    rows.push(lanes.map(lane => {
+      let t;
+      if (r === 0) t = 'battle';
+      else if (r === MAP_ROWS - 1) t = 'boss';
+      else if (r === MAP_ROWS - 2) t = 'rest';
+      else {
+        const w = [['battle', 45], ['elite', r >= 2 ? 16 : 0], ['chest', 14], ['rest', r >= 2 ? 11 : 0], ['tavern', 14]];
+        let x = Math.random() * w.reduce((n, [, v]) => n + v, 0);
+        t = w.find(([, v]) => (x -= v) < 0)[0];
+      }
+      return { lane, t, next: [] };
+    }));
+  }
+  // links: each node goes to the next-row nodes in its own or a neighbouring lane; nobody is left unreachable
+  for (let r = 0; r < MAP_ROWS - 1; r++){
+    const a = rows[r], b = rows[r + 1];
+    a.forEach(n => { n.next = b.map((m, j) => Math.abs(m.lane - n.lane) <= 1 ? j : -1).filter(j => j >= 0);
+      if (!n.next.length) n.next = [b.reduce((best, m, j) => Math.abs(m.lane - n.lane) < Math.abs(b[best].lane - n.lane) ? j : best, 0)]; });
+    b.forEach((m, j) => { if (!a.some(n => n.next.includes(j))){
+      const k = a.reduce((best, n, i) => Math.abs(n.lane - m.lane) < Math.abs(a[best].lane - m.lane) ? i : best, 0); a[k].next.push(j); } });
+  }
+  return rows;
+}
+const nodeAt = (c, p) => p ? c.map[p.r][p.i] : null;
+// where the player may go next: the first fight, or the links of the last finished node
+const nextNodes = c => !c.pos ? [{ r: 0, i: 0 }] : c.pos.r >= MAP_ROWS - 1 ? [] : nodeAt(c, c.pos).next.map(i => ({ r: c.pos.r + 1, i }));
+function ensureMap(c){ if (!c.map){ c.map = genMap(); c.pos = c.battle > 1 ? { r: 0, i: 0 } : null; } return c; }
 function newCampaign(){
   shuffle(NAMES);
-  return { v: 2, battle: 1, wins: 0, nextCid: 2, fallen: [], mercs: [], atCamp: false, bag: [],
+  return { v: 3, battle: 1, wins: 0, nextCid: 2, fallen: [], mercs: [], atCamp: false, bag: [], map: genMap(), pos: null, cur: { r: 0, i: 0 },
     hero: { cid: 1, hero: true, name: NAMES[0], level: 1, xp: 0, bhp: HERO_HP, hp: HERO_HP, items: [],
             st: { hp: 0, atk: 0, armor: 0, move: 0, vision: 0 }, perks: [] } };
 }
 async function startCampaign(c){
+  ensureMap(c);
+  if (!c.cur) c.cur = nextNodes(c)[0];
   c.atCamp = false;
   await Store.save(SAVE_KEY, c);
   hideOverlay();
@@ -1309,15 +1403,55 @@ async function afterVictory(){
   }
   c.mercs = next;
   c.wins++; c.battle++;
-  c.offer = null;
-  // every second victory a sword-for-hire waits at the camp
-  if (c.wins % 2 === 0 && c.mercs.length < MERC_MAX){
-    const used = new Set([h.name, ...c.mercs.map(m => m.name), ...c.fallen]);
-    c.hireOffer = NAMES.find(n => !used.has(n)) || `Боец ${c.nextCid}`;
-  } else c.hireOffer = null;
+  c.offer = null; c.hireOffer = null;
+  ensureMap(c);
+  const done = nodeAt(c, c.cur) || { t: 'battle' };
+  c.pos = c.cur || c.pos; c.cur = null;
+  if (c.pos) (c.trail = c.trail || []).push(c.pos.r + ':' + c.pos.i);
+  if (done.t === 'elite'){ // trophy: a guaranteed rare-or-better item
+    const it = pick(['sword','shield','boots','scope','amulet']) + (Math.random() < .3 ? '++' : '+');
+    c.bag.push(it); report.found.push(it); report.trophy = it;
+  }
+  if (done.t === 'boss'){
+    const rec = (await Store.load(RECORD_KEY)) || 0;
+    await Store.save(RECORD_KEY, Math.max(rec, c.wins)); await Store.remove(SAVE_KEY);
+    showOverlay(`<div class="eyebrow">Кампания пройдена</div>
+      <h2 class="win">Вождь орков повержен!</h2>
+      <p>${h.name} прошёл всю карту: побед ${c.wins}, уровень ${h.level}.</p>
+      <div class="ov-btns"><button class="primary" data-act="new-camp">Новая кампания</button><button data-act="menu">В меню</button></div>`);
+    renderMap(null); return;
+  }
   c.report = report; c.atCamp = true;
   await Store.save(SAVE_KEY, c);
   showCamp(c);
+}
+// stepping onto the next node of the map: fights start a battle, the rest is resolved right at the camp
+async function goNode(r, i){
+  const c = await Store.load(SAVE_KEY); if (!c || !c.atCamp || c.pending) return;
+  ensureMap(c);
+  if (!nextNodes(c).some(p => p.r === r && p.i === i)) return;
+  const n = c.map[r][i];
+  if (FIGHT.has(n.t)){ c.cur = { r, i }; return startCampaign(c); }
+  c.pos = { r, i }; c.cur = null; (c.trail = c.trail || []).push(r + ':' + i);
+  const h = c.hero, rep = c.report = { mercs: [], event: n.t };
+  if (n.t === 'chest'){
+    const base = pick(['sword','shield','boots','scope','amulet']), x = Math.random();
+    const it = base + (x < .25 ? '++' : x < .75 ? '+' : '');
+    c.bag = [...(c.bag || []), it]; rep.found = [it];
+    rep.text = `В тайнике: ${itm(it).full} — ${itm(it).desc}. Предмет в мешке.`;
+  } else if (n.t === 'rest'){
+    const before = h.hp; h.hp = Math.min(heroMax(h), h.hp + 6);
+    c.mercs.forEach(m => { m.hp = BASE.hp + itemsFx(m.items, 'hp'); });
+    rep.text = `У костра: ${h.name} +${h.hp - before} HP${c.mercs.length ? ', наёмники полностью здоровы' : ''}.`;
+  } else if (n.t === 'tavern'){
+    c.potions = (c.potions || 0) + 1;
+    if (c.mercs.length < MERC_MAX){
+      const used = new Set([h.name, ...c.mercs.map(m => m.name), ...c.fallen]);
+      c.hireOffer = NAMES.find(n => !used.has(n)) || `Боец ${c.nextCid}`;
+    }
+    rep.text = `В таверне: +1 зелье${c.hireOffer ? `, ${c.hireOffer} готов присоединиться` : ', но отряд уже полон'}.`;
+  }
+  await Store.save(SAVE_KEY, c); showCamp(c);
 }
 async function pickUpgrade(bid){
   const c = await Store.load(SAVE_KEY); if (!c || !c.pending) return;
@@ -1476,6 +1610,7 @@ function showResult(){
     <h2 class="${win ? 'win' : 'loss'}">${S.result}</h2><p>${S.reason}</p><div class="ov-btns">${btns}</div>`);
 }
 function showCamp(c){
+  ensureMap(c); renderMap(c);
   const h = c.hero, r = c.report || { mercs: [] }, mx = heroMax(h);
   const stats = [`урон ${BASE.atk + h.st.atk}`, `ход ${BASE.move + h.st.move}`, `обзор ${BASE.vision + h.st.vision}`]
     .concat(h.st.armor ? [`броня ${h.st.armor}`] : []).join(' · ');
@@ -1506,14 +1641,20 @@ function showCamp(c){
       <div class="hero-row">${xpBar}<span>опыт ${h.xp} / ${xpNeed(h.level)}</span></div>
       <div class="hero-row muted">${stats}</div>
       ${h.perks.length || h.items.length ? `<div class="items">${h.perks.map(perkHTML).join('')}${h.items.map(itemHTML).join('')}</div>` : ''}
+      ${r.text ? `<p class="event">${r.text}</p>` : ''}
+      ${r.trophy ? `<p class="event">Трофей элиты: ${itm(r.trophy).full}.</p>` : ''}
       ${r.xp ? `<p>За бой: +${r.xp} опыта${r.kills ? ` (убито орков: ${r.kills})` : ''}.</p>` : ''}
       ${r.heroHealed ? `<p class="rest">Отдых на привале: +${r.heroHealed} HP</p>` : ''}
       ${(r.found || []).length ? `<p>В мешок: ${r.found.map(i => itm(i).name).join(', ')}.</p>` : ''}
     </div>
     ${mercRows ? `<ul class="squad">${mercRows}</ul>` : ''}
     ${choice}${hire}
-    <p>Следующий бой ${c.battle}: орков ${enemiesFor(c.battle)}, у каждого ${orcHp(c.battle)} HP и урон ${orcAtk(c.battle)}.</p>
-    <div class="ov-btns">${c.pending ? '<button disabled>Сначала выберите навык</button>' : '<button class="primary" data-act="fight">В бой</button>'}<button data-act="inv">Инвентарь <small>${(c.bag || []).length ? `в мешке: ${c.bag.length}` : 'снаряжение'}</small></button><button data-act="menu">В меню</button></div>`);
+    <div class="eyebrow">Дальше по карте</div>
+    <div class="ov-btns path">${nextNodes(c).map(p => { const n = c.map[p.r][p.i], d = NODE[n.t];
+      const extra = FIGHT.has(n.t) ? ` · орков ${enemiesFor(c.battle) + (n.t === 'elite' ? 1 : 0)}, HP ${orcHp(c.battle) + (n.t === 'elite' ? 2 : 0)}` : '';
+      return `<button data-act="go" data-r="${p.r}" data-i="${p.i}" ${c.pending ? 'disabled' : ''}><span class="pn" style="--b:${d.tint}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#${d.sym}"/></svg>${d.name}<span class="lane">${['слева','в центре','справа'][n.lane]}</span></span><small>${d.desc}${extra}</small></button>`; }).join('')}</div>
+    ${c.pending ? '<p class="note">Сначала выберите навык.</p>' : ''}
+    <div class="ov-btns"><button data-act="inv">Инвентарь <small>${(c.bag || []).length ? `в мешке: ${c.bag.length}` : 'снаряжение'}</small></button><button data-act="menu">В меню</button></div>`);
 }
 overlay.addEventListener('click', async ev => {
   if (ev.target === overlay) return resumeGame(); // any popup closes on a click outside the card
@@ -1527,6 +1668,7 @@ overlay.addEventListener('click', async ev => {
   if (act === 'inv'){ const c = await Store.load(SAVE_KEY); return c ? showInventory(c, false) : null; }
   if (act === 'to-camp'){ const c = await Store.load(SAVE_KEY); return c ? showCamp(c) : showMenu(); }
   if (act === 'drink') return campDrink(b.dataset.cid);
+  if (act === 'go') return goNode(+b.dataset.r, +b.dataset.i);
   if (act === 'bag-sel'){ invSel = invSel === +b.dataset.i ? null : +b.dataset.i; return invC && showInventory(invC, false); }
   if (act === 'equip' || act === 'unequip' || act === 'swap') return invChange(act, b.dataset.cid, +b.dataset.i);
   if (act === 'hire') return hireMerc();
@@ -1576,7 +1718,7 @@ function render(){
     if (S.exits.has(k)) inner += '<span class="mark exit"></span>';
     if (S.chests && S.chests.has(k) && S.vis.has(k)){ if (u) inner += '<svg class="chest" aria-hidden="true"><use href="#i-chest"/></svg>'; else prop += '<svg class="pchest" aria-hidden="true" viewBox="0 0 512 512"><use href="#i-chest"/></svg>'; }
     if (u){
-      inner += `<svg class="unit ${u.side}${u.hero ? ' hero' : ''}${u.side === 'p' && u.acted && S.phase === 'player' ? ' done' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip ? '<use href="#u-crown"/>' : ''}</svg>
+      inner += `<svg class="unit ${u.side}${u.hero ? ' hero' : ''}${u.side === 'p' && u.acted && S.phase === 'player' ? ' done' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip || u.boss ? '<use href="#u-crown"/>' : ''}</svg>
         ${heartsHTML(u.hp, false, maxHp(u))}`;
       if (tgt.has(u.id)) inner += `<span class="pv">−${dmgParts(sel,u).d}</span>`;
     }
@@ -1663,8 +1805,8 @@ function renderHover(){
   const ic = (sym, tint) => `<span class="tsw" style="--b:${tint}"><svg aria-hidden="true" viewBox="0 0 512 512"><use href="#${sym}"/></svg></span>`;
   const rows = [];
   if (u){
-    const who = u.side === 'e' ? 'Орк' : u.hero ? `${u.name}, ур. ${u.lvl}` : u.name === 'Боец' ? 'Ваш боец' : u.name;
-    const tok = `<span class="tsw sw cell t-${tid}"><svg class="unit ${u.side}${u.hero ? ' hero' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip ? '<use href="#u-crown"/>' : ''}</svg></span>`;
+    const who = u.side === 'e' ? (u.boss ? 'Вождь орков' : 'Орк') : u.hero ? `${u.name}, ур. ${u.lvl}` : u.name === 'Боец' ? 'Ваш боец' : u.name;
+    const tok = `<span class="tsw sw cell t-${tid}"><svg class="unit ${u.side}${u.hero ? ' hero' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip || u.boss ? '<use href="#u-crown"/>' : ''}</svg></span>`;
     rows.push(row(tok, `${who} · ${coord(h.x,h.y)}`, `${u.hp}/${maxHp(u)} HP`));
   }
   const sw = `<span class="tsw sw cell t-${tid}">${tid === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${tid}"/></svg>`}</span>`;
@@ -1692,6 +1834,33 @@ function showInfo(html, label){
 }
 addEventListener('scroll', hideTip, true);
 
+// the run map on the left: rows from the first fight (bottom) to the boss (top)
+function renderMap(c){
+  const el = document.getElementById('runmap'); if (!el) return;
+  if (!c || !c.map){ el.hidden = true; return; }
+  el.hidden = false;
+  const Wd = 168, rowH = 64, top = 26, Hh = top * 2 + rowH * (MAP_ROWS - 1);
+  const px = n => 28 + n.lane * 56, py = r => Hh - top - r * rowH;
+  const nxt = new Set(c.atCamp ? nextNodes(c).map(p => p.r + ':' + p.i) : []);
+  const cur = c.cur && !c.atCamp ? c.cur.r + ':' + c.cur.i : null;
+  // nodes on the walked path: everything at or below the current row that leads to where we are is "passed"
+  const passed = new Set(); if (c.trail) c.trail.forEach(k => passed.add(k));
+  if (c.pos) passed.add(c.pos.r + ':' + c.pos.i);
+  let lines = '', dots = '';
+  c.map.forEach((row, r) => row.forEach((n, i) => {
+    n.next.forEach(j => { const m = c.map[r + 1][j], on = passed.has(r + ':' + i) && (passed.has((r + 1) + ':' + j) || nxt.has((r + 1) + ':' + j) || cur === (r + 1) + ':' + j);
+      lines += `<line x1="${px(n)}" y1="${py(r)}" x2="${px(m)}" y2="${py(r + 1)}" class="${on ? 'on' : ''}"/>`; });
+  }));
+  c.map.forEach((row, r) => row.forEach((n, i) => {
+    const k = r + ':' + i, d = NODE[n.t];
+    const st = k === cur ? 'cur' : nxt.has(k) ? 'next' : passed.has(k) ? 'done' : r <= (c.pos ? c.pos.r : -1) ? 'skip' : '';
+    const big = n.t === 'boss' ? 1.25 : 1;
+    dots += `<g class="mn ${st}" transform="translate(${px(n)} ${py(r)}) scale(${big})" style="--b:${d.tint}"><title>${d.name}: ${d.desc}</title>
+      <circle r="17"/><svg x="-11" y="-11" width="22" height="22" viewBox="0 0 512 512"><use href="#${d.sym}"/></svg></g>`;
+  }));
+  el.innerHTML = `<div class="label">Карта кампании</div><svg class="mapsvg" viewBox="0 0 ${Wd} ${Hh}" width="${Wd}" height="${Hh}">${lines}${dots}</svg>
+    <div class="maplegend">${['battle','elite','chest','rest','tavern','boss'].map(t => `<span style="--b:${NODE[t].tint}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#${NODE[t].sym}"/></svg>${NODE[t].name}</span>`).join('')}</div>`;
+}
 function buildRefs(){
   { const v = document.getElementById('ver'); if (v){ v.textContent = `v${VERSION}`; v.title = `Версия ${VERSION} от ${VERSION_DATE}`; } }
   showInfo(null);
