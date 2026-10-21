@@ -520,9 +520,9 @@ button.bitem.sel{border-color:#7ccf00!important}
 .prop{position:absolute;width:var(--c);height:var(--hh);pointer-events:none;z-index:auto;display:grid;place-items:center;
   left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)) - var(--lift,0px))}
 .prop svg{grid-area:1/1;transform:scaleY(var(--up));transform-origin:50% 85%;filter:drop-shadow(0 3px 2px rgba(0,0,0,.45))}
-.prop .pico{width:86%;height:86%;margin-bottom:22%;color:var(--ic)}
-.prop.t-swamp .pico,.prop.t-spring .pico,.prop.t-forge .pico{width:66%;height:66%;margin-bottom:6%}
-.prop .pchest{width:62%;height:62%;margin-bottom:18%;color:var(--goal)}
+.prop .pico{width:62%;height:62%;margin-bottom:10%;color:var(--ic)}
+.prop.t-swamp .pico,.prop.t-spring .pico,.prop.t-forge .pico{width:54%;height:54%;margin-bottom:4%}
+.prop .pchest{width:50%;height:50%;margin-bottom:8%;color:var(--goal)}
 .prop .pico + .pchest{width:46%;height:46%;margin:0 0 -4% 40%}
 .prop.fog{opacity:.3;filter:grayscale(.6)}
 .prop.t-forest{--ic:var(--ic-forest)} .prop.t-hill{--ic:var(--ic-hill)} .prop.t-swamp{--ic:var(--ic-swamp)} .prop.t-rock{--ic:var(--ic-rock)}
@@ -537,6 +537,10 @@ button.bitem.sel{border-color:#7ccf00!important}
 .icard .drink svg{width:16px;height:16px;color:var(--hp-ok)}
 .potline .pots{display:inline-flex;gap:2px;vertical-align:middle;margin-right:6px}
 .potline .pots svg{width:18px;height:18px;color:var(--hp-ok)}
+
+/* figures inside a tile are stretched upright by --up; keep them small enough that the hex does not cut their top */
+.board .unit{width:66%;height:58%;margin:6% 0 0}
+.board .unit.hero{filter:drop-shadow(0 0 2px var(--goal)) drop-shadow(0 2px 1.5px rgba(0,0,0,.4))}
 </style>
 </head>
 <body>
