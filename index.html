@@ -474,6 +474,26 @@ button.node[data-tip]{cursor:pointer}
 .squad .hearts.big{justify-self:end;flex-wrap:wrap;max-width:100%}
 .squad .hearts.big svg{flex:none;width:13px;max-width:none}
 .ibag li.note{grid-column:1/-1;color:var(--muted);font-size:.85rem}
+
+/* ===== Tilted board ("isometry lite"): the board leans back, tiles get a side face, figures stand up ===== */
+:root{--tilt:35deg;--up:1.22;--thick:7px}
+.board-wrap{overflow:visible}
+.board{transform:perspective(1800px) rotateX(var(--tilt)) scale(1.1);transform-origin:50% 60%;margin:-40px 0 calc(var(--thick) - 30px)}
+.edge{position:absolute;width:var(--c);height:var(--hh);pointer-events:none;
+  left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)) + var(--thick));
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);background:color-mix(in srgb,var(--plain) 45%,#000)}
+.edge.t-forest{background:color-mix(in srgb,var(--forest) 50%,#000)}
+.edge.t-hill{background:color-mix(in srgb,var(--hill) 50%,#000)}
+.edge.t-swamp{background:color-mix(in srgb,var(--swamp) 50%,#000)}
+.edge.t-rock{background:color-mix(in srgb,var(--rock) 50%,#000)}
+.edge.t-tower{background:color-mix(in srgb,var(--tower) 50%,#000)}
+.edge.t-forge{background:color-mix(in srgb,var(--forge) 50%,#000)}
+.edge.t-spring{background:color-mix(in srgb,var(--spring) 50%,#000)}
+.edge.fog{background:color-mix(in srgb,var(--plain) 25%,#000)}
+.board .cell{box-shadow:inset 0 2px 0 rgba(255,255,255,.1)}
+.board .unit,.board .ticon,.board .chest{transform:scaleY(var(--up));transform-origin:50% 90%}
+.board .unit{transition:filter .15s,opacity .15s}
+@media (prefers-reduced-motion:reduce){.board{transform:none}}
 </style>
 </head>
 <body>
@@ -1451,6 +1471,8 @@ function render(){
       if (tgt.has(u.id)) inner += `<span class="pv">−${dmgParts(sel,u).d}</span>`;
     }
     if (isHit && S.vis.has(k)) inner += `<span class="dmg">−${S.hit.dmg}</span>`;
+    // the tile's side face, drawn just before the tile so the row below covers it (fake thickness)
+    html += `<div class="edge t-${t}${S.vis.has(k) ? '' : ' fog'}" style="--x:${x};--y:${y};--o:${y & 1}" aria-hidden="true"></div>`;
     html += `<div class="${cls.join(' ')}" style="--x:${x};--y:${y};--o:${y & 1}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
   }
   board.innerHTML = html;
