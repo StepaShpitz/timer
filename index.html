@@ -532,6 +532,11 @@ button.bitem.sel{border-color:#7ccf00!important}
 :root{--glow:#00b8db}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--glow:#5ee7ff}}
 :root[data-theme="dark"]{--glow:#5ee7ff}
+
+.icard .drink{flex:none;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;min-height:0;border-radius:8px;border:1px solid color-mix(in srgb,var(--hp-ok) 60%,transparent)!important;background:color-mix(in srgb,var(--hp-ok) 18%,var(--card))!important;color:#fff!important;font:500 .78rem/1.2 var(--body);cursor:pointer}
+.icard .drink svg{width:16px;height:16px;color:var(--hp-ok)}
+.potline .pots{display:inline-flex;gap:2px;vertical-align:middle;margin-right:6px}
+.potline .pots svg{width:18px;height:18px;color:var(--hp-ok)}
 </style>
 </head>
 <body>
@@ -615,6 +620,7 @@ button.bitem.sel{border-color:#7ccf00!important}
           <button id="waitBtn" title="Клавиша W">Ждать</button>
           <button id="endBtn" class="primary" title="Клавиша Space">Конец хода</button>
           <button id="dangerBtn" aria-pressed="false" title="Клавиша T">Угрозы</button>
+          <button id="potBtn" hidden title="Выпить зелье выбранным бойцом: +4 HP, ход не тратится (клавиша P)">Зелье</button>
           <button id="invBtn" hidden>Инвентарь</button>
           <button id="resetBtn">Меню</button>
         </div>
@@ -641,7 +647,7 @@ button.bitem.sel{border-color:#7ccf00!important}
             <li><b>Инвентарь:</b> в кампании лишние находки (когда у бойца заняты обе ячейки) попадают в мешок. На привале в «Инвентаре» выберите вещь в мешке и нажмите на ячейку бойца: свободную — чтобы надеть, занятую — чтобы поменять. Два одинаковых предмета на одного бойца надеть нельзя. Во время боя инвентарь можно только посмотреть.</li>
             <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. Каждый уровень даёт очко навыка: в дереве три ветки (Воин, Страж, Следопыт), каждая открывается сверху вниз. После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
             <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
-            <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP. Предметы бывают обычные, <b style="color:var(--r1)">редкие</b> и <b style="color:var(--r2)">эпические</b> — у редких эффект сильнее или добавлен второй; чем дальше в кампании, тем чаще они выпадают. Один предмет каждого вида на бойца, но его можно заменить лучшим.</li>
+            <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье +4 HP — копится в сумке, выпить можно в бою (кнопка «Зелье», ход не тратится) или на привале. Предметы бывают обычные, <b style="color:var(--r1)">редкие</b> и <b style="color:var(--r2)">эпические</b> — у редких эффект сильнее или добавлен второй; чем дальше в кампании, тем чаще они выпадают. Один предмет каждого вида на бойца, но его можно заменить лучшим.</li>
           </ul>
         </details>
         <details>
@@ -811,7 +817,7 @@ function newGame(camp = null){
   for (let y = 3; y <= H-4; y++) for (let x = 0; x < W; x++)
     if (inside(x,y) && m.T[y][x] === 'plain' && !(m.point && m.point.x === x && m.point.y === y)) spots.push(key(x,y));
   const chests = new Set(shuffle(spots).slice(0, 3 + (camp && camp.battle >= 3 ? 1 : 0)));
-  S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units, camp, chests, kills: 0,
+  S = { turn: 1, phase: 'player', sel: null, log: [], hit: null, hover: null, trail: new Set(), units, camp, chests, kills: 0, potions: camp ? (camp.potions || 0) : 0,
         terr: m.T, obj: m.obj, point: m.point, exits: m.exits, hold: 0,
         alert: ['kill','timed','vip','exit'].includes(m.obj), result: null, reason: '' };
   if (m.obj === 'exit') units.filter(u => u.side === 'e').slice(0, 2).forEach(u => { u.guard = true; });
@@ -1037,11 +1043,11 @@ function openChest(u){
   const own = new Set((u.items || []).map(itemBase)); // no second item of the same kind on one fighter
   const pool = ['sword','shield','boots','scope','amulet','potion','potion'].filter(i => !own.has(i));
   const it = rollItem(pool);
-  if (itm(it).instant){
-    const before = u.hp; u.hp = Math.min(maxHp(u), u.hp + 4);
+  if (itm(it).instant){ // potions go to the shared pouch and are drunk when needed
+    S.potions = (S.potions || 0) + 1;
     S.chests.delete(k);
-    addLog('p', `${u.name} открывает сундук: ${itm(it).name}, +${u.hp - before} HP`);
-    toast(it, `${u.name}: ${itm(it).name}, +${u.hp - before} HP`);
+    addLog('p', `${u.name} находит зелье (в сумке: ${S.potions})`);
+    toast(it, `Зелье — в сумку (всего: ${S.potions})`);
     return;
   }
   u.items = u.items || [];
@@ -1059,6 +1065,14 @@ function openChest(u){
   if (itemFx(it).vision) updateVis();
 }
 
+const POTION_HEAL = 4;
+// drinking is a free action: heals the selected fighter and does not use up its move or attack
+function drinkPotion(){
+  const sel = selected(); if (!sel || S.phase !== 'player' || S.busy || !S.potions || sel.hp >= maxHp(sel)) return;
+  const before = sel.hp; sel.hp = Math.min(maxHp(sel), sel.hp + POTION_HEAL); S.potions--;
+  toast('potion', `${sel.name} пьёт зелье: +${sel.hp - before} HP (осталось: ${S.potions})`);
+  render();
+}
 function waitUnit(){
   const sel = selected(); if (!sel || S.phase !== 'player' || S.busy) return;
   sel.acted = sel.moved = true; S.sel = null;
@@ -1270,6 +1284,7 @@ async function afterVictory(){
   h.hp = Math.min(heroMax(h), hu.hp + HERO_REST);
   report.heroHealed = h.hp - hu.hp;
   c.bag = [...(c.bag || []), ...(S.loot || [])];
+  c.potions = S.potions || 0;
   report.found = [...(S.loot || [])];
   const gain = S.kills * XP_KILL + XP_WIN;
   report.xp = gain; report.kills = S.kills;
@@ -1329,6 +1344,7 @@ function showInventory(c, inBattle){
   invC = c; if (inBattle) invSel = null;
   const fighters = inBattle ? S.units.filter(u => u.side === 'p') : invFighters(c);
   const bag = inBattle ? [...(c.bag || []), ...(S.loot || [])] : (c.bag || []);
+  const pots = inBattle ? (S.potions || 0) : (c.potions || 0);
   if (invSel != null && !bag[invSel]) invSel = null;
   const card = f => {
     const its = f.items || [], dead = inBattle && f.hp <= 0, room = !inBattle && its.length < ITEM_SLOTS;
@@ -1355,6 +1371,7 @@ function showInventory(c, inBattle){
     return `<li class="icard${dead ? ' dead' : ''}${f.hero ? ' hero' : ''}">
       <span class="tok"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#u-p"/></svg></span>
       <span class="who"><b>${f.name}${lvl}</b><span class="sub">${dead ? 'пал в бою' : `${Math.max(0, f.hp)}/${invFighterMax(f, inBattle)} HP`}${f.hero ? ' · герой' : ' · наёмник'}</span></span>
+      ${!inBattle && pots && f.hp < invFighterMax(f, false) ? `<button class="drink" data-act="drink" data-cid="${f.cid}" title="+${POTION_HEAL} HP">${itemIcon('potion')}Выпить</button>` : ''}
       <span class="islots">${slots}</span></li>`;
   };
   const bagHTML = bag.length ? bag.map((it, i) => {
@@ -1370,11 +1387,20 @@ function showInventory(c, inBattle){
   showOverlay(`<div class="eyebrow">Инвентарь</div>
     <h2>Снаряжение отряда</h2>
     <ul class="icards">${fighters.map(card).join('')}</ul>
+    <div class="eyebrow">Зелья · ${pots}</div>
+    <p class="note potline">${pots ? `<span class="pots">${Array.from({length: Math.min(pots, 8)}, () => itemIcon('potion')).join('')}</span> Каждое +${POTION_HEAL} HP. ${inBattle ? 'В бою — кнопка «Зелье» у выбранного бойца, ход не тратится.' : 'На привале — кнопка «Выпить» у раненого бойца.'}` : 'Зелий нет. Они попадаются в сундуках и копятся в сумке.'}</p>
     <div class="eyebrow">Мешок · ${bag.length}</div>
     <ul class="ibag">${bagHTML}</ul>
     <p class="note">${hint}</p>
     <div class="ov-btns">${inBattle ? '<button class="primary" data-act="resume">Вернуться к бою</button>' : '<button class="primary" data-act="to-camp">Назад к привалу</button>'}</div>`);
   overlay.querySelector('.ov-card').classList.add('wide');
+}
+async function campDrink(cid){
+  const c = await Store.load(SAVE_KEY); if (!c || !c.atCamp || !c.potions) return;
+  const f = invFighters(c).find(f => String(f.cid) === String(cid)); if (!f) return;
+  const mx = f.hero ? heroMax(f) : BASE.hp + itemsFx(f.items, 'hp'); if (f.hp >= mx) return;
+  f.hp = Math.min(mx, f.hp + POTION_HEAL); c.potions--;
+  await Store.save(SAVE_KEY, c); showInventory(c, false);
 }
 async function invChange(kind, cid, i){
   const c = await Store.load(SAVE_KEY); if (!c || !c.atCamp) return;
@@ -1492,6 +1518,7 @@ overlay.addEventListener('click', async ev => {
   if (act === 'pick') return pickUpgrade(b.dataset.up);
   if (act === 'inv'){ const c = await Store.load(SAVE_KEY); return c ? showInventory(c, false) : null; }
   if (act === 'to-camp'){ const c = await Store.load(SAVE_KEY); return c ? showCamp(c) : showMenu(); }
+  if (act === 'drink') return campDrink(b.dataset.cid);
   if (act === 'bag-sel'){ invSel = invSel === +b.dataset.i ? null : +b.dataset.i; return invC && showInventory(invC, false); }
   if (act === 'equip' || act === 'unequip' || act === 'swap') return invChange(act, b.dataset.cid, +b.dataset.i);
   if (act === 'hire') return hireMerc();
@@ -1586,6 +1613,8 @@ function render(){
     card.innerHTML = `<p class="empty">${S.phase === 'player' ? `Нажмите на своего бойца. Готовы действовать: ${left}.` : S.phase === 'enemy' ? 'Противник действует…' : 'Начните новую карту.'}</p>`;
   }
   waitBtn.disabled = !sel;
+  const potB = document.getElementById('potBtn');
+  if (potB){ potB.hidden = !S.potions; potB.textContent = `Зелье · ${S.potions || 0}`; potB.disabled = !sel || sel.hp >= maxHp(sel) || S.phase !== 'player'; }
   const invB = document.getElementById('invBtn'); if (invB) invB.hidden = !S.camp;
   endBtn.disabled = S.phase !== 'player';
   const logEl = document.getElementById('log');
@@ -1685,6 +1714,7 @@ board.addEventListener('mouseover', ev => {
 });
 board.addEventListener('mouseleave', () => { S.hover = null; renderHover(); });
 waitBtn.onclick = waitUnit;
+{ const pb = document.getElementById('potBtn'); if (pb) pb.onclick = drinkPotion; }
 endBtn.onclick = endTurn;
 resetBtn.onclick = () => {
   if (S && S.phase === 'over' && S.camp && S.result === 'Победа' && !S.campDone) return showResult();
@@ -1698,6 +1728,7 @@ document.addEventListener('keydown', ev => {
   if (ev.target.closest('button,summary') && (ev.key === ' ' || ev.key === 'Enter')) return;
   if (ev.key === ' '){ ev.preventDefault(); endTurn(); }
   else if ('wWцЦ'.includes(ev.key)) waitUnit();
+  else if ('pPзЗ'.includes(ev.key)) drinkPotion();
   else if ('tTеЕ'.includes(ev.key)) toggleDanger();
   else if (ev.key === 'Escape'){ S.sel = null; render(); }
 });
