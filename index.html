@@ -541,6 +541,8 @@ button.bitem.sel{border-color:#7ccf00!important}
 /* figures inside a tile are stretched upright by --up; keep them small enough that the hex does not cut their top */
 .board .unit{width:66%;height:58%;margin:6% 0 0}
 .board .unit.hero{filter:drop-shadow(0 0 2px var(--goal)) drop-shadow(0 2px 1.5px rgba(0,0,0,.4))}
+
+h1 .ver{font:500 .75rem/1 var(--body);color:var(--muted);letter-spacing:0;vertical-align:middle;margin-left:6px;padding:3px 7px;border:1px solid var(--line);border-radius:999px}
 </style>
 </head>
 <body>
@@ -598,7 +600,7 @@ button.bitem.sel{border-color:#7ccf00!important}
 
 <div class="wrap">
   <header>
-    <h1>Тактика на клетках</h1>
+    <h1>Тактика на клетках <span class="ver" id="ver"></span></h1>
     <div class="status" id="status"></div>
   </header>
   <div class="layout">
@@ -685,6 +687,8 @@ const OBJ = {
   vip:   { name: 'Защитить командира', desc: `Командир (жетон с короной) должен продержаться ${VIP_N} ходов. Его гибель — поражение.` },
   timed: { name: 'Блицкриг', desc: `Уничтожьте всех врагов за ${TIMED_N} ходов.` },
 };
+// shown next to the title and in the menu; bump on every release to the site
+const VERSION = '0.11', VERSION_DATE = '21.10.2026';
 const ITEMS = {
   sword:  { name: 'Меч',             desc: '+1 к урону' },
   shield: { name: 'Щит',             desc: 'входящий урон −1' },
@@ -1450,7 +1454,7 @@ async function showMenu(resumable = false){
   const c = await Store.load(SAVE_KEY), rec = await Store.load(RECORD_KEY);
   // the first button is the highlighted one: back to the battle if it has started, otherwise the campaign
   const showResume = resumable && (S.turn > 1 || S.units.some(u => u.moved || u.acted));
-  showOverlay(`<div class="eyebrow">Пошаговая тактика</div>
+  showOverlay(`<div class="eyebrow">Пошаговая тактика · версия ${VERSION}</div>
     <h2>Тактика на клетках</h2>
     <div class="ov-btns">
       ${showResume ? '<button class="primary" data-act="resume">Вернуться к бою</button>' : ''}
@@ -1689,6 +1693,7 @@ function showInfo(html, label){
 addEventListener('scroll', hideTip, true);
 
 function buildRefs(){
+  { const v = document.getElementById('ver'); if (v){ v.textContent = `v${VERSION}`; v.title = `Версия ${VERSION} от ${VERSION_DATE}`; } }
   showInfo(null);
   axisX.innerHTML = [...COLS].map(c => `<span>${c}</span>`).join('');
   axisY.innerHTML = Array.from({length: H}, (_, i) => `<span>${i + 1}</span>`).join('');
