@@ -497,6 +497,41 @@ button.node[data-tip]{cursor:pointer}
 
 .board .cell.up{transform:translateY(calc(-1 * var(--lift)))}
 .board .cell.up{box-shadow:inset 0 3px 0 rgba(255,255,255,.18)}
+
+/* ---------- item rarity ---------- */
+:root{--r1:#51a2ff;--r2:#c27aff}
+.ico.r1{box-shadow:0 0 0 2px var(--r1),0 0 10px color-mix(in srgb,var(--r1) 60%,transparent)}
+.ico.r2{box-shadow:0 0 0 2px var(--r2),0 0 12px color-mix(in srgb,var(--r2) 70%,transparent)}
+.bitem.r1{border-color:color-mix(in srgb,var(--r1) 55%,transparent)!important}
+.bitem.r2{border-color:color-mix(in srgb,var(--r2) 60%,transparent)!important;background:linear-gradient(135deg,color-mix(in srgb,var(--r2) 18%,var(--card)),var(--card))!important}
+button.bitem.sel{border-color:#7ccf00!important}
+.rar{display:block;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:#99a1af}
+.rar.r1{color:var(--r1)} .rar.r2{color:var(--r2)}
+.trow .rar{display:inline;text-transform:none;letter-spacing:0;font-size:.78rem;margin-left:2px}
+.badge.r1{box-shadow:0 0 0 1px var(--r1)} .badge.r2{box-shadow:0 0 0 1px var(--r2)}
+.islot .cmp{font-size:.65rem;font-weight:600;color:#d1d5dc}
+.islot .cmp.up{color:#7ccf00} .islot .cmp.down{color:#ff6467}
+
+/* ===== Look pass: seamless ground, sunken tiles, props above tiles, glowing move outline ===== */
+:root{--g:1px}
+.board .cell.t-plain{background-position:calc(-1 * (var(--x) + var(--o) * .5) * (var(--c) + var(--g))) calc(-1 * var(--y) * (var(--hh) * .75 + var(--g)))}
+.board .cell.alt{background-color:var(--plain)}
+.board .cell.down{box-shadow:inset 0 9px 7px -5px rgba(0,0,0,.55),inset 0 -2px 0 rgba(255,255,255,.08)}
+.prop{position:absolute;width:var(--c);height:var(--hh);pointer-events:none;z-index:auto;display:grid;place-items:center;
+  left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)) - var(--lift,0px))}
+.prop svg{grid-area:1/1;transform:scaleY(var(--up));transform-origin:50% 85%;filter:drop-shadow(0 3px 2px rgba(0,0,0,.45))}
+.prop .pico{width:86%;height:86%;margin-bottom:22%;color:var(--ic)}
+.prop.t-swamp .pico,.prop.t-spring .pico,.prop.t-forge .pico{width:66%;height:66%;margin-bottom:6%}
+.prop .pchest{width:62%;height:62%;margin-bottom:18%;color:var(--goal)}
+.prop .pico + .pchest{width:46%;height:46%;margin:0 0 -4% 40%}
+.prop.fog{opacity:.3;filter:grayscale(.6)}
+.prop.t-forest{--ic:var(--ic-forest)} .prop.t-hill{--ic:var(--ic-hill)} .prop.t-swamp{--ic:var(--ic-swamp)} .prop.t-rock{--ic:var(--ic-rock)}
+.prop.t-tower{--ic:var(--ic-tower)} .prop.t-forge{--ic:var(--ic-forge)} .prop.t-spring{--ic:var(--ic-spring)}
+/* reachable tiles: glowing outline instead of a flat fill */
+.board .cell.reach::before{background:radial-gradient(ellipse 58% 54% at 50% 50%,color-mix(in srgb,var(--glow) 10%,transparent) 62%,color-mix(in srgb,var(--glow) 75%,transparent) 100%);box-shadow:none;z-index:1}
+:root{--glow:#00b8db}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--glow:#5ee7ff}}
+:root[data-theme="dark"]{--glow:#5ee7ff}
 </style>
 </head>
 <body>
@@ -606,7 +641,7 @@ button.node[data-tip]{cursor:pointer}
             <li><b>Инвентарь:</b> в кампании лишние находки (когда у бойца заняты обе ячейки) попадают в мешок. На привале в «Инвентаре» выберите вещь в мешке и нажмите на ячейку бойца: свободную — чтобы надеть, занятую — чтобы поменять. Два одинаковых предмета на одного бойца надеть нельзя. Во время боя инвентарь можно только посмотреть.</li>
             <li><b>Кампания:</b> вы начинаете одним героем (12 HP). За каждого убитого героем орка — 2 опыта, за победу — ещё 3. Каждый уровень даёт очко навыка: в дереве три ветки (Воин, Страж, Следопыт), каждая открывается сверху вниз. После каждой второй победы в таверне можно нанять наёмника (до двух) — он не качается, но держит строй. Здоровье и снаряжение переходят из боя в бой, на привале герой восстанавливает 5 HP, наёмники — 4. Орков с каждым боем больше и они крепче. Гибель героя заканчивает кампанию.</li>
             <li>Прогресс кампании сохраняется в браузере после каждого боя.</li>
-            <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP.</li>
+            <li><b>Сундуки:</b> на карте 3–4 сундука, их видно только в зоне обзора. Закончите ход на клетке сундука, чтобы открыть его. Предметы остаются у нашедшего бойца на всю кампанию (2 ячейки) и теряются, если он погибнет. Меч +1 урон, Щит −1 входящий урон, Сапоги +1 ход, Подзорная труба +2 обзор, Амулет +2 макс. здоровья, Зелье сразу +4 HP. Предметы бывают обычные, <b style="color:var(--r1)">редкие</b> и <b style="color:var(--r2)">эпические</b> — у редких эффект сильнее или добавлен второй; чем дальше в кампании, тем чаще они выпадают. Один предмет каждого вида на бойца, но его можно заменить лучшим.</li>
           </ul>
         </details>
         <details>
@@ -650,7 +685,34 @@ const ITEMS = {
 };
 const ITEM_SLOTS = 2;
 const ITEM_TINT = { sword:'var(--red)', shield:'var(--blue)', boots:'var(--ic-hill)', scope:'var(--ic-tower)', amulet:'var(--ic-spring)', potion:'var(--hp-ok)' };
-const itemHTML = it => `<span class="badge tint" style="--b:${ITEM_TINT[it]}" title="${ITEMS[it].desc}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#i-${it}"/></svg>${ITEMS[it].name}</span>`;
+/* Rarity: an item is stored as its base name plus one "+" per tier ('sword', 'sword+', 'sword++').
+   Each tier has its own effects; old saves (no "+") are simply common items. */
+const RARITY = ['обычный', 'редкий', 'эпический'];
+const ITEM_TIERS = {
+  sword:  [{ atk: 1 }, { atk: 2 }, { atk: 2, hp: 2 }],
+  shield: [{ block: 1 }, { block: 1, hp: 2 }, { block: 2 }],
+  boots:  [{ move: 1 }, { move: 1, vision: 1 }, { move: 2 }],
+  scope:  [{ vision: 2 }, { vision: 3 }, { vision: 3, atk: 1 }],
+  amulet: [{ hp: 2 }, { hp: 4 }, { hp: 6 }],
+};
+const FX_TEXT = { atk: n => `+${n} к урону`, block: n => `входящий урон −${n}`, move: n => `+${n} к ходу`, vision: n => `обзор +${n}`, hp: n => `макс. здоровье +${n}` };
+const itemBase = it => it.replace(/\+/g, '');
+const itemTier = it => (it.match(/\+/g) || []).length;
+const itemFx = it => (ITEM_TIERS[itemBase(it)] || [])[itemTier(it)] || {};
+function itm(it){
+  const b = itemBase(it), t = itemTier(it), def = ITEMS[b], fx = itemFx(it);
+  const desc = def.instant ? def.desc : Object.entries(fx).map(([k, n]) => FX_TEXT[k](n)).join(', ');
+  return { base: b, tier: t, name: def.name, full: t ? `${def.name} (${RARITY[t]})` : def.name, desc, instant: def.instant, tint: ITEM_TINT[b], rar: RARITY[t] };
+}
+const itemsFx = (list, k) => (list || []).reduce((n, it) => n + (itemFx(it)[k] || 0), 0);
+const itemHTML = it => `<span class="badge tint r${itemTier(it)}" style="--b:${itm(it).tint}" title="${itm(it).rar}: ${itm(it).desc}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#i-${itemBase(it)}"/></svg>${itm(it).name}</span>`;
+// chest roll: rarer items get more likely as the campaign goes on
+function rollItem(pool){
+  const it = pick(pool); if (itm(it).instant) return it;
+  const b = S && S.camp ? S.camp.battle : 1, r = Math.random();
+  const epic = Math.min(.2, .04 + .02 * b), rare = Math.min(.45, .2 + .03 * b);
+  return it + (r < epic ? '++' : r < epic + rare ? '+' : '');
+}
 const abilityHTML = t => TERRAIN[t].ability ? `<span class="badge tint" style="--b:var(--ic-${t})" title="${TERRAIN[t].effect}"><svg viewBox="0 0 512 512" aria-hidden="true"><use href="#t-${t}"/></svg>${TERRAIN[t].ability}</span>` : '';
 // Hex grid, pointy-top, "odd-r" layout: odd rows are shifted half a cell to the right
 const HEX_EVEN = [[1,0],[-1,0],[0,-1],[-1,-1],[0,1],[-1,1]];
@@ -765,13 +827,13 @@ const unitAt = (x,y) => S.units.find(u => u.hp > 0 && u.x === x && u.y === y);
 const selected = () => S.units.find(u => u.id === S.sel && u.hp > 0);
 const terr = (x,y) => S.terr[y][x];
 const terrOf = u => terr(u.x,u.y);
-const has = (u, it) => (u.items || []).filter(i => i === it).length;
+const fx = (u, k) => itemsFx(u.items, k);   // summed item effects
 const st = (u, k) => (u.st && u.st[k]) || 0;              // hero upgrades
 const perk = (u, p) => !!(u.perks && u.perks.includes(p));  // hero perks
-const maxHp = u => (u.bhp || BASE.hp) + 2 * has(u, 'amulet') + st(u, 'hp');
-const moveOf = u => BASE.move + has(u, 'boots') + st(u, 'move');
+const maxHp = u => (u.bhp || BASE.hp) + fx(u, 'hp') + st(u, 'hp');
+const moveOf = u => BASE.move + fx(u, 'move') + st(u, 'move');
 const rangeOf = u => BASE.range + (terrOf(u) === 'hill' ? 1 : 0) + (perk(u, 'spear') ? 1 : 0);
-const visionOf = u => BASE.vision + (terrOf(u) === 'tower' ? 2 : 0) + 2 * has(u, 'scope') + st(u, 'vision');
+const visionOf = u => BASE.vision + (terrOf(u) === 'tower' ? 2 : 0) + fx(u, 'vision') + st(u, 'vision');
 const known = u => u.side === 'p' || S.vis.has(key(u.x,u.y));
 const abilitiesOf = u => { const a = TERRAIN[terrOf(u)].ability; return a ? [a] : []; };
 
@@ -788,7 +850,7 @@ function dmgParts(a, t){
   const forge = terrOf(a) === 'forge' ? 1 : 0;
   const flank = alive(a.side).filter(o => o !== a && dist(o,t) === 1).length;
   const cover = terrOf(t) === 'forest' ? 1 : 0;
-  const sword = has(a, 'sword'), shield = has(t, 'shield'), armor = st(t, 'armor');
+  const sword = fx(a, 'atk'), shield = fx(t, 'block'), armor = st(t, 'armor');
   const lead = a.side === 'p' && !a.hero && alive('p').some(h => h.hero && perk(h, 'leader') && dist(h, a) === 1) ? 1 : 0;
   const base = (a.batk || BASE.atk) + st(a, 'atk');
   return { d: Math.max(1, base + sword + forge + flank + lead - cover - shield - armor), forge, flank, cover, sword, shield, armor, lead };
@@ -965,36 +1027,36 @@ function toast(it, text){
   let box = document.getElementById('toasts');
   if (!box){ document.body.insertAdjacentHTML('beforeend', '<div id="toasts" aria-live="polite"></div>'); box = document.getElementById('toasts'); }
   const el = document.createElement('div'); el.className = 'toast';
-  el.innerHTML = (it ? `<svg viewBox="0 0 512 512" style="color:${ITEM_TINT[it]}" aria-hidden="true"><use href="#i-${it}"/></svg>` : '') + `<span>${text}</span>`;
+  el.innerHTML = (it ? `<svg viewBox="0 0 512 512" style="color:${itm(it).tint}" aria-hidden="true"><use href="#i-${itemBase(it)}"/></svg>` : '') + `<span>${text}</span>`;
   box.appendChild(el);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 300); }, 2600);
 }
 function openChest(u){
   const k = key(u.x,u.y);
   if (!S.chests || !S.chests.has(k)) return;
-  const has = new Set(u.items || []); // a fighter never gets a second copy of the same item
-  const pool = ['sword','shield','boots','scope','amulet','potion','potion'].filter(i => !has.has(i));
-  const it = pick(pool);
-  if (ITEMS[it].instant){
+  const own = new Set((u.items || []).map(itemBase)); // no second item of the same kind on one fighter
+  const pool = ['sword','shield','boots','scope','amulet','potion','potion'].filter(i => !own.has(i));
+  const it = rollItem(pool);
+  if (itm(it).instant){
     const before = u.hp; u.hp = Math.min(maxHp(u), u.hp + 4);
     S.chests.delete(k);
-    addLog('p', `${u.name} открывает сундук: ${ITEMS[it].name}, +${u.hp - before} HP`);
-    toast(it, `${u.name}: ${ITEMS[it].name}, +${u.hp - before} HP`);
+    addLog('p', `${u.name} открывает сундук: ${itm(it).name}, +${u.hp - before} HP`);
+    toast(it, `${u.name}: ${itm(it).name}, +${u.hp - before} HP`);
     return;
   }
   u.items = u.items || [];
   if (u.items.length >= ITEM_SLOTS){
     if (!S.camp){ addLog('sys', `${u.name}: обе ячейки заняты, сундук остаётся на месте`); toast(null, `${u.name}: обе ячейки заняты`); return; }
     S.loot = S.loot || []; S.loot.push(it); S.chests.delete(k);
-    toast(it, `${ITEMS[it].name} — в мешок (ячейки ${u.name} заняты)`);
+    toast(it, `${itm(it).full} — в мешок (ячейки ${u.name} заняты)`);
     return;
   }
   u.items.push(it);
-  if (it === 'amulet') u.hp = Math.min(maxHp(u), u.hp + 2);
+  if (itemFx(it).hp) u.hp = Math.min(maxHp(u), u.hp + itemFx(it).hp);
   S.chests.delete(k);
-  addLog('p', `${u.name} находит в сундуке: ${ITEMS[it].name} (${ITEMS[it].desc})`);
-  toast(it, `${u.name} берёт: ${ITEMS[it].name} — ${ITEMS[it].desc}`);
-  if (it === 'scope') updateVis();
+  addLog('p', `${u.name} находит в сундуке: ${itm(it).name} (${itm(it).desc})`);
+  toast(it, `${u.name} берёт: ${itm(it).full} — ${itm(it).desc}`);
+  if (itemFx(it).vision) updateVis();
 }
 
 function waitUnit(){
@@ -1174,7 +1236,7 @@ const TREE = [
   { id: 'scout', name: 'Следопыт', tint: 'var(--ic-tower)', nodes: ['vision', 'move', 'spear', 'vision'] },
 ];
 const treeOf = h => (h.tree = h.tree || { war: 0, guard: 0, scout: 0 });
-function heroMax(h){ return (h.bhp || HERO_HP) + h.st.hp + 2 * (h.items || []).filter(i => i === 'amulet').length; }
+function heroMax(h){ return (h.bhp || HERO_HP) + h.st.hp + itemsFx(h.items, 'hp'); }
 function rollUpgrades(c){
   const h = c.hero, taken = k => (UPGRADES[k].perk ? (h.perks.includes(k) ? 1 : 0) : (h.st[k] || 0));
   const pool = Object.keys(UPGRADES).filter(k => {
@@ -1257,8 +1319,12 @@ async function hireMerc(){
 // At the camp: equip from the bag or take items off. In battle: view only.
 function invFighters(c){ return [c.hero, ...c.mercs]; }
 let invSel = null, invC = null; // selected bag item (camp only)
-function invFighterMax(f, inBattle){ return inBattle ? maxHp(f) : f.hero ? heroMax(f) : BASE.hp + 2 * (f.items || []).filter(x => x === 'amulet').length; }
-const itemIcon = it => `<svg viewBox="0 0 512 512" aria-hidden="true"><use href="#i-${it}"/></svg>`;
+function invFighterMax(f, inBattle){ return inBattle ? maxHp(f) : f.hero ? heroMax(f) : BASE.hp + itemsFx(f.items, 'hp'); }
+const itemIcon = it => `<svg viewBox="0 0 512 512" aria-hidden="true"><use href="#i-${itemBase(it)}"/></svg>`;
+// one item of each kind per fighter; a swap may replace the same kind (e.g. a better sword)
+const canEquip = (its, nb) => its.length < ITEM_SLOTS && !its.some(x => itemBase(x) === itemBase(nb));
+const canSwap = (its, i, nb) => nb !== its[i] && !its.some((x, j) => j !== i && itemBase(x) === itemBase(nb));
+const itemScore = it => { const f = itemFx(it); return 3 * (f.atk || 0) + 3 * (f.block || 0) + 2 * (f.move || 0) + (f.vision || 0) + (f.hp || 0) / 2; };
 function showInventory(c, inBattle){
   invC = c; if (inBattle) invSel = null;
   const fighters = inBattle ? S.units.filter(u => u.side === 'p') : invFighters(c);
@@ -1269,14 +1335,17 @@ function showInventory(c, inBattle){
     const slots = Array.from({length: ITEM_SLOTS}, (_, i) => {
       const it = its[i];
       if (it){
-        const inner = `<span class="ico" style="--b:${ITEM_TINT[it]}">${itemIcon(it)}</span><span class="cap">${ITEMS[it].name}</span>`;
-        if (inBattle) return `<span class="islot full" title="${ITEMS[it].desc}">${inner}</span>`;
+        const inner = `<span class="ico r${itemTier(it)}" style="--b:${itm(it).tint}">${itemIcon(it)}</span><span class="cap">${itm(it).name}</span>`;
+        if (inBattle) return `<span class="islot full" title="${itm(it).rar}: ${itm(it).desc}">${inner}</span>`;
         const nb = invSel != null ? bag[invSel] : null;
-        if (nb && nb !== it && !its.includes(nb))
-          return `<button class="islot full swap" data-act="swap" data-cid="${f.cid}" data-i="${i}" title="Заменить: ${ITEMS[it].name} → ${ITEMS[nb].name}">${inner}<span class="swapmark">⇄</span></button>`;
-        return `<button class="islot full" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="${ITEMS[it].name}: ${ITEMS[it].desc}. Нажмите, чтобы снять в мешок">${inner}</button>`;
+        if (nb && canSwap(its, i, nb)){
+          const same = itemBase(nb) === itemBase(it), d = itemScore(nb) - itemScore(it);
+          const cmp = same ? (d > 0 ? '<span class="cmp up">▲ лучше</span>' : d < 0 ? '<span class="cmp down">▼ хуже</span>' : '<span class="cmp">= то же</span>') : '';
+          return `<button class="islot full swap" data-act="swap" data-cid="${f.cid}" data-i="${i}" title="Заменить: ${itm(it).full} → ${itm(nb).full}">${inner}<span class="swapmark">⇄</span>${cmp}</button>`;
+        }
+        return `<button class="islot full" data-act="unequip" data-cid="${f.cid}" data-i="${i}" title="${itm(it).name}: ${itm(it).desc}. Нажмите, чтобы снять в мешок">${inner}</button>`;
       }
-      const dup = room && invSel != null && its.includes(bag[invSel]);
+      const dup = room && invSel != null && !canEquip(its, bag[invSel]);
       if (dup) return `<span class="islot empty dup" title="Два одинаковых предмета надеть нельзя"><span class="ico">×</span><span class="cap">уже есть</span></span>`;
       const target = room && invSel != null;
       return target ? `<button class="islot empty target" data-act="equip" data-cid="${f.cid}" data-i="${invSel}" title="Надеть сюда"><span class="ico">+</span><span class="cap">надеть</span></button>`
@@ -1289,14 +1358,14 @@ function showInventory(c, inBattle){
       <span class="islots">${slots}</span></li>`;
   };
   const bagHTML = bag.length ? bag.map((it, i) => {
-      const inner = `<span class="ico" style="--b:${ITEM_TINT[it]}">${itemIcon(it)}</span><span class="who"><b>${ITEMS[it].name}</b><span class="sub">${ITEMS[it].desc}</span></span>`;
-      return inBattle ? `<li><span class="bitem">${inner}</span></li>`
-        : `<li><button class="bitem${invSel === i ? ' sel' : ''}" data-act="bag-sel" data-i="${i}" aria-pressed="${invSel === i}">${inner}</button></li>`;
+      const inner = `<span class="ico r${itemTier(it)}" style="--b:${itm(it).tint}">${itemIcon(it)}</span><span class="who"><b>${itm(it).name}</b><span class="rar r${itemTier(it)}">${itm(it).rar}</span><span class="sub">${itm(it).desc}</span></span>`;
+      return inBattle ? `<li><span class="bitem r${itemTier(it)}">${inner}</span></li>`
+        : `<li><button class="bitem r${itemTier(it)}${invSel === i ? ' sel' : ''}" data-act="bag-sel" data-i="${i}" aria-pressed="${invSel === i}">${inner}</button></li>`;
     }).join('')
     : '<li class="note">Мешок пуст. Лишние находки из сундуков попадают сюда.</li>';
-  const free = invFighters(c).some(f => (f.items || []).length < ITEM_SLOTS && (invSel == null || !(f.items || []).includes(bag[invSel])));
+
   const hint = inBattle ? 'В бою снаряжение не меняется — переодеться можно на привале после победы (кнопка «Инвентарь»).'
-    : invSel != null ? `Выбран «${ITEMS[bag[invSel]].name}»: нажмите на свободную ячейку, чтобы надеть, или на надетый предмет (⇄), чтобы поменять местами с мешком.`
+    : invSel != null ? `Выбран «${itm(bag[invSel]).full}»: нажмите на свободную ячейку, чтобы надеть, или на надетый предмет (⇄), чтобы поменять местами с мешком.`
     : 'Нажмите на предмет в мешке, затем на ячейку бойца — свободную или занятую (заменит). Нажатие на надетый предмет без выбора снимает его в мешок.';
   showOverlay(`<div class="eyebrow">Инвентарь</div>
     <h2>Снаряжение отряда</h2>
@@ -1312,17 +1381,17 @@ async function invChange(kind, cid, i){
   const f = invFighters(c).find(f => String(f.cid) === String(cid)); if (!f) return;
   f.items = f.items || []; c.bag = c.bag || [];
   if (kind === 'swap'){
-    const nb = c.bag[invSel]; if (invSel == null || !nb || !f.items[i] || f.items.includes(nb)) return;
+    const nb = c.bag[invSel]; if (invSel == null || !nb || !f.items[i] || !canSwap(f.items, i, nb)) return;
     const old = f.items[i]; f.items[i] = nb; c.bag.splice(invSel, 1); c.bag.push(old);
-    const mx = f.hero ? heroMax(f) : BASE.hp + 2 * f.items.filter(x => x === 'amulet').length;
+    const mx = f.hero ? heroMax(f) : BASE.hp + itemsFx(f.items, 'hp');
     f.hp = Math.min(f.hp, mx);
   } else if (kind === 'equip'){
-    if (f.items.length >= ITEM_SLOTS || !c.bag[i] || f.items.includes(c.bag[i])) return;
+    if (!c.bag[i] || !canEquip(f.items, c.bag[i])) return;
     f.items.push(c.bag.splice(i, 1)[0]);
   } else {
     if (!f.items[i]) return;
     c.bag.push(f.items.splice(i, 1)[0]);
-    const mx = f.hero ? heroMax(f) : BASE.hp + 2 * f.items.filter(x => x === 'amulet').length;
+    const mx = f.hero ? heroMax(f) : BASE.hp + itemsFx(f.items, 'hp');
     f.hp = Math.min(f.hp, mx); // taking an amulet off lowers max HP
   }
   invSel = null;
@@ -1405,7 +1474,7 @@ function showCamp(c){
       ${h.perks.length || h.items.length ? `<div class="items">${h.perks.map(perkHTML).join('')}${h.items.map(itemHTML).join('')}</div>` : ''}
       ${r.xp ? `<p>За бой: +${r.xp} опыта${r.kills ? ` (убито орков: ${r.kills})` : ''}.</p>` : ''}
       ${r.heroHealed ? `<p class="rest">Отдых на привале: +${r.heroHealed} HP</p>` : ''}
-      ${(r.found || []).length ? `<p>В мешок: ${r.found.map(i => ITEMS[i].name).join(', ')}.</p>` : ''}
+      ${(r.found || []).length ? `<p>В мешок: ${r.found.map(i => itm(i).name).join(', ')}.</p>` : ''}
     </div>
     ${mercRows ? `<ul class="squad">${mercRows}</ul>` : ''}
     ${choice}${hire}
@@ -1437,7 +1506,7 @@ overlay.addEventListener('click', async ev => {
 /* ---------- rendering ---------- */
 const heartsHTML = (hp, big, max = BASE.hp) => `<div class="hearts${big ? ' big' : ''}" aria-hidden="true">` +
   Array.from({length: max}, (_, i) => `<svg><use href="#hp-${i < hp ? 'full' : 'empty'}"/></svg>`).join('') + '</div>';
-const LIFT = { forest: 6, hill: 11, rock: 15, tower: 13 }; // px the tile is raised above the ground
+const LIFT = { forest: 6, hill: 11, rock: 15, tower: 13, swamp: -6, spring: -8 }; // px the tile is raised above the ground
 function render(){
   const sel = S.phase === 'player' ? selected() : null;
   const r = sel && !sel.moved ? reach(sel) : null;
@@ -1460,7 +1529,9 @@ function render(){
     const isHit = S.hit && S.hit.x === x && S.hit.y === y;
     if (isHit) cls.push('hit');
     if (u) cls.push('occ');
-    let inner = t === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${t}"/></svg>`;
+    // a free tile's icon is drawn as a "prop" above the tile (not clipped by the hex, can stick out); with a figure on it, a small badge stays inside
+    let inner = t === 'plain' || !u ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${t}"/></svg>`;
+    let prop = !u && t !== 'plain' ? `<svg class="pico" aria-hidden="true" viewBox="0 0 512 512"><use href="#t-${t}"/></svg>` : '';
     const dn = dz ? (dz.get(k) || 0) : 0;
     if (dn && S.vis.has(k)){
       if (S.showDanger) inner += '<span class="dzall"></span>';
@@ -1468,7 +1539,7 @@ function render(){
     }
     if (S.point && S.point.x === x && S.point.y === y) inner += '<span class="mark point"></span>';
     if (S.exits.has(k)) inner += '<span class="mark exit"></span>';
-    if (S.chests && S.chests.has(k) && S.vis.has(k)) inner += '<svg class="chest" aria-hidden="true"><use href="#i-chest"/></svg>';
+    if (S.chests && S.chests.has(k) && S.vis.has(k)){ if (u) inner += '<svg class="chest" aria-hidden="true"><use href="#i-chest"/></svg>'; else prop += '<svg class="pchest" aria-hidden="true" viewBox="0 0 512 512"><use href="#i-chest"/></svg>'; }
     if (u){
       inner += `<svg class="unit ${u.side}${u.hero ? ' hero' : ''}${u.side === 'p' && u.acted && S.phase === 'player' ? ' done' : ''}" viewBox="0 0 512 512" aria-hidden="true"><use href="#u-${u.side}"/>${u.vip ? '<use href="#u-crown"/>' : ''}</svg>
         ${heartsHTML(u.hp, false, maxHp(u))}`;
@@ -1481,7 +1552,9 @@ function render(){
     const lift = (LIFT[t] || 0) + (chestHere && !LIFT[t] ? 5 : 0);
     const pos = `--x:${x};--y:${y};--o:${y & 1};--lift:${lift}px`;
     html += `<div class="edge t-${t}${S.vis.has(k) ? '' : ' fog'}" style="${pos}" aria-hidden="true"></div>`;
-    html += `<div class="${cls.join(' ')}${lift ? ' up' : ''}" style="${pos}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
+    const tileCls = cls.join(' ') + (lift > 0 ? ' up' : lift < 0 ? ' up down' : '');
+    html += `<div class="${tileCls}" style="${pos}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
+    if (prop) html += `<div class="prop t-${t}${S.vis.has(k) ? '' : ' fog'}" style="${pos}" aria-hidden="true">${prop}</div>`;
   }
   board.innerHTML = html;
 
@@ -1559,7 +1632,7 @@ function renderHover(){
   }
   const sw = `<span class="tsw sw cell t-${tid}">${tid === 'plain' ? '' : `<svg class="ticon" aria-hidden="true"><use href="#t-${tid}"/></svg>`}</span>`;
   rows.push(row(sw, u ? t.name : `${t.name} · ${coord(h.x,h.y)}`, t.effect));
-  if (u) (u.items || []).forEach(i => rows.push(row(ic('i-' + i, ITEM_TINT[i]), ITEMS[i].name, ITEMS[i].desc)));
+  if (u) (u.items || []).forEach(i => rows.push(row(ic('i-' + itemBase(i), itm(i).tint), itm(i).name + (itemTier(i) ? ` <span class="rar r${itemTier(i)}">${itm(i).rar}</span>` : ''), itm(i).desc)));
   if (u && u.perks) u.perks.forEach(p => rows.push(row(ic('s-' + p, 'var(--goal)'), UPGRADES[p].name, UPGRADES[p].desc)));
   if (S.point && S.point.x === h.x && S.point.y === h.y) rows.push(row(ic('u-crown', 'var(--goal)'), 'Точка удержания', 'держите здесь бойца.'));
   if (S.exits.has(k)) rows.push(row(ic('u-crown', 'var(--goal)'), 'Выход', 'доведите сюда бойцов.'));
