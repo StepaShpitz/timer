@@ -474,6 +474,29 @@ button.node[data-tip]{cursor:pointer}
 .squad .hearts.big{justify-self:end;flex-wrap:wrap;max-width:100%}
 .squad .hearts.big svg{flex:none;width:13px;max-width:none}
 .ibag li.note{grid-column:1/-1;color:var(--muted);font-size:.85rem}
+
+/* ===== Tilted board ("isometry lite"): the board leans back, tiles get a side face, figures stand up ===== */
+:root{--tilt:38deg;--up:1.27;--thick:7px}
+.board-wrap{overflow:visible}
+.board{transform:rotateX(var(--tilt));transform-origin:50% 0;margin:24px 0 -17%}
+.edge{position:absolute;width:var(--c);height:calc(var(--hh) + var(--thick) + var(--lift,0px));pointer-events:none;
+  left:calc((var(--x) + var(--o) * .5) * (var(--c) + var(--g)));top:calc(var(--y) * (var(--hh) * .75 + var(--g)) - var(--lift,0px));
+  clip-path:polygon(50% 0,100% calc(var(--hh) * .25),100% calc(100% - var(--hh) * .25),50% 100%,0 calc(100% - var(--hh) * .25),0 calc(var(--hh) * .25));background:color-mix(in srgb,var(--plain) 45%,#000)}
+.edge.t-forest{background:color-mix(in srgb,var(--forest) 50%,#000)}
+.edge.t-hill{background:color-mix(in srgb,var(--hill) 50%,#000)}
+.edge.t-swamp{background:color-mix(in srgb,var(--swamp) 50%,#000)}
+.edge.t-rock{background:color-mix(in srgb,var(--rock) 50%,#000)}
+.edge.t-tower{background:color-mix(in srgb,var(--tower) 50%,#000)}
+.edge.t-forge{background:color-mix(in srgb,var(--forge) 50%,#000)}
+.edge.t-spring{background:color-mix(in srgb,var(--spring) 50%,#000)}
+.edge.fog{opacity:.45}
+.board .cell{box-shadow:inset 0 2px 0 rgba(255,255,255,.1)}
+.board .unit,.board .ticon,.board .chest{transform:scaleY(var(--up));transform-origin:50% 90%}
+.board .unit{transition:filter .15s,opacity .15s}
+@media (prefers-reduced-motion:reduce){.board{transform:none}}
+
+.board .cell.up{transform:translateY(calc(-1 * var(--lift)))}
+.board .cell.up{box-shadow:inset 0 3px 0 rgba(255,255,255,.18)}
 </style>
 </head>
 <body>
@@ -1414,6 +1437,7 @@ overlay.addEventListener('click', async ev => {
 /* ---------- rendering ---------- */
 const heartsHTML = (hp, big, max = BASE.hp) => `<div class="hearts${big ? ' big' : ''}" aria-hidden="true">` +
   Array.from({length: max}, (_, i) => `<svg><use href="#hp-${i < hp ? 'full' : 'empty'}"/></svg>`).join('') + '</div>';
+const LIFT = { forest: 6, hill: 11, rock: 15, tower: 13 }; // px the tile is raised above the ground
 function render(){
   const sel = S.phase === 'player' ? selected() : null;
   const r = sel && !sel.moved ? reach(sel) : null;
@@ -1451,7 +1475,13 @@ function render(){
       if (tgt.has(u.id)) inner += `<span class="pv">−${dmgParts(sel,u).d}</span>`;
     }
     if (isHit && S.vis.has(k)) inner += `<span class="dmg">−${S.hit.dmg}</span>`;
-    html += `<div class="${cls.join(' ')}" style="--x:${x};--y:${y};--o:${y & 1}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
+    // the tile's side face, drawn just before the tile so the row below covers it (fake thickness)
+    // raised tiles: things that stick out of the ground get a taller block
+    const chestHere = S.chests && S.chests.has(k) && S.vis.has(k);
+    const lift = (LIFT[t] || 0) + (chestHere && !LIFT[t] ? 5 : 0);
+    const pos = `--x:${x};--y:${y};--o:${y & 1};--lift:${lift}px`;
+    html += `<div class="edge t-${t}${S.vis.has(k) ? '' : ' fog'}" style="${pos}" aria-hidden="true"></div>`;
+    html += `<div class="${cls.join(' ')}${lift ? ' up' : ''}" style="${pos}" data-x="${x}" data-y="${y}" role="gridcell" aria-label="${coord(x,y)} ${TERRAIN[t].name}${u ? ', ' + (u.side === 'p' ? 'ваш боец ' + u.name : 'враг, орк') + ' ' + u.hp + ' HP' : ''}">${inner}</div>`;
   }
   board.innerHTML = html;
 
