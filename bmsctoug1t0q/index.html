@@ -143,6 +143,10 @@ td input.name{width:100%;padding:6px 10px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:70;background:#1e2939;color:#fff;padding:10px 16px;border-radius:10px;font-size:.88rem;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
 [hidden]{display:none!important}
+.pill{font-size:.78rem;padding:6px 10px;color:var(--muted);white-space:nowrap}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--red)}
+.card hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+.card h4{margin:0;font-size:.95rem;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -154,6 +158,7 @@ td input.name{width:100%;padding:6px 10px}
       <button class="icon" id="prev" aria-label="Предыдущий месяц">‹</button>
       <div class="m" id="mlabel"></div>
       <button class="icon" id="next" aria-label="Следующий месяц">›</button>
+      <button class="icon pill" id="sync" hidden></button>
       <button class="icon" id="settings" title="Настройки" aria-label="Настройки">⚙</button>
     </div>
   </header>
@@ -192,7 +197,7 @@ const MON_S = ['янв','фев','мар','апр','май','июн','июл','�
 
 function defaults(){
   const C = (name, subs) => ({ id: uid(), name, subs: subs.map(n => ({ id: uid(), name: n })) });
-  return { v: 1, cur: '€', plans: {}, tx: [], cats: [
+  return { v: 1, cur: '€', plans: {}, tx: [], del: {}, ts: {}, cats: [
     C('Дом', ['Аренда / ипотека','Электричество','Вода','Интернет и связь','Ремонт и быт']),
     C('Продукты', ['Супермаркет','Рынок','Хозтовары']),
     C('Дети', ['Школа','Сад','Кружки и секции','Одежда и обувь','Игрушки и прочее']),
@@ -205,12 +210,21 @@ function defaults(){
 }
 
 let D = Store.load(KEY) || defaults();
+D.del = D.del || {}; D.ts = D.ts || {};
 const now = new Date();
 const pad = n => String(n).padStart(2,'0');
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 let M = `${now.getFullYear()}-${pad(now.getMonth()+1)}`;
 let TAB = 'overview', EDIT = false, FILTER = '';
-const save = () => { if (!Store.save(KEY, D)) toast('Не удалось сохранить в браузере'); };
+// kind marks what changed, so two phones can merge their edits: tx by id, plans per month, sections as a whole
+const save = kind => {
+  const n = Date.now(); D.ts = D.ts || {};
+  if (kind === 'cats') D.ts.cats = n;
+  else if (kind === 'plan') D.ts['p' + M] = n;
+  else if (kind === 'all') { D.ts.cats = n; for (const m in D.plans) D.ts['p' + m] = n; }
+  if (!Store.save(KEY, D)) toast('Не удалось сохранить в браузере');
+  Sync.later();
+};
 
 // ===== Helpers =====
 const $ = id => document.getElementById(id);
@@ -263,8 +277,8 @@ $('addf').addEventListener('submit', e => {
   if (!(amt > 0)) { toast('Введите сумму'); $('a-amt').focus(); return; }
   const date = $('a-date').value, sub = $('a-sub').value;
   if (!sub) { toast('Выберите статью'); return; }
-  D.tx.push({ id: uid(), date, sub, amt, note: $('a-note').value.trim() });
-  save();
+  D.tx.push({ id: uid(), date, sub, amt, note: $('a-note').value.trim(), u: Date.now() });
+  save('tx');
   $('a-amt').value = ''; $('a-note').value = '';
   const name = subIndex()[sub].s.name;
   if (!date.startsWith(M)) M = date.slice(0, 7);
@@ -350,8 +364,8 @@ function donut(cats, total){
 }
 
 function trend(){
-  const ms = []; for (let i = 5; i >= 0; i--) ms.push(shiftMonth(M, -i));
-  const data = ms.map(m => { const p = planOf(m); return { m, fact: D.tx.reduce((a, t) => a + (t.date.startsWith(m) ? t.amt : 0), 0), plan: Object.values(p).reduce((a, v) => a + (+v || 0), 0) }; });
+  const ms = [], ix = subIndex(); for (let i = 5; i >= 0; i--) ms.push(shiftMonth(M, -i));
+  const data = ms.map(m => { const p = planOf(m); return { m, fact: D.tx.reduce((a, t) => a + (t.date.startsWith(m) ? t.amt : 0), 0), plan: Object.entries(p).reduce((a, [k, v]) => a + (ix[k] ? +v || 0 : 0), 0) }; });
   const max = Math.max(...data.map(d => Math.max(d.fact, d.plan)));
   if (!max) return '<div class="empty">Пока нет данных</div>';
   const L = 52, W = 330, H = 150, top = 14, base = 120, bw = 30, step = (W - L) / 6;
@@ -442,12 +456,12 @@ view.addEventListener('change', e => {
     if (isNaN(v) || v < 0) { toast('Неверная сумма'); t.value = ''; return; }
     const p = D.plans[M] || (D.plans[M] = {});
     if (v) p[t.dataset.plan] = v; else delete p[t.dataset.plan];
-    save(); const y = scrollY; render(); scrollTo(0, y);
+    save('plan'); const y = scrollY; render(); scrollTo(0, y);
   } else if (t.dataset.cat || t.dataset.sub) {
     const name = t.value.trim(); if (!name) { render(); return; }
     if (t.dataset.cat) D.cats.find(c => c.id === t.dataset.cat).name = name;
     else subIndex()[t.dataset.sub].s.name = name;
-    save(); renderHead();
+    save('cats'); renderHead();
   } else if (t.id === 'flt') { FILTER = t.value; render(); }
 });
 view.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) { e.target.blur(); } });
@@ -455,31 +469,29 @@ view.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   const ds = b.dataset, y = scrollY;
   if ('edit' in ds) EDIT = !EDIT;
-  else if (ds.copy) { D.plans[M] = { ...D.plans[ds.copy] }; save(); toast('План скопирован'); }
-  else if ('clearplan' in ds) { if (!confirm(`Очистить план на ${mLabel(M).toLowerCase()}?`)) return; delete D.plans[M]; save(); }
-  else if (ds.addsub) { D.cats.find(c => c.id === ds.addsub).subs.push({ id: uid(), name: 'Новый подраздел' }); save(); }
-  else if ('addcat' in ds) { D.cats.push({ id: uid(), name: 'Новый раздел', subs: [{ id: uid(), name: 'Разное' }] }); save(); }
+  else if (ds.copy) { D.plans[M] = { ...D.plans[ds.copy] }; save('plan'); toast('План скопирован'); }
+  else if ('clearplan' in ds) { if (!confirm(`Очистить план на ${mLabel(M).toLowerCase()}?`)) return; delete D.plans[M]; save('plan'); }
+  else if (ds.addsub) { D.cats.find(c => c.id === ds.addsub).subs.push({ id: uid(), name: 'Новый подраздел' }); save('cats'); }
+  else if ('addcat' in ds) { D.cats.push({ id: uid(), name: 'Новый раздел', subs: [{ id: uid(), name: 'Разное' }] }); save('cats'); }
   else if (ds.delsub) {
     const n = D.tx.filter(t => t.sub === ds.delsub).length, { s, c } = subIndex()[ds.delsub];
     if (c.subs.length === 1) { toast('В разделе должен остаться хотя бы один подраздел'); return; }
     if (!confirm(`Удалить «${s.name}»?${n ? `\nВместе с ним удалятся траты: ${n}.` : ''}`)) return;
-    c.subs = c.subs.filter(x => x.id !== s.id); D.tx = D.tx.filter(t => t.sub !== s.id);
-    for (const m in D.plans) delete D.plans[m][s.id]; save();
+    c.subs = c.subs.filter(x => x.id !== s.id); tomb(t => t.sub === s.id); save('cats');
   } else if (ds.delcat) {
     const c = D.cats.find(x => x.id === ds.delcat), ids = new Set(c.subs.map(s => s.id)), n = D.tx.filter(t => ids.has(t.sub)).length;
     if (!confirm(`Удалить раздел «${c.name}»?${n ? `\nВместе с ним удалятся траты: ${n}.` : ''}`)) return;
-    D.cats = D.cats.filter(x => x !== c); D.tx = D.tx.filter(t => !ids.has(t.sub));
-    for (const m in D.plans) for (const id of ids) delete D.plans[m][id]; save();
+    D.cats = D.cats.filter(x => x !== c); tomb(t => ids.has(t.sub)); save('cats');
   } else if (ds.deltx) {
     const i = D.tx.findIndex(t => t.id === ds.deltx); if (i < 0) return;
-    const [t] = D.tx.splice(i, 1); save(); render();
+    const [t] = D.tx.splice(i, 1); D.del[t.id] = Date.now(); save('tx'); render();
     toastUndo(t); return;
   } else return;
   render(); scrollTo(0, y);
 });
 function toastUndo(t){
   const el = $('toast'); el.innerHTML = `Трата удалена · <u style="cursor:pointer;pointer-events:auto">вернуть</u>`; el.classList.add('show'); el.style.pointerEvents = 'auto';
-  el.onclick = () => { D.tx.push(t); save(); render(); el.classList.remove('show'); el.style.pointerEvents = ''; el.onclick = null; };
+  el.onclick = () => { delete D.del[t.id]; t.u = Date.now(); D.tx.push(t); save('tx'); render(); el.classList.remove('show'); el.style.pointerEvents = ''; el.onclick = null; };
   clearTimeout(toastT); toastT = setTimeout(() => { el.classList.remove('show'); el.style.pointerEvents = ''; el.onclick = null; }, 4000);
 }
 
@@ -495,26 +507,130 @@ $('settings').onclick = () => {
     <label class="f">Валюта<input id="s-cur" value="${esc(D.cur)}" maxlength="4"></label>
     <p>Данные хранятся только в этом браузере. Делайте копию, чтобы не потерять их или перенести на другое устройство.</p>
     <div class="btns"><button id="s-exp">Скачать копию</button><button id="s-imp">Загрузить копию</button><input type="file" id="s-file" accept=".json,application/json" hidden></div>
+    <hr><h4>Синхронизация с GitHub</h4>
+    ${Sync.on() ? `<p>Подключено: <b>${esc(Sync.cfg.repo)}</b> · файл ${esc(Sync.cfg.path)}. ${esc(Sync.label())}.</p>
+      <div class="btns"><button id="s-link">Ссылка для телефона</button><button id="s-now">Синхронизировать</button><button class="danger" id="s-off">Отключить</button></div>
+      <p style="font-size:.8rem">Ссылка уже содержит ключ: откройте её на телефоне, и он подключится сам. Не публикуйте её.</p>`
+    : `<p>Данные будут храниться в файле <b>data.json</b> приватного репозитория и сходиться на всех устройствах.</p>
+      <label class="f">Репозиторий<input id="s-repo" value="StepaShpitz/budget-data"></label>
+      <label class="f">Ключ доступа<input id="s-token" type="password" placeholder="github_pat_…" autocomplete="off"></label>
+      <div class="btns"><button class="primary" id="s-con">Подключить</button></div>`}
+    <hr>
     <div class="btns"><button class="danger" id="s-reset">Стереть всё</button><button class="primary" id="s-ok" style="margin-left:auto">Готово</button></div>`);
   const q = s => o.querySelector(s);
-  q('#s-ok').onclick = () => { D.cur = q('#s-cur').value.trim() || '€'; save(); o.remove(); render(); };
+  q('#s-ok').onclick = () => { const cur = q('#s-cur').value.trim() || '€'; if (cur !== D.cur) { D.cur = cur; save('cats'); } o.remove(); render(); };
   q('#s-exp').onclick = () => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(D, null, 1)], { type: 'application/json' }));
     a.download = `budget-${todayISO()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   q('#s-imp').onclick = () => q('#s-file').click();
+  if (Sync.on()) {
+    q('#s-link').onclick = async () => {
+      const url = location.origin + location.pathname + '#sync=' + btoa(JSON.stringify({ r: Sync.cfg.repo, t: Sync.cfg.token, p: Sync.cfg.path }));
+      try { await navigator.clipboard.writeText(url); toast('Ссылка скопирована'); } catch(_) { prompt('Скопируйте ссылку', url); }
+    };
+    q('#s-now').onclick = () => { o.remove(); Sync.run(); };
+    q('#s-off').onclick = () => { if (!confirm('Отключить синхронизацию на этом устройстве? Данные останутся здесь и в GitHub.')) return; Sync.connect(null); o.remove(); };
+  } else q('#s-con').onclick = () => {
+    const repo = q('#s-repo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''), token = q('#s-token').value.trim();
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) { toast('Укажите репозиторий и ключ'); return; }
+    Sync.connect({ repo, token, path: 'data.json' }); o.remove();
+  };
   q('#s-file').onchange = async e => {
     try { const d = JSON.parse(await e.target.files[0].text());
       if (!d || !Array.isArray(d.cats) || !Array.isArray(d.tx)) throw 0;
       if (!confirm('Заменить текущие данные загруженной копией?')) return;
-      D = { v: 1, cur: '€', plans: {}, ...d }; save(); o.remove(); render(); toast('Копия загружена');
+      D = { v: 1, cur: '€', plans: {}, ...d, del: { ...(D.del || {}), ...(d.del || {}) }, ts: d.ts || {} }; save('all'); o.remove(); render(); toast('Копия загружена');
     } catch(_) { toast('Это не файл копии бюджета'); }
   };
-  q('#s-reset').onclick = () => { if (confirm('Стереть все траты, планы и разделы?')) { D = defaults(); save(); o.remove(); render(); } };
+  q('#s-reset').onclick = () => { if (confirm('Стереть все траты, планы и разделы?' + (Sync.on() ? '\nОни сотрутся и в GitHub, и на других устройствах.' : ''))) { const old = D; tomb(() => true); D = { ...defaults(), del: old.del, ts: {} }; for (const m in old.plans) D.ts['p' + m] = Date.now(); save('cats'); o.remove(); render(); } };
 };
 
+// ===== Sync: one data.json in a private GitHub repo, merged with what each device has =====
+function tomb(fn){ const n = Date.now(); D.tx = D.tx.filter(t => fn(t) ? (D.del[t.id] = n, false) : true); }
+function canon(v){ // stable JSON so an unchanged file is not committed again
+  if (Array.isArray(v)) return '[' + v.map(canon).join(',') + ']';
+  if (v && typeof v === 'object') return '{' + Object.keys(v).sort().filter(k => v[k] !== undefined).map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+  return JSON.stringify(v);
+}
+function merge(a, b){ // a = this device, b = GitHub; on a tie GitHub wins
+  const A = a.ts || {}, B = b.ts || {}, del = { ...(b.del || {}) };
+  for (const k in a.del || {}) del[k] = Math.max(del[k] || 0, a.del[k]);
+  const useA = (A.cats || 0) > (B.cats || 0);
+  const out = { v: 1, cur: (useA ? a : b).cur || '€', cats: (useA ? a : b).cats, ts: { cats: Math.max(A.cats || 0, B.cats || 0) }, plans: {}, del };
+  const months = new Set([...Object.keys(a.plans || {}), ...Object.keys(b.plans || {}), ...[...Object.keys(A), ...Object.keys(B)].filter(k => k[0] === 'p').map(k => k.slice(1))]);
+  for (const m of months) {
+    const ta = A['p' + m] || 0, tb = B['p' + m] || 0, src = ta > tb ? a : b;
+    if (src.plans && src.plans[m] && Object.keys(src.plans[m]).length) out.plans[m] = src.plans[m];
+    if (ta || tb) out.ts['p' + m] = Math.max(ta, tb);
+  }
+  const tx = new Map();
+  for (const t of [...(b.tx || []), ...(a.tx || [])]) { const o = tx.get(t.id); if (!o || (t.u || 0) > (o.u || 0)) tx.set(t.id, t); }
+  out.tx = [...tx.values()].filter(t => !(del[t.id] >= (t.u || 0))).sort((x, y) => x.date.localeCompare(y.date) || x.id.localeCompare(y.id));
+  return out;
+}
+const b64e = s => { const u = new TextEncoder().encode(s); let r = ''; for (let i = 0; i < u.length; i += 0x8000) r += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(r); };
+const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
+const SKEY = 'fam.budget.sync';
+const Sync = {
+  cfg: Store.load(SKEY), busy: false, again: false, timer: null, st: 'off', at: 0,
+  on(){ return !!(this.cfg && this.cfg.repo && this.cfg.token); },
+  connect(cfg){ this.cfg = cfg; if (cfg) Store.save(SKEY, cfg); else try { localStorage.removeItem(SKEY); } catch(_) {} this.set(cfg ? 'sync' : 'off'); if (cfg) this.run(); },
+  url(){ return `https://api.github.com/repos/${this.cfg.repo}/contents/${encodeURIComponent(this.cfg.path || 'data.json')}`; },
+  hdr(){ return { Authorization: 'Bearer ' + this.cfg.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }; },
+  label(){ return { off: '', sync: 'Синхронизация…', wait: 'Есть изменения', ok: 'Сохранено в GitHub', net: 'Нет связи — сохранено здесь', auth: 'Ошибка ключа или репозитория', err: 'Ошибка синхронизации' }[this.st]; },
+  set(st){ this.st = st; const b = $('sync'); b.hidden = st === 'off';
+    b.textContent = { sync: '↻ синхр.', wait: '● изменения', ok: '✓ GitHub', net: '○ офлайн', auth: '! ключ', err: '! ошибка' }[st] || '';
+    b.className = 'icon pill' + (st === 'ok' ? ' ok' : st === 'auth' || st === 'err' ? ' bad' : '');
+    b.title = this.label() + (this.at ? ' · ' + new Date(this.at).toLocaleTimeString('ru-RU') : '') + ' · нажмите, чтобы обновить'; },
+  later(){ if (!this.on()) return; this.set('wait'); clearTimeout(this.timer); this.timer = setTimeout(() => this.run(), 1200); },
+  async run(){
+    if (!this.on()) return this.set('off');
+    if (this.busy) { this.again = true; return; }
+    this.busy = true; this.set('sync'); clearTimeout(this.timer);
+    try {
+      for (let attempt = 0; ; attempt++) {
+        const r = await fetch(this.url() + '?nocache=' + Date.now(), { headers: this.hdr(), cache: 'no-store' });
+        if (r.status === 401 || r.status === 403) throw 'auth';
+        let raw = null, sha;
+        if (r.ok) { const j = await r.json(); sha = j.sha; if (j.encoding !== 'base64') throw 'big'; raw = b64d(j.content); }
+        else if (r.status === 404) { /* first save creates the file; a missing repo then fails with 404 again */ }
+        else throw 'err';
+        const before = canon(D), merged = raw ? merge(D, JSON.parse(raw)) : merge(D, D), text = canon(merged);
+        if (text !== raw) {
+          const p = await fetch(this.url(), { method: 'PUT', headers: this.hdr(), body: JSON.stringify({ message: 'Бюджет: обновление', content: b64e(text), sha }) });
+          if ((p.status === 409 || p.status === 422) && attempt < 3) continue; // someone saved at the same moment: merge again
+          if (p.status === 401 || p.status === 403 || p.status === 404) throw 'auth';
+          if (!p.ok) throw 'err';
+        }
+        if (canon(D) !== before) continue; // edited while we were saving: go round once more
+        D = merged; Store.save(KEY, D); this.at = Date.now();
+        if (text !== before && !document.activeElement.closest('#view input,#view select')) { const y = scrollY; render(); scrollTo(0, y); }
+        break;
+      }
+      this.set('ok');
+    } catch (e) {
+      this.set(e === 'auth' ? 'auth' : e instanceof TypeError ? 'net' : 'err');
+      if (e === 'big') toast('Файл в GitHub стал слишком большим — напишите Claude');
+    } finally {
+      this.busy = false;
+      if (this.again) { this.again = false; this.run(); }
+    }
+  }
+};
+$('sync').onclick = () => Sync.run();
+// a phone link like …/#sync=… connects this device and removes the key from the address bar
+if (location.hash.startsWith('#sync=')) {
+  try { const c = JSON.parse(atob(decodeURIComponent(location.hash.slice(6)))); Sync.cfg = { repo: c.r, token: c.t, path: c.p || 'data.json' }; Store.save(SKEY, Sync.cfg); setTimeout(() => toast('Синхронизация подключена'), 300); } catch(_) { toast('Ссылка повреждена'); }
+  history.replaceState(null, '', location.pathname);
+}
+addEventListener('online', () => Sync.run());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') Sync.run(); });
+setInterval(() => { if (document.visibilityState === 'visible' && Sync.st !== 'auth') Sync.run(); }, 60000);
+
 render();
+Sync.run();
 </script>
 </body>
 </html>
