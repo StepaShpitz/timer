@@ -146,8 +146,16 @@ td input.name{width:100%;padding:6px 10px}
 [hidden]{display:none!important}
 .pill{font-size:.78rem;padding:6px 10px;color:var(--muted);white-space:nowrap}
 .pill.ok{color:var(--ok)} .pill.bad{color:var(--red)}
-.nosync{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;font-size:.9rem;
-  border-color:color-mix(in srgb,var(--warn) 45%,var(--line));background:color-mix(in srgb,var(--warn) 8%,var(--surface))}
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+.gate .card{box-shadow:0 1px 2px rgba(16,24,40,.05)}
+.err{color:var(--red);font-size:.85rem}
+.adv summary{cursor:pointer;font-size:.85rem;color:var(--muted);list-style:none}
+.adv summary::-webkit-details-marker{display:none}
+.adv[open]{display:flex;flex-direction:column;gap:10px}
+.users{display:flex;flex-direction:column;gap:6px}
+.users div{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border:1px solid var(--line);border-radius:10px;font-size:.9rem}
+.uadd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;gap:8px}
+@media (max-width:420px){.uadd{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.uadd button{grid-column:1/-1}}
 .card hr{border:0;border-top:1px solid var(--line);margin:4px 0}
 .card h4{margin:0;font-size:.95rem;font-weight:600}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -174,11 +182,6 @@ td input.name{width:100%;padding:6px 10px}
     <button class="primary wide" type="submit">Добавить трату</button>
   </form>
 
-  <div class="box nosync" id="nosync" hidden>
-    <div><b>Траты сохраняются только на этом устройстве.</b> <span class="muted">Остальные их не увидят, пока устройство не подключено к общему файлу.</span></div>
-    <button class="primary" id="nosync-btn">Подключить</button>
-  </div>
-
   <div class="bar-top">
     <div class="tabs" role="tablist">
       <button data-tab="overview">Обзор</button>
@@ -188,6 +191,21 @@ td input.name{width:100%;padding:6px 10px}
   </div>
 
   <main id="view"></main>
+</div>
+<div class="gate" id="gate" hidden>
+  <form class="card" id="loginf" autocomplete="on">
+    <h3>Семейный бюджет</h3>
+    <p>Войдите, чтобы видеть общие траты семьи и вносить новые.</p>
+    <label class="f">Логин<input id="l-user" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+    <label class="f">Пароль<input id="l-pass" name="password" type="password" autocomplete="current-password" required></label>
+    <div class="err" id="l-err" hidden></div>
+    <button class="primary" type="submit" id="l-btn">Войти</button>
+    <details class="adv"><summary>Вход по ключу GitHub</summary>
+      <label class="f">Репозиторий<input id="k-repo" value="StepaShpitz/budget-data"></label>
+      <label class="f">Ключ доступа<input id="k-token" type="password" placeholder="github_pat_…" autocomplete="off"></label>
+      <button type="button" id="k-btn">Войти по ключу</button>
+    </details>
+  </form>
 </div>
 <div class="tip" id="tip"></div>
 <div class="toast" id="toast"></div>
@@ -286,7 +304,7 @@ $('addf').addEventListener('submit', e => {
   if (!(amt > 0)) { toast('Введите сумму'); $('a-amt').focus(); return; }
   const date = $('a-date').value, sub = $('a-sub').value;
   if (!sub) { toast('Выберите статью'); return; }
-  D.tx.push({ id: uid(), date, sub, amt, note: $('a-note').value.trim(), u: Date.now() });
+  D.tx.push({ id: uid(), date, sub, amt, note: $('a-note').value.trim(), u: Date.now(), by: Sync.cfg && Sync.cfg.user || undefined });
   save('tx');
   $('a-amt').value = ''; $('a-note').value = '';
   const name = subIndex()[sub].s.name;
@@ -438,7 +456,7 @@ function renderTx(){
       const sum = list.filter(x => x.date === day).reduce((a, x) => a + x.amt, 0);
       html += `<div class="day row1"><span>${d} ${MON_S[mo - 1]}</span><span class="num">${fmt(sum)}</span></div>`; }
     const { s, c, ci } = ix[t.sub];
-    html += `<div class="tx"><span class="dot" style="--c:${color(ci)}"></span><div class="t"><div>${esc(s.name)} <small>· ${esc(c.name)}</small></div>${t.note ? `<div><small>${esc(t.note)}</small></div>` : ''}</div>
+    html += `<div class="tx"><span class="dot" style="--c:${color(ci)}"></span><div class="t"><div>${esc(s.name)} <small>· ${esc(c.name)}</small></div>${t.note || t.by ? `<div><small>${t.note ? esc(t.note) : ''}${t.note && t.by ? ' · ' : ''}${t.by ? '👤 ' + esc(t.by) : ''}</small></div>` : ''}</div>
       <span class="num">${fmt(t.amt)}</span><button class="icon danger" data-deltx="${t.id}" aria-label="Удалить">✕</button></div>`;
   }
   return `<div class="box">
@@ -514,16 +532,15 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') document.que
 $('settings').onclick = () => {
   const o = modal(`<h3>Настройки</h3>
     <label class="f">Валюта<input id="s-cur" value="${esc(D.cur)}" maxlength="4"></label>
-    <p>Данные хранятся только в этом браузере. Делайте копию, чтобы не потерять их или перенести на другое устройство.</p>
+    <p>Копия всех данных в файл — на всякий случай.</p>
     <div class="btns"><button id="s-exp">Скачать копию</button><button id="s-imp">Загрузить копию</button><input type="file" id="s-file" accept=".json,application/json" hidden></div>
-    <hr><h4>Синхронизация с GitHub</h4>
-    ${Sync.on() ? `<p>Подключено: <b>${esc(Sync.cfg.repo)}</b> · файл ${esc(Sync.cfg.path)}. ${esc(Sync.label())}.</p>
-      <div class="btns"><button id="s-link">Ссылка для телефона</button><button id="s-now">Синхронизировать</button><button class="danger" id="s-off">Отключить</button></div>
-      <p style="font-size:.8rem">Ссылка уже содержит ключ: откройте её на телефоне, и он подключится сам. Не публикуйте её.</p>`
-    : `<p><b>Проще всего:</b> на уже подключённом устройстве откройте ⚙ → «Ссылка для телефона» и откройте эту ссылку здесь. Траты, внесённые на этом устройстве раньше, не потеряются — они добавятся в общий файл.</p><p>Или введите ключ вручную:</p>
-      <label class="f">Репозиторий<input id="s-repo" value="StepaShpitz/budget-data"></label>
-      <label class="f">Ключ доступа<input id="s-token" type="password" placeholder="github_pat_…" autocomplete="off"></label>
-      <div class="btns"><button class="primary" id="s-con">Подключить</button></div>`}
+    <hr><h4>Аккаунт</h4>
+    <p>${Sync.cfg && Sync.cfg.user ? `Вы вошли как <b>${esc(Sync.cfg.user)}</b>.` : 'Вход по ключу GitHub.'} ${esc(Sync.label())}.</p>
+    <div class="btns"><button id="s-now">Синхронизировать</button><button class="danger" id="s-out">Выйти</button></div>
+    <hr><h4>Пользователи</h4>
+    <div class="users" id="s-users"><span class="muted" style="font-size:.85rem">Загрузка…</span></div>
+    <div class="uadd"><input id="u-name" placeholder="логин" autocapitalize="none" spellcheck="false" autocomplete="off"><input id="u-pass" placeholder="пароль" autocomplete="new-password"><button id="u-add">Добавить</button></div>
+    <p style="font-size:.8rem">Логин и пароль подходят на любом устройстве. Пароль не короче 6 символов.</p>
     <hr>
     <div class="btns"><button class="danger" id="s-reset">Стереть всё</button><button class="primary" id="s-ok" style="margin-left:auto">Готово</button></div>`);
   const q = s => o.querySelector(s);
@@ -534,17 +551,41 @@ $('settings').onclick = () => {
     a.download = `budget-${todayISO()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   q('#s-imp').onclick = () => q('#s-file').click();
-  if (Sync.on()) {
-    q('#s-link').onclick = async () => {
-      const url = location.origin + location.pathname + '#sync=' + btoa(JSON.stringify({ r: Sync.cfg.repo, t: Sync.cfg.token, p: Sync.cfg.path }));
-      try { await navigator.clipboard.writeText(url); toast('Ссылка скопирована'); } catch(_) { prompt('Скопируйте ссылку', url); }
-    };
-    q('#s-now').onclick = () => { o.remove(); Sync.run(); };
-    q('#s-off').onclick = () => { if (!confirm('Отключить синхронизацию на этом устройстве? Данные останутся здесь и в GitHub.')) return; Sync.connect(null); o.remove(); };
-  } else q('#s-con').onclick = () => {
-    const repo = q('#s-repo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''), token = q('#s-token').value.trim();
-    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) { toast('Укажите репозиторий и ключ'); return; }
-    Sync.connect({ repo, token, path: 'data.json' }); o.remove();
+  q('#s-now').onclick = () => { o.remove(); Sync.run(); };
+  q('#s-out').onclick = async () => {
+    if (!confirm('Выйти на этом устройстве? Траты останутся в общем файле, здесь они будут скрыты до следующего входа.')) return;
+    if (Sync.st !== 'ok') await Sync.run();
+    if (Sync.st !== 'ok' && !confirm('Последние изменения ещё не отправлены и пропадут. Всё равно выйти?')) return;
+    try { localStorage.removeItem(SKEY); localStorage.removeItem(KEY); } catch(_) {}
+    location.reload();
+  };
+  let U = null;
+  const drawUsers = () => {
+    const names = Object.keys(U.users).sort();
+    q('#s-users').innerHTML = names.length ? names.map(n => `<div><span>👤 ${esc(n)}${Sync.cfg.user === n ? ' <span class="muted">(вы)</span>' : ''}</span><button class="icon danger" data-u="${esc(n)}" aria-label="Удалить">✕</button></div>`).join('')
+      : '<span class="muted" style="font-size:.85rem">Пока никого — добавьте себя и семью.</span>';
+  };
+  const usersErr = e => q('#s-users').innerHTML = `<span class="err">${e === 'scope' ? 'У ключа нет права записи в репозиторий StepaShpitz/timer — добавьте его в настройках ключа на GitHub (Contents: Read and write).' : 'Не удалось загрузить список. Проверьте интернет.'}</span>`;
+  Users.load(Sync.cfg.token).then(u => { U = u; drawUsers(); }, usersErr);
+  q('#s-users').onclick = async e => {
+    const b = e.target.closest('[data-u]'); if (!b || !U) return; const n = b.dataset.u;
+    if (n === Sync.cfg.user && !confirm('Это вы. После выхода войти под этим логином будет нельзя. Удалить?')) return;
+    if (n !== Sync.cfg.user && !confirm(`Удалить пользователя «${n}»?`)) return;
+    try { const next = { ...U.users }; delete next[n]; U = await Users.save(next, U.sha, Sync.cfg.token, `Бюджет: удалён пользователь ${n}`); drawUsers(); toast('Пользователь удалён'); } catch (e) { usersErr(e); }
+  };
+  q('#u-add').onclick = async () => {
+    const n = Users.norm(q('#u-name').value), pw = q('#u-pass').value;
+    if (!U) return;
+    if (!/^[a-zа-яё0-9._-]{2,32}$/i.test(n)) { toast('Логин: 2–32 символа, буквы и цифры'); return; }
+    if (pw.length < 6) { toast('Пароль не короче 6 символов'); return; }
+    if (U.users[n] && !confirm(`«${n}» уже есть. Сменить ему пароль?`)) return;
+    const btn = q('#u-add'); btn.disabled = true; btn.textContent = '…';
+    try {
+      const entry = await Vault.seal({ r: Sync.cfg.repo, t: Sync.cfg.token, p: Sync.cfg.path || 'data.json' }, n, pw);
+      U = await Users.save({ ...U.users, [n]: entry }, U.sha, Sync.cfg.token, `Бюджет: пользователь ${n}`);
+      if (!Sync.cfg.user && Object.keys(U.users).length === 1) { Sync.cfg.user = n; Store.save(SKEY, Sync.cfg); }
+      q('#u-name').value = ''; q('#u-pass').value = ''; drawUsers(); toast(`Пользователь «${n}» добавлен`);
+    } catch (e) { usersErr(e); } finally { btn.disabled = false; btn.textContent = 'Добавить'; }
   };
   q('#s-file').onchange = async e => {
     try { const d = JSON.parse(await e.target.files[0].text());
@@ -610,7 +651,7 @@ const Sync = {
   url(){ return `https://api.github.com/repos/${this.cfg.repo}/contents/${encodeURIComponent(this.cfg.path || 'data.json')}`; },
   hdr(){ return { Authorization: 'Bearer ' + this.cfg.token, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }; },
   label(){ return { off: 'Только на этом устройстве', sync: 'Синхронизация…', wait: 'Есть изменения', ok: 'Сохранено в GitHub', net: 'Нет связи — сохранено здесь', auth: 'Ошибка ключа или репозитория', err: 'Ошибка синхронизации' }[this.st]; },
-  set(st){ this.st = st; const b = $('sync'); b.hidden = false; $('nosync').hidden = st !== 'off';
+  set(st){ this.st = st; const b = $('sync'); b.hidden = st === 'off'; $('gate').hidden = this.on(); document.querySelector('.wrap').hidden = !this.on();
     b.textContent = { off: '○ не подключено', sync: '↻ синхр.', wait: '● изменения', ok: '✓ GitHub', net: '○ офлайн', auth: '! ключ', err: '! ошибка' }[st] || '';
     b.className = 'icon pill' + (st === 'ok' ? ' ok' : st === 'auth' || st === 'err' || st === 'off' ? ' bad' : '');
     b.title = this.label() + (this.at ? ' · ' + new Date(this.at).toLocaleTimeString('ru-RU') : '') + ' · нажмите, чтобы обновить'; },
@@ -649,8 +690,64 @@ const Sync = {
     }
   }
 };
-$('sync').onclick = () => Sync.st === 'off' || Sync.st === 'auth' ? $('settings').click() : Sync.run();
-$('nosync-btn').onclick = () => $('settings').click();
+$('sync').onclick = () => Sync.st === 'auth' ? $('settings').click() : Sync.run();
+
+// ===== Logins: each user's password unlocks the shared GitHub key (AES-GCM, key from PBKDF2). The list is public, the key inside is not =====
+const u8b64 = u => { let r = ''; u.forEach(c => r += String.fromCharCode(c)); return btoa(r); };
+const b64u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const Vault = {
+  async key(pass, salt, n){ const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: n, hash: 'SHA-256' }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']); },
+  async seal(obj, login, pass){ const n = 310000, salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+    const c = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, additionalData: new TextEncoder().encode(login) }, await this.key(pass, salt, n), new TextEncoder().encode(JSON.stringify(obj)));
+    return { n, s: u8b64(salt), i: u8b64(iv), c: u8b64(new Uint8Array(c)) }; },
+  async open(e, login, pass){ const p = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64u8(e.i), additionalData: new TextEncoder().encode(login) }, await this.key(pass, b64u8(e.s), e.n), b64u8(e.c));
+    return JSON.parse(new TextDecoder().decode(p)); }
+};
+const Users = {
+  repo: 'StepaShpitz/timer', path: 'bmsctoug1t0q/users.json',
+  norm: s => String(s).trim().toLowerCase(),
+  url(){ return `https://api.github.com/repos/${this.repo}/contents/${this.path}`; },
+  hdr(t){ const h = { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' }; if (t) h.Authorization = 'Bearer ' + t; return h; },
+  async load(token){
+    try {
+      const r = await fetch(this.url() + '?nocache=' + Date.now(), { headers: this.hdr(token), cache: 'no-store' });
+      if (r.status === 404) return { users: {}, sha: undefined };
+      if (r.ok) { const j = await r.json(); return { users: JSON.parse(b64d(j.content)).users || {}, sha: j.sha }; }
+    } catch (e) { if (!token) throw e; }
+    // the API allows a few anonymous calls per hour; the published copy of the file is the fallback
+    const r = await fetch('users.json?' + Date.now(), { cache: 'no-store' });
+    if (r.status === 404) return { users: {}, sha: undefined };
+    if (!r.ok) throw 'net';
+    return { users: (await r.json()).users || {}, sha: undefined };
+  },
+  async save(users, sha, token, message){
+    const body = { message, content: b64e(JSON.stringify({ users }, null, 1) + '\n') }; if (sha) body.sha = sha;
+    const r = await fetch(this.url(), { method: 'PUT', headers: this.hdr(token), body: JSON.stringify(body) });
+    if (r.status === 401 || r.status === 403 || r.status === 404) throw 'scope';
+        if (!r.ok) throw 'net';
+    return { users, sha: (await r.json()).content.sha };
+  }
+};
+$('loginf').addEventListener('submit', async e => {
+  e.preventDefault();
+  const n = Users.norm($('l-user').value), pw = $('l-pass').value, err = $('l-err'), btn = $('l-btn');
+  err.hidden = true; btn.disabled = true; btn.textContent = 'Вход…';
+  try {
+    const { users } = await Users.load();
+    if (!users[n]) throw 'bad';
+    let c; try { c = await Vault.open(users[n], n, pw); } catch (_) { throw 'bad'; }
+    $('l-pass').value = '';
+    Sync.connect({ repo: c.r, token: c.t, path: c.p || 'data.json', user: n }); render();
+  } catch (x) {
+    err.textContent = x === 'bad' ? 'Неверный логин или пароль' : 'Нет связи. Проверьте интернет и попробуйте ещё раз.'; err.hidden = false;
+  } finally { btn.disabled = false; btn.textContent = 'Войти'; }
+});
+$('k-btn').onclick = () => {
+  const repo = $('k-repo').value.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, ''), token = $('k-token').value.trim();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) { toast('Укажите репозиторий и ключ'); return; }
+  Sync.connect({ repo, token, path: 'data.json' }); render();
+};
 // a phone link like …/#sync=… connects this device and removes the key from the address bar
 if (location.hash.startsWith('#sync=')) {
   try { const c = JSON.parse(atob(decodeURIComponent(location.hash.slice(6)))); Sync.cfg = { repo: c.r, token: c.t, path: c.p || 'data.json' }; Store.save(SKEY, Sync.cfg); setTimeout(() => toast('Синхронизация подключена'), 300); } catch(_) { toast('Ссылка повреждена'); }
@@ -660,6 +757,7 @@ addEventListener('online', () => Sync.run());
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') Sync.run(); });
 setInterval(() => { if (document.visibilityState === 'visible' && Sync.st !== 'auth') Sync.run(); }, 60000);
 
+Sync.set(Sync.on() ? 'sync' : 'off');
 render();
 Sync.run();
 </script>
