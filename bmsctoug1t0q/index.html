@@ -334,7 +334,9 @@ function renderOverview(){
   const [y, mo] = M.split('-').map(Number), days = new Date(y, mo, 0).getDate();
   const isNow = M === todayISO().slice(0, 7);
   const passed = isNow ? new Date().getDate() / days : (M < todayISO().slice(0, 7) ? 1 : 0);
-  const forecast = isNow && passed > 0 ? fact / passed : null;
+  // forecast: each line ends at its plan, or at what is already spent if that is more; lines without a plan count as spent
+  const forecast = passed >= 1 ? fact : cats.reduce((a, c) => a + c.subs.reduce((b, x) => b + Math.max(x.fact, x.plan), 0), 0);
+  const overBy = forecast - plan;
   const scale = Math.max(1, ...cats.map(c => Math.max(c.plan, c.fact)));
   const k = (l, v, s, cls = '') => `<div class="box kpi ${cls}"><div class="l">${l}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`;
 
@@ -357,7 +359,7 @@ function renderOverview(){
       ${k('План на месяц', fmt(plan), plan ? 'по всем статьям' : 'заполните во вкладке «Бюджет»')}
       ${k('Потрачено', fmt(fact), plan ? Math.round(fact / plan * 100) + '% плана' : D.tx.filter(t => t.date.startsWith(M)).length + ' трат')}
       ${k(left < 0 ? 'Перерасход' : 'Осталось', fmt(Math.abs(left)), left < 0 ? 'сверх плана' : 'до конца плана', left < 0 ? 'over' : '')}
-      ${k('Прогноз на месяц', forecast != null ? fmt(forecast) : '—', forecast != null ? `прошло ${Math.round(passed * 100)}% месяца` : (passed ? 'месяц закончился' : 'месяц не начался'), forecast != null && plan && forecast > plan ? 'over' : '')}
+      ${k(passed >= 1 ? 'Итог месяца' : 'Прогноз на месяц', fmt(forecast), passed >= 1 ? 'месяц закончился' : overBy > 0.004 ? `на ${fmt(overBy)} больше плана` : 'если дальше тратить по плану', overBy > 0.004 ? 'over' : '')}
     </div>
     <div class="grid2">
       <div class="box acc"><div class="hd"><h2 style="margin:0">План и факт по разделам</h2><span class="muted" style="font-size:.8rem">нажмите — подразделы</span></div>${rows}</div>
