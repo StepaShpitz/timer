@@ -52,18 +52,55 @@ label.f{display:flex;flex-direction:column;gap:4px;font-size:.75rem;font-weight:
 .monthnav{display:flex;align-items:center;gap:6px}
 .monthnav .m{min-width:150px;text-align:center;font-weight:600}
 @media (max-width:480px){.monthnav{flex-wrap:wrap}.monthnav .m{min-width:0;padding:0 4px}.pill{padding:6px 8px}}
-.tabs{display:inline-flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.tabs{display:inline-flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);max-width:100%;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{white-space:nowrap}
 .tabs button{border-color:transparent;border-radius:9px}
 .bar-top{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 
 /* quick add */
-.add{display:grid;grid-template-columns:120px minmax(170px,1.4fr) 150px minmax(120px,1fr) auto;gap:10px;align-items:end}
+.add{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end}
 .add>label{min-width:0}.add input,.add select{width:100%}
-@media (max-width:760px){.add{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.add .wide{grid-column:1/-1}}
+.add .wide{grid-column:span 2}
+.add .full{grid-column:1/-1}
+.seg{display:inline-flex;gap:4px;padding:3px;border:1px solid var(--line);border-radius:10px;justify-self:start}
+.seg button{border-color:transparent;padding:6px 14px;border-radius:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chips .l{font-size:.75rem;font-weight:600;color:var(--muted);margin-right:2px}
+.chips button{padding:5px 11px;font-size:.82rem;border-radius:999px}
 
 /* KPI tiles */
-.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:12px}
 @media (max-width:760px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi.good .v{color:var(--ok)}
+/* module cards */
+.blist{display:flex;flex-direction:column;gap:10px}
+.blist .meter{height:8px;margin-top:5px}
+.badge{display:inline-block;font-size:.72rem;font-weight:500;padding:1px 7px;border-radius:999px;background:color-mix(in srgb,var(--blue) 10%,transparent);color:var(--ink);margin-left:4px;white-space:nowrap}
+.rrow{display:grid;grid-template-columns:10px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.rrow:last-child{border-bottom:0}
+.rrow .t{min-width:0}.rrow .t div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow small{color:var(--muted)}
+.paid{color:var(--ok);font-size:.85rem;font-weight:600;white-space:nowrap}
+.late{color:var(--red)}
+.redit{display:grid;grid-template-columns:minmax(120px,1.3fr) minmax(130px,1.3fr) 100px 70px minmax(110px,1fr) minmax(110px,1fr) auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.redit input,.redit select{width:100%;padding:7px 10px}
+.redit.hd{font-size:.72rem;font-weight:600;color:var(--muted);letter-spacing:.03em;padding-top:0}
+@media (max-width:760px){.redit{grid-template-columns:1fr 1fr}.redit.hd{display:none}.redit>:first-child{grid-column:1/-1}}
+.goals{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.goal .meter{height:12px;margin:10px 0 6px}
+.goal .act{display:flex;gap:8px;margin-top:12px}.goal .act input{flex:1;min-width:0}
+.gadd{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}
+.gadd input{width:100%}
+table.heat td,table.heat th{white-space:nowrap}
+table.heat td.v{text-align:right;font-variant-numeric:tabular-nums;background:color-mix(in srgb,var(--s1) var(--a),transparent)}
+table.heat tr.sum td{font-weight:700}
+.mods{display:flex;flex-direction:column;gap:8px}
+.mods label{display:grid;grid-template-columns:20px 1fr;gap:8px;align-items:start;font-size:.9rem;cursor:pointer}
+.mods input{margin:3px 0 0;width:16px;height:16px;accent-color:var(--blue)}
+.mods small{display:block;color:var(--muted);font-size:.8rem}
+.ledit{display:flex;flex-direction:column;gap:6px}
+.ledit div{display:flex;gap:6px}.ledit input{flex:1;min-width:0;padding:7px 10px}
 .kpi .l{font-size:.75rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
 .kpi .v{font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin-top:2px}
 .kpi .s{font-size:.8rem;color:var(--muted)}
@@ -175,11 +212,15 @@ td input.name{width:100%;padding:6px 10px}
   </header>
 
   <form class="box add" id="addf" autocomplete="off">
+    <div class="seg full" id="a-kind" hidden><button type="button" data-kind="exp">Трата</button><button type="button" data-kind="inc">Доход</button></div>
     <label class="f">Сумма<input class="amt" id="a-amt" inputmode="decimal" placeholder="0,00" required></label>
-    <label class="f">Статья<select id="a-sub" required></select></label>
+    <label class="f"><span id="a-sub-l">Статья</span><select id="a-sub" required></select></label>
+    <label class="f" id="a-tag-w" hidden>Для кого<select id="a-tag"></select></label>
+    <label class="f" id="a-pay-w" hidden>Чем платили<select id="a-pay"></select></label>
     <label class="f">Дата<input type="date" id="a-date" required></label>
     <label class="f wide">Комментарий<input id="a-note" placeholder="необязательно"></label>
-    <button class="primary wide" type="submit">Добавить трату</button>
+    <button class="primary" type="submit" id="a-btn">Добавить трату</button>
+    <div class="chips full" id="quick" hidden></div>
   </form>
 
   <div class="bar-top">
@@ -187,6 +228,9 @@ td input.name{width:100%;padding:6px 10px}
       <button data-tab="overview">Обзор</button>
       <button data-tab="budget">Бюджет</button>
       <button data-tab="tx">Траты</button>
+      <button data-tab="rec" data-mod="rec">Регулярные</button>
+      <button data-tab="goals" data-mod="goals">Цели</button>
+      <button data-tab="year" data-mod="year">Год</button>
     </div>
   </div>
 
@@ -224,7 +268,7 @@ const MON_S = ['янв','фев','мар','апр','май','июн','июл','�
 function defaults(){
   let ci = 0; // fixed ids, so devices started separately still share sections
   const C = (name, subs) => { const c = 'c' + ci++; return { id: c, name, subs: subs.map((n, i) => ({ id: c + 's' + i, name: n })) }; };
-  return { v: 1, cur: '€', plans: {}, tx: [], del: {}, ts: {}, cats: [
+  return { v: 1, cur: '€', plans: {}, tx: [], inc: [], rec: [], goals: [], gc: [], cfg: defaultCfg(), del: {}, ts: {}, cats: [
     C('Дом', ['Аренда / ипотека','Электричество','Вода','Интернет и связь','Ремонт и быт']),
     C('Продукты', ['Супермаркет','Рынок','Хозтовары']),
     C('Дети', ['Школа','Сад','Кружки и секции','Одежда и обувь','Игрушки и прочее']),
@@ -236,19 +280,39 @@ function defaults(){
   ]};
 }
 
-let D = Store.load(KEY) || defaults();
-D.del = D.del || {}; D.ts = D.ts || {};
+// Optional modules and their lists; synced as one block (last edit wins)
+function defaultCfg(){
+  const L = (p, names) => names.map((name, i) => ({ id: p + (i + 1), name }));
+  return { mods: { inc: true, rec: true, tags: true, pay: true, goals: true, quick: true, year: true, xls: true },
+    tags: L('t', ['Ребёнок 1', 'Ребёнок 2', 'Ребёнок 3', 'Машина 1', 'Машина 2', 'Собака', 'Родители']),
+    pays: L('p', ['Карта', 'Наличные']),
+    incs: L('i', ['Зарплата', 'Подработка', 'Прочее']) };
+}
+const LISTS = ['tx', 'inc', 'rec', 'goals', 'gc'];
+function normalize(d){
+  d.del = d.del || {}; d.ts = d.ts || {}; d.plans = d.plans || {};
+  for (const k of LISTS) d[k] = Array.isArray(d[k]) ? d[k] : [];
+  const dc = defaultCfg(); d.cfg = d.cfg || dc;
+  d.cfg.mods = { ...dc.mods, ...(d.cfg.mods || {}) };
+  for (const k of ['tags', 'pays', 'incs']) if (!Array.isArray(d.cfg[k])) d.cfg[k] = dc[k];
+  return d;
+}
+let D = normalize(Store.load(KEY) || defaults());
 const now = new Date();
 const pad = n => String(n).padStart(2,'0');
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
 let M = `${now.getFullYear()}-${pad(now.getMonth()+1)}`;
-let TAB = 'overview', EDIT = false, FILTER = '';
+let TAB = 'overview', EDIT = false, FILTER = '', KIND = 'exp';
+const on = k => !!D.cfg.mods[k];
+const byId = (list, id) => list.find(x => x.id === id);
+const nameOf = (list, id) => { const x = byId(list, id); return x ? x.name : ''; };
 // kind marks what changed, so two phones can merge their edits: tx by id, plans per month, sections as a whole
 const save = kind => {
   const n = Date.now(); D.ts = D.ts || {};
   if (kind === 'cats') D.ts.cats = n;
+  else if (kind === 'cfg') D.ts.cfg = n;
   else if (kind === 'plan') D.ts['p' + M] = n;
-  else if (kind === 'all') { D.ts.cats = n; for (const m in D.plans) D.ts['p' + m] = n; }
+  else if (kind === 'all') { D.ts.cats = n; D.ts.cfg = n; for (const m in D.plans) D.ts['p' + m] = n; }
   if (!Store.save(KEY, D)) toast('Не удалось сохранить в браузере');
   Sync.later();
 };
@@ -288,13 +352,24 @@ document.addEventListener('scroll', () => tip.classList.remove('show'), true);
 let toastT; function toast(s){ const t = $('toast'); t.textContent = s; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800); }
 
 // ===== Header, quick add =====
+function opts(list, first){ return (first != null ? `<option value="">${first}</option>` : '') + list.map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join(''); }
+function subOpts(){ return D.cats.map(c => `<optgroup label="${esc(c.name)}">${c.subs.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</optgroup>`).join(''); }
 function renderHead(){
-  $('mlabel').textContent = mLabel(M);
-  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === TAB));
+  if (!on('inc')) KIND = 'exp';
+  $('mlabel').textContent = TAB === 'year' ? M.slice(0, 4) + ' год' : mLabel(M);
+  document.querySelectorAll('.tabs button').forEach(b => { b.hidden = b.dataset.mod ? !on(b.dataset.mod) : false; b.classList.toggle('on', b.dataset.tab === TAB); });
+  $('a-kind').hidden = !on('inc');
+  $('a-kind').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.kind === KIND));
+  const inc = KIND === 'inc';
+  $('a-sub-l').textContent = inc ? 'Источник' : 'Статья';
+  $('a-btn').textContent = inc ? 'Добавить доход' : 'Добавить трату';
   const sel = $('a-sub'), keep = sel.value;
-  sel.innerHTML = '<option value="" disabled selected>Выберите…</option>' + D.cats.map(c =>
-    `<optgroup label="${esc(c.name)}">${c.subs.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</optgroup>`).join('');
-  if (keep && subIndex()[keep]) sel.value = keep;
+  sel.innerHTML = '<option value="" disabled selected>Выберите…</option>' + (inc ? opts(D.cfg.incs) : subOpts());
+  if (keep && [...sel.options].some(o => o.value === keep)) sel.value = keep;
+  const fill = (id, list, first) => { const el = $(id), k = el.value; el.innerHTML = opts(list, first); if ([...el.options].some(o => o.value === k)) el.value = k; };
+  $('a-tag-w').hidden = inc || !on('tags'); fill('a-tag', D.cfg.tags, '— вся семья');
+  $('a-pay-w').hidden = !on('pay'); fill('a-pay', D.cfg.pays, '—');
+  renderQuick();
   const d = $('a-date');
   if (!d.value || !d.value.startsWith(M)) d.value = todayISO().startsWith(M) ? todayISO() : M + '-01';
 }
@@ -303,14 +378,39 @@ $('addf').addEventListener('submit', e => {
   const amt = parseAmt($('a-amt').value);
   if (!(amt > 0)) { toast('Введите сумму'); $('a-amt').focus(); return; }
   const date = $('a-date').value, sub = $('a-sub').value;
-  if (!sub) { toast('Выберите статью'); return; }
-  D.tx.push({ id: uid(), date, sub, amt, note: $('a-note').value.trim(), u: Date.now(), by: Sync.cfg && Sync.cfg.user || undefined });
+  if (!sub) { toast(KIND === 'inc' ? 'Выберите источник' : 'Выберите статью'); return; }
+  const rec = { id: uid(), date, amt, note: $('a-note').value.trim(), u: Date.now() }, by = Sync.cfg && Sync.cfg.user;
+  if (by) rec.by = by;
+  if (on('pay') && $('a-pay').value) rec.pay = $('a-pay').value;
+  let name;
+  if (KIND === 'inc') { rec.src = sub; D.inc.push(rec); name = nameOf(D.cfg.incs, sub); }
+  else { rec.sub = sub; if (on('tags') && $('a-tag').value) rec.tag = $('a-tag').value; D.tx.push(rec); name = subIndex()[sub].s.name; }
   save('tx');
   $('a-amt').value = ''; $('a-note').value = '';
-  const name = subIndex()[sub].s.name;
   if (!date.startsWith(M)) M = date.slice(0, 7);
-  render(); toast(`+ ${fmt(amt)} · ${name}`); $('a-amt').focus();
+  render(); toast(`${KIND === 'inc' ? 'Доход' : '+'} ${fmt(amt)} · ${name}`); $('a-amt').focus();
 });
+$('a-kind').onclick = e => { const b = e.target.closest('[data-kind]'); if (!b) return; KIND = b.dataset.kind; $('a-sub').value = ''; renderHead(); };
+
+// Quick entry: what the family enters most often, one tap fills the form
+function renderQuick(){
+  const box = $('quick');
+  if (!on('quick') || KIND !== 'exp') { box.hidden = true; return; }
+  const ix = subIndex(), since = shiftMonth(todayISO().slice(0, 7), -3), bySub = {}, byPair = {};
+  for (const t of D.tx) { if (t.date < since || !ix[t.sub] || t.rec) continue;
+    bySub[t.sub] = (bySub[t.sub] || 0) + 1; const k = t.sub + '|' + t.amt; byPair[k] = (byPair[k] || 0) + 1; }
+  const top = Object.entries(bySub).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  if (!top.length) { box.hidden = true; return; }
+  box.innerHTML = '<span class="l">Часто:</span>' + top.map(([sub]) => {
+    const pair = Object.entries(byPair).filter(([k, n]) => k.startsWith(sub + '|') && n >= 2).sort((a, b) => b[1] - a[1])[0];
+    const amt = pair ? +pair[0].split('|')[1] : '';
+    return `<button type="button" data-qs="${sub}" data-qa="${amt}">${esc(ix[sub].s.name)}${amt ? ' · ' + esc(fmt(amt)) : ''}</button>`;
+  }).join('');
+  box.hidden = false;
+}
+$('quick').onclick = e => { const b = e.target.closest('[data-qs]'); if (!b) return;
+  $('a-sub').value = b.dataset.qs; if (b.dataset.qa) $('a-amt').value = String(b.dataset.qa).replace('.', ',');
+  $('a-amt').focus(); $('a-amt').select(); };
 
 // ===== Overview =====
 function meter(fact, plan, scale, tick = true){
@@ -360,12 +460,20 @@ function renderOverview(){
       ${k('Потрачено', fmt(fact), plan ? Math.round(fact / plan * 100) + '% плана' : D.tx.filter(t => t.date.startsWith(M)).length + ' трат')}
       ${k(left < 0 ? 'Перерасход' : 'Осталось', fmt(Math.abs(left)), left < 0 ? 'сверх плана' : 'до конца плана', left < 0 ? 'over' : '')}
       ${k(passed >= 1 ? 'Итог месяца' : 'Прогноз на месяц', fmt(forecast), passed >= 1 ? 'месяц закончился' : overBy > 0.004 ? `на ${fmt(overBy)} больше плана` : 'если дальше тратить по плану', overBy > 0.004 ? 'over' : '')}
+      ${on('inc') ? (() => { const inc = sumInc(M), bal = inc - fact;
+        return k('Доходы', fmt(inc), D.inc.filter(t => t.date.startsWith(M)).length + ' поступл.') +
+          k(bal < 0 ? 'Минус за месяц' : 'Остаётся', fmt(Math.abs(bal)), bal < 0 ? 'трат больше, чем доходов' : 'доходы минус траты', bal < 0 ? 'over' : inc ? 'good' : ''); })() : ''}
     </div>
     <div class="grid2">
       <div class="box acc"><div class="hd"><h2 style="margin:0">План и факт по разделам</h2><span class="muted" style="font-size:.8rem">нажмите — подразделы</span></div>${rows}</div>
       <div class="col">
         <div class="box chart"><h2>Куда ушли деньги</h2>${donut(cats, fact)}</div>
         <div class="box chart"><h2>Траты за полгода</h2>${trend()}</div>
+        ${on('rec') ? recCard() : ''}
+        ${on('tags') ? groupCard('Для кого', 'tag', D.cfg.tags, 'вся семья') : ''}
+        ${on('pay') ? groupCard('Чем платили', 'pay', D.cfg.pays, 'не указано') : ''}
+        ${who()}
+        ${on('goals') && D.goals.length ? goalsCard() : ''}
       </div>
     </div>
   </div>`;
@@ -415,6 +523,169 @@ function trend(){
     <div class="keys"><span><i></i>Потрачено</span><span><i class="tick"></i>План</span><span><i style="background:var(--red)"></i>Больше плана</span></div>`;
 }
 
+// ===== Module cards on the overview =====
+const sumInc = m => D.inc.reduce((a, t) => a + (t.date.startsWith(m) ? t.amt : 0), 0);
+function blist(items, total){
+  const max = Math.max(1, ...items.map(x => x.v));
+  return `<div class="blist">${items.map(x => `<div style="--c:${x.c || 'var(--s1)'}"><div class="row1"><span>${esc(x.name)}</span><span class="num">${fmt(x.v)}${total ? ` <span class="muted">${Math.round(x.v / total * 100)}%</span>` : ''}</span></div><div class="meter"><i style="width:${(x.v / max * 100).toFixed(1)}%"></i></div></div>`).join('')}</div>`;
+}
+function groupCard(title, field, list, none){
+  const sums = {}, mt = D.tx.filter(t => t.date.startsWith(M));
+  for (const t of mt) sums[t[field] || ''] = (sums[t[field] || ''] || 0) + t.amt;
+  const total = mt.reduce((a, t) => a + t.amt, 0);
+  if (!total || !list.some(x => sums[x.id])) return '';
+  const items = list.filter(x => sums[x.id]).map(x => ({ name: x.name, v: sums[x.id] })).sort((a, b) => b.v - a.v);
+  if (sums['']) items.push({ name: none, v: sums[''], c: 'var(--s0)' });
+  return `<div class="box"><h2>${title}</h2>${blist(items, total)}</div>`;
+}
+function who(){
+  const sums = {}; for (const t of D.tx) if (t.date.startsWith(M) && t.by) sums[t.by] = (sums[t.by] || 0) + t.amt;
+  const names = Object.keys(sums); if (names.length < 2) return '';
+  return `<div class="box"><h2>Кто вносил</h2>${blist(names.map(n => ({ name: n, v: sums[n] })).sort((a, b) => b.v - a.v))}</div>`;
+}
+// ===== Recurring payments =====
+const daysIn = m => { const [y, mo] = m.split('-').map(Number); return new Date(y, mo, 0).getDate(); };
+const recDue = m => D.rec.filter(r => (!r.from || r.from <= m) && ix0()[r.sub]).sort((a, b) => (a.day || 1) - (b.day || 1));
+const ix0 = () => subIndex();
+const recPaid = (r, m) => D.tx.find(t => t.rec === r.id && t.date.startsWith(m));
+function recRow(r, m, compact){
+  const ix = subIndex(), { s, c, ci } = ix[r.sub], paid = recPaid(r, m), day = Math.min(r.day || 1, daysIn(m));
+  const late = !paid && (m < todayISO().slice(0, 7) || (m === todayISO().slice(0, 7) && day < +todayISO().slice(8)));
+  return `<div class="rrow"><span class="dot" style="--c:${color(ci)}"></span><div class="t"><div>${esc(r.name || s.name)}</div><div><small class="${late ? 'late' : ''}">${day} ${MON_S[+m.slice(5) - 1]}${late ? ' · просрочено' : ''}${compact ? '' : ' · ' + esc(c.name)}</small></div></div>
+    <span class="num">${fmt(paid ? paid.amt : r.amt)}</span>${paid ? '<span class="paid">✓ оплачено</span>' : `<button class="icon" data-payrec="${r.id}">Оплачено</button>`}</div>`;
+}
+function recCard(){
+  const due = recDue(M); if (!due.length) return '';
+  const unpaid = due.filter(r => !recPaid(r, M)), left = unpaid.reduce((a, r) => a + r.amt, 0);
+  return `<div class="box"><div class="row1" style="margin-bottom:6px"><h2 style="margin:0">Регулярные платежи</h2><span class="muted" style="font-size:.85rem">${due.length - unpaid.length} из ${due.length}</span></div>
+    ${unpaid.length ? unpaid.slice(0, 5).map(r => recRow(r, M, true)).join('') + `<div class="row1" style="margin-top:8px;font-size:.85rem"><span class="muted">${unpaid.length > 5 ? `и ещё ${unpaid.length - 5} · ` : ''}осталось оплатить</span><span class="num" style="font-weight:600">${fmt(left)}</span></div>` : '<div class="paid" style="padding:6px 0">Всё оплачено за этот месяц</div>'}</div>`;
+}
+function payRec(id, m){
+  const r = byId(D.rec, id); if (!r || recPaid(r, m)) return false;
+  if (!(r.amt > 0)) { toast('Укажите сумму платежа во вкладке «Регулярные»'); return false; }
+  const today = todayISO(), day = pad(Math.min(r.day || 1, daysIn(m)));
+  const t = { id: uid(), date: m === today.slice(0, 7) ? today : `${m}-${day}`, sub: r.sub, amt: r.amt, note: r.name || '', rec: r.id, u: Date.now() };
+  if (Sync.cfg && Sync.cfg.user) t.by = Sync.cfg.user; if (r.tag) t.tag = r.tag; if (r.pay) t.pay = r.pay;
+  D.tx.push(t); return true;
+}
+function renderRec(){
+  const due = recDue(M), tagOn = on('tags'), payOn = on('pay');
+  const row = r => `<div class="redit" data-rid="${r.id}">
+      <input data-rf="name" value="${esc(r.name || '')}" placeholder="Название">
+      <select data-rf="sub">${subOpts()}</select>
+      <input data-rf="amt" class="amt" inputmode="decimal" value="${r.amt || ''}" placeholder="Сумма">
+      <input data-rf="day" class="amt" inputmode="numeric" value="${r.day || ''}" placeholder="День">
+      ${tagOn ? `<select data-rf="tag">${opts(D.cfg.tags, '— вся семья')}</select>` : '<span></span>'}
+      ${payOn ? `<select data-rf="pay">${opts(D.cfg.pays, '—')}</select>` : '<span></span>'}
+      <button class="icon danger" data-delrec="${r.id}" aria-label="Удалить">✕</button></div>`;
+  const html = `<div class="col">
+    <div class="box"><div class="tools"><h2 style="margin:0;margin-right:auto">Платежи · ${mLabel(M).toLowerCase()}</h2>${due.some(r => !recPaid(r, M)) ? '<button data-payall>Отметить все оплаченными</button>' : ''}</div>
+      ${due.length ? due.map(r => recRow(r, M)).join('') : '<div class="empty">Регулярных платежей пока нет — добавьте их ниже</div>'}</div>
+    <div class="box"><div class="tools"><h2 style="margin:0;margin-right:auto">Список регулярных</h2><button class="primary" data-addrec>+ Платёж</button></div>
+      <p class="muted" style="margin:-4px 0 8px;font-size:.85rem">Аренда, школа, сад, страховки — каждый месяц они появятся сами, останется нажать «Оплачено». Сумму можно поправить в трате.</p>
+      ${D.rec.length ? `<div class="redit hd"><span>Название</span><span>Статья</span><span>Сумма</span><span>День</span><span>${tagOn ? 'Для кого' : ''}</span><span>${payOn ? 'Чем' : ''}</span><span></span></div>` + D.rec.map(row).join('') : ''}</div></div>`;
+  setTimeout(() => D.rec.forEach(r => { const el = document.querySelector(`[data-rid="${r.id}"]`); if (!el) return;
+    el.querySelector('[data-rf=sub]').value = r.sub; const tg = el.querySelector('[data-rf=tag]'); if (tg) tg.value = r.tag || ''; const pg = el.querySelector('[data-rf=pay]'); if (pg) pg.value = r.pay || ''; }));
+  return html;
+}
+// ===== Savings goals =====
+const goalSaved = g => D.gc.reduce((a, x) => a + (x.goal === g.id ? x.amt : 0), 0);
+function goalInfo(g){
+  const saved = goalSaved(g), left = Math.max(0, g.target - saved), pct = g.target ? Math.min(100, saved / g.target * 100) : 0;
+  let pace = '';
+  if (left > 0 && g.by) { const [y, m] = g.by.split('-').map(Number), [ty, tm] = todayISO().split('-').map(Number), months = (y - ty) * 12 + (m - tm) + 1;
+    pace = months > 0 ? `к ${MON_S[m - 1]} ${y} · откладывать ~${fmt(Math.ceil(left / months))} в месяц` : `срок ${MON_S[m - 1]} ${y} прошёл`; }
+  return { saved, left, pct, pace };
+}
+function goalsCard(){
+  return `<div class="box"><h2>Цели</h2><div class="blist">${D.goals.map((g, i) => { const x = goalInfo(g);
+    return `<div style="--c:${color(i % 8)}"><div class="row1"><span>${esc(g.name)}</span><span class="num">${fmt(x.saved)} <span class="muted">из ${fmt(g.target)}</span></span></div><div class="meter"><i style="width:${x.pct.toFixed(1)}%"></i></div></div>`; }).join('')}</div></div>`;
+}
+function renderGoals(){
+  return `<div class="col">
+    <div class="goals">${D.goals.map((g, i) => { const x = goalInfo(g);
+      return `<div class="box goal" style="--c:${color(i % 8)}"><div class="row1"><h2 style="margin:0">${esc(g.name)}</h2><button class="icon danger" data-delgoal="${g.id}" aria-label="Удалить">✕</button></div>
+        <div class="meter"><i style="width:${x.pct.toFixed(1)}%"></i></div>
+        <div class="row1"><span class="num" style="font-weight:600">${fmt(x.saved)}</span><span class="muted num">из ${fmt(g.target)} · ${Math.round(x.pct)}%</span></div>
+        <div class="muted" style="font-size:.82rem;margin-top:4px">${x.left > 0 ? `осталось ${fmt(x.left)}${x.pace ? ' · ' + x.pace : ''}` : '🎉 Цель достигнута'}</div>
+        <div class="act"><input class="amt" data-gin="${g.id}" inputmode="decimal" placeholder="Сумма"><button data-gput="${g.id}">Отложить</button><button data-gtake="${g.id}" title="Взять из копилки">Взять</button></div></div>`; }).join('')}</div>
+    <div class="box"><h2>Новая цель</h2><div class="gadd">
+      <label class="f">Название<input id="g-name" placeholder="Отпуск, машина…"></label>
+      <label class="f">Сумма<input id="g-target" class="amt" inputmode="decimal" placeholder="0"></label>
+      <label class="f">К какому месяцу<input id="g-by" type="month"></label>
+      <button class="primary" data-addgoal>Добавить цель</button></div></div></div>`;
+}
+// ===== Year =====
+function renderYear(){
+  const Y = M.slice(0, 4), ms = Array.from({ length: 12 }, (_, i) => `${Y}-${pad(i + 1)}`), ix = subIndex(), incOn = on('inc');
+  const spent = ms.map(m => D.tx.reduce((a, t) => a + (t.date.startsWith(m) && ix[t.sub] ? t.amt : 0), 0));
+  const income = ms.map(sumInc), total = spent.reduce((a, b) => a + b, 0), itot = income.reduce((a, b) => a + b, 0);
+  const active = spent.filter(v => v > 0).length || 1;
+  const k = (l, v, s, cls = '') => `<div class="box kpi ${cls}"><div class="l">${l}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`;
+  // chart: spending bars, income as a tick on the same € axis
+  const max = Math.max(...spent, ...(incOn ? income : [0]));
+  let chart = '<div class="empty">За этот год трат нет</div>';
+  if (max) {
+    const L = 56, W = 640, H = 190, top = 14, base = 160, step = (W - L) / 12, bw = Math.min(30, step - 10);
+    const nice = (() => { const p = Math.pow(10, Math.floor(Math.log10(max))); return Math.ceil(max / p) * p; })(), yy = v => base - v / nice * (base - top);
+    let g = '';
+    for (const f of [0, .5, 1]) g += `<line x1="${L}" x2="${W}" y1="${yy(nice * f)}" y2="${yy(nice * f)}" stroke="var(--line)"/><text x="${L - 6}" y="${yy(nice * f) + 3}" text-anchor="end" font-size="10" fill="var(--muted)">${esc(fmt(nice * f))}</text>`;
+    ms.forEach((m, i) => { const x = L + i * step + (step - bw) / 2, h = base - yy(spent[i]);
+      const tp = `<b>${MONTHS[i]} ${Y}</b><span class=sub>Потрачено ${esc(fmt(spent[i]))}${incOn ? ' · доходы ' + esc(fmt(income[i])) : ''}</span>`;
+      g += `<rect class="hit" data-tip="${tp}" x="${L + i * step}" y="${top}" width="${step}" height="${base - top + 22}" fill="transparent"/>`;
+      if (h > 0) g += `<path pointer-events="none" fill="${incOn && income[i] && spent[i] > income[i] ? 'var(--red)' : 'var(--s1)'}" d="M${x} ${base} V${base - h + Math.min(4, h)} q0 -4 4 -4 h${bw - 8} q4 0 4 4 V${base} Z"/>`;
+      if (incOn && income[i]) g += `<line pointer-events="none" x1="${x - 4}" x2="${x + bw + 4}" y1="${yy(income[i])}" y2="${yy(income[i])}" stroke="var(--ok)" stroke-width="2.5" stroke-linecap="round"/>`;
+      g += `<text x="${x + bw / 2}" y="${base + 16}" text-anchor="middle" font-size="11" fill="${m === M ? 'var(--ink)' : 'var(--muted)'}" font-weight="${m === M ? 600 : 400}">${MON_S[i]}</text>`; });
+    chart = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Траты по месяцам за ${Y}">${g}</svg>
+      <div class="keys"><span><i></i>Потрачено</span>${incOn ? '<span><i class="tick" style="background:var(--ok);opacity:1"></i>Доходы</span><span><i style="background:var(--red)"></i>Трат больше доходов</span>' : ''}</div>`;
+  }
+  // table: sections × months
+  const rows = D.cats.map(c => { const ids = new Set(c.subs.map(s => s.id));
+    const v = ms.map(m => D.tx.reduce((a, t) => a + (t.date.startsWith(m) && ids.has(t.sub) ? t.amt : 0), 0)); return { name: c.name, v, sum: v.reduce((a, b) => a + b, 0) }; });
+  const cmax = Math.max(1, ...rows.flatMap(r => r.v));
+  const cell = v => `<td class="v" style="--a:${v ? Math.round(8 + v / cmax * 42) : 0}%">${v ? fmt(v) : '<span class="muted">—</span>'}</td>`;
+  const table = `<div class="tbl"><table class="heat"><thead><tr><th>Раздел</th>${MON_S.map(m => `<th class="r">${m}</th>`).join('')}<th class="r">Итого</th><th class="r">В среднем</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${esc(r.name)}</td>${r.v.map(cell).join('')}<td class="r num" style="font-weight:600">${fmt(r.sum)}</td><td class="r num">${fmt(r.sum / active)}</td></tr>`).join('')}
+    <tr class="sum"><td>Всего</td>${spent.map(v => `<td class="r num">${v ? fmt(v) : '—'}</td>`).join('')}<td class="r num">${fmt(total)}</td><td class="r num">${fmt(total / active)}</td></tr>
+    ${incOn ? `<tr><td>Доходы</td>${income.map(v => `<td class="r num">${v ? fmt(v) : '—'}</td>`).join('')}<td class="r num" style="font-weight:600">${fmt(itot)}</td><td class="r num">${fmt(itot / active)}</td></tr>` : ''}
+    </tbody></table></div>`;
+  return `<div class="col">
+    <div class="kpis">${k('Потрачено за год', fmt(total), `${active} мес. с тратами`)}${k('В среднем в месяц', fmt(total / active), 'по месяцам с тратами')}
+      ${incOn ? k('Доходы за год', fmt(itot), '') + k(itot - total < 0 ? 'Минус за год' : 'Отложено за год', fmt(Math.abs(itot - total)), 'доходы минус траты', itot - total < 0 ? 'over' : itot ? 'good' : '') : ''}</div>
+    <div class="box chart"><div class="tools"><h2 style="margin:0;margin-right:auto">По месяцам · ${Y}</h2>${on('xls') ? '<button data-xls>Скачать Excel</button>' : ''}</div>${chart}</div>
+    <div class="box"><h2>Разделы по месяцам</h2>${table}</div></div>`;
+}
+// ===== Excel export (SheetJS, loaded only when asked) =====
+let xlsxLib = null;
+function loadXlsx(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  return xlsxLib = xlsxLib || new Promise((ok, no) => { const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = () => ok(window.XLSX); s.onerror = () => { xlsxLib = null; no(); }; document.head.appendChild(s); });
+}
+async function exportXlsx(){
+  let X; try { X = await loadXlsx(); } catch (_) { toast('Не удалось загрузить Excel-модуль. Проверьте интернет.'); return; }
+  const ix = subIndex(), dt = s => { const [y, m, d] = s.split('-').map(Number); return { t: 'n', v: (Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 864e5, z: 'dd.mm.yyyy' }; };
+  const money = v => ({ t: 'n', v: Math.round(v * 100) / 100, z: '#,##0.00' });
+  const sheet = (rows, w) => { const ws = X.utils.aoa_to_sheet(rows); ws['!cols'] = w.map(wch => ({ wch })); return ws; };
+  const wb = X.utils.book_new();
+  const tx = [...D.tx].filter(t => ix[t.sub]).sort((a, b) => a.date.localeCompare(b.date));
+  X.utils.book_append_sheet(wb, sheet([['Дата', 'Раздел', 'Статья', 'Сумма', 'Для кого', 'Чем платили', 'Комментарий', 'Кто внёс'],
+    ...tx.map(t => [dt(t.date), ix[t.sub].c.name, ix[t.sub].s.name, money(t.amt), nameOf(D.cfg.tags, t.tag), nameOf(D.cfg.pays, t.pay), t.note || '', t.by || ''])], [11, 14, 24, 11, 14, 14, 28, 12]), 'Траты');
+  if (D.inc.length) X.utils.book_append_sheet(wb, sheet([['Дата', 'Источник', 'Сумма', 'Комментарий', 'Кто внёс'],
+    ...[...D.inc].sort((a, b) => a.date.localeCompare(b.date)).map(t => [dt(t.date), nameOf(D.cfg.incs, t.src), money(t.amt), t.note || '', t.by || ''])], [11, 16, 11, 28, 12]), 'Доходы');
+  const months = [...new Set([...Object.keys(D.plans), ...D.tx.map(t => t.date.slice(0, 7)), ...D.inc.map(t => t.date.slice(0, 7))])].sort();
+  const bud = [['Месяц', 'Раздел', 'Статья', 'План', 'Факт', 'Остаток']];
+  for (const m of months) { const f = factBySub(m), p = planOf(m);
+    for (const c of D.cats) for (const s of c.subs) { const pl = +p[s.id] || 0, fa = f[s.id] || 0; if (pl || fa) bud.push([mLabel(m), c.name, s.name, money(pl), money(fa), money(pl - fa)]); } }
+  X.utils.book_append_sheet(wb, sheet(bud, [16, 14, 24, 11, 11, 11]), 'Бюджет');
+  X.utils.book_append_sheet(wb, sheet([['Месяц', 'План', 'Потрачено', 'Доходы', 'Доходы − траты'],
+    ...months.map(m => { const pl = Object.entries(planOf(m)).reduce((a, [k, v]) => a + (ix[k] ? +v || 0 : 0), 0), sp = Object.values(factBySub(m)).reduce((a, b) => a + b, 0), inc = sumInc(m);
+      return [mLabel(m), money(pl), money(sp), money(inc), money(inc - sp)]; })], [16, 12, 12, 12, 16]), 'Итоги по месяцам');
+  if (D.goals.length) X.utils.book_append_sheet(wb, sheet([['Цель', 'Нужно', 'Отложено', 'Осталось', 'К месяцу'],
+    ...D.goals.map(g => { const x = goalInfo(g); return [g.name, money(g.target), money(x.saved), money(x.left), g.by ? mLabel(g.by) : '']; })], [20, 12, 12, 12, 16]), 'Цели');
+  X.writeFile(wb, `budget-${todayISO()}.xlsx`);
+}
+
 // ===== Budget =====
 function renderBudget(){
   const cats = catTotals(M), p = D.plans[M];
@@ -436,6 +707,7 @@ function renderBudget(){
     <div class="tools">
       <h2 style="margin:0;margin-right:auto">Бюджет на ${mLabel(M).toLowerCase()}</h2>
       ${!EDIT && prev ? `<button data-copy="${prev}">Скопировать план из «${mLabel(prev)}»</button>` : ''}
+      ${!EDIT && on('rec') && recDue(M).length ? '<button data-recplan title="Поднять план по статьям до суммы регулярных платежей">План из регулярных</button>' : ''}
       ${!EDIT && p && Object.keys(p).length ? '<button class="danger" data-clearplan>Очистить план</button>' : ''}
       <button class="${EDIT ? 'on' : ''}" data-edit>${EDIT ? 'Готово' : 'Изменить разделы'}</button>
     </div>
@@ -447,34 +719,40 @@ function renderBudget(){
 
 // ===== Transactions =====
 function renderTx(){
-  const ix = subIndex();
-  let list = D.tx.filter(t => t.date.startsWith(M) && ix[t.sub]);
-  if (FILTER) list = list.filter(t => ix[t.sub].c.id === FILTER);
+  const ix = subIndex(), incOn = on('inc');
+  let list = FILTER === '__inc' ? [] : D.tx.filter(t => t.date.startsWith(M) && ix[t.sub]);
+  if (FILTER && FILTER !== '__inc') list = list.filter(t => ix[t.sub].c.id === FILTER);
+  if (incOn && (!FILTER || FILTER === '__inc')) list = list.concat(D.inc.filter(t => t.date.startsWith(M)).map(t => ({ ...t, isInc: true })));
   list.sort((a, b) => b.date.localeCompare(a.date));
-  const total = list.reduce((a, t) => a + t.amt, 0);
+  const total = list.reduce((a, t) => a + (t.isInc ? 0 : t.amt), 0), itotal = list.reduce((a, t) => a + (t.isInc ? t.amt : 0), 0);
   let html = '', day = '';
   for (const t of list) {
     if (t.date !== day) { day = t.date; const [y, mo, d] = day.split('-').map(Number);
-      const sum = list.filter(x => x.date === day).reduce((a, x) => a + x.amt, 0);
+      const sum = list.filter(x => x.date === day && !x.isInc).reduce((a, x) => a + x.amt, 0);
       html += `<div class="day row1"><span>${d} ${MON_S[mo - 1]}</span><span class="num">${fmt(sum)}</span></div>`; }
+    const meta = [t.note && esc(t.note), on('pay') && t.pay && nameOf(D.cfg.pays, t.pay) && '💳 ' + esc(nameOf(D.cfg.pays, t.pay)), t.by && '👤 ' + esc(t.by)].filter(Boolean).join(' · ');
+    const tag = on('tags') && t.tag && nameOf(D.cfg.tags, t.tag) ? `<span class="badge">${esc(nameOf(D.cfg.tags, t.tag))}</span>` : '';
+    if (t.isInc) { html += `<div class="tx"><span class="dot" style="--c:var(--ok)"></span><div class="t"><div>${esc(nameOf(D.cfg.incs, t.src) || 'Доход')} <small>· доход</small></div>${meta ? `<div><small>${meta}</small></div>` : ''}</div>
+      <span class="num left">+${fmt(t.amt)}</span><button class="icon danger" data-delinc="${t.id}" aria-label="Удалить">✕</button></div>`; continue; }
     const { s, c, ci } = ix[t.sub];
-    html += `<div class="tx"><span class="dot" style="--c:${color(ci)}"></span><div class="t"><div>${esc(s.name)} <small>· ${esc(c.name)}</small></div>${t.note || t.by ? `<div><small>${t.note ? esc(t.note) : ''}${t.note && t.by ? ' · ' : ''}${t.by ? '👤 ' + esc(t.by) : ''}</small></div>` : ''}</div>
+    html += `<div class="tx"><span class="dot" style="--c:${color(ci)}"></span><div class="t"><div>${esc(s.name)} <small>· ${esc(c.name)}</small>${tag}${t.rec ? '<span class="badge">регулярный</span>' : ''}</div>${meta ? `<div><small>${meta}</small></div>` : ''}</div>
       <span class="num">${fmt(t.amt)}</span><button class="icon danger" data-deltx="${t.id}" aria-label="Удалить">✕</button></div>`;
   }
   return `<div class="box">
     <div class="tools"><h2 style="margin:0;margin-right:auto">Траты · ${mLabel(M).toLowerCase()}</h2>
-      <select id="flt"><option value="">Все разделы</option>${D.cats.map(c => `<option value="${c.id}" ${c.id === FILTER ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>
-      <span class="num" style="font-weight:600">${fmt(total)}</span></div>
+      <select id="flt"><option value="">Все разделы</option>${D.cats.map(c => `<option value="${c.id}" ${c.id === FILTER ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}${incOn ? `<option value="__inc" ${FILTER === '__inc' ? 'selected' : ''}>Доходы</option>` : ''}</select>
+      <span class="num" style="font-weight:600">${FILTER === '__inc' ? '' : fmt(total)}${itotal ? ` <span class="left">+${fmt(itotal)}</span>` : ''}</span></div>
     ${html || '<div class="empty">Трат пока нет — добавьте первую сверху</div>'}</div>`;
 }
 
 // ===== Render & events =====
 function render(){
+  if ({ rec: 1, goals: 1, year: 1 }[TAB] && !on(TAB)) TAB = 'overview';
   renderHead();
-  $('view').innerHTML = TAB === 'overview' ? renderOverview() : TAB === 'budget' ? renderBudget() : renderTx();
+  $('view').innerHTML = TAB === 'budget' ? renderBudget() : TAB === 'tx' ? renderTx() : TAB === 'rec' ? renderRec() : TAB === 'goals' ? renderGoals() : TAB === 'year' ? renderYear() : renderOverview();
 }
-$('prev').onclick = () => { M = shiftMonth(M, -1); render(); };
-$('next').onclick = () => { M = shiftMonth(M, 1); render(); };
+$('prev').onclick = () => { M = shiftMonth(M, TAB === 'year' ? -12 : -1); render(); };
+$('next').onclick = () => { M = shiftMonth(M, TAB === 'year' ? 12 : 1); render(); };
 document.querySelector('.tabs').onclick = e => { const b = e.target.closest('[data-tab]'); if (b) { TAB = b.dataset.tab; EDIT = false; render(); } };
 
 const view = $('view');
@@ -492,6 +770,14 @@ view.addEventListener('change', e => {
     else subIndex()[t.dataset.sub].s.name = name;
     save('cats'); renderHead();
   } else if (t.id === 'flt') { FILTER = t.value; render(); }
+  else if (t.dataset.rf) {
+    const r = byId(D.rec, t.closest('[data-rid]').dataset.rid), f = t.dataset.rf; if (!r) return;
+    if (f === 'amt') { const v = parseAmt(t.value); if (!(v > 0)) { toast('Неверная сумма'); t.value = r.amt || ''; return; } r.amt = v; }
+    else if (f === 'day') { const v = parseInt(t.value, 10); if (!(v >= 1 && v <= 31)) { toast('День от 1 до 31'); t.value = r.day || ''; return; } r.day = v; }
+    else if (f === 'name') r.name = t.value.trim();
+    else if (t.value) r[f] = t.value; else delete r[f];
+    r.u = Date.now(); save('tx'); renderHead();
+  }
 });
 view.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('input')) { e.target.blur(); } });
 view.addEventListener('click', e => {
@@ -499,6 +785,26 @@ view.addEventListener('click', e => {
   const ds = b.dataset, y = scrollY;
   if ('edit' in ds) EDIT = !EDIT;
   else if (ds.copy) { D.plans[M] = { ...D.plans[ds.copy] }; save('plan'); toast('План скопирован'); }
+  else if (ds.payrec) { if (!payRec(ds.payrec, M)) return; save('tx'); toast('Отмечено как оплачено'); }
+  else if ('payall' in ds) { recDue(M).forEach(r => payRec(r.id, M)); save('tx'); toast('Все платежи отмечены'); }
+  else if ('addrec' in ds) { const sub = D.cats[0] && D.cats[0].subs[0]; if (!sub) return; D.rec.push({ id: uid(), name: '', sub: sub.id, amt: 0, day: 1, from: M, u: Date.now() }); save('tx');
+    render(); const el = document.querySelector(`[data-rid="${D.rec[D.rec.length - 1].id}"] [data-rf=name]`); if (el) el.focus(); return; }
+  else if (ds.delrec) { const r = byId(D.rec, ds.delrec); if (!confirm(`Удалить регулярный платёж${r && r.name ? ` «${r.name}»` : ''}? Уже внесённые траты останутся.`)) return;
+    D.rec = D.rec.filter(x => x.id !== ds.delrec); D.del[ds.delrec] = Date.now(); save('tx'); }
+  else if ('recplan' in ds) { const need = {}; recDue(M).forEach(r => need[r.sub] = (need[r.sub] || 0) + (r.amt || 0));
+    const p = D.plans[M] || (D.plans[M] = {}); let n = 0; for (const k in need) if ((+p[k] || 0) < need[k]) { p[k] = need[k]; n++; }
+    save('plan'); toast(n ? `Обновлено статей: ${n}` : 'План уже покрывает регулярные платежи'); }
+  else if ('addgoal' in ds) { const name = $('g-name').value.trim(), target = parseAmt($('g-target').value), by = $('g-by').value;
+    if (!name) { toast('Назовите цель'); return; } if (!(target > 0)) { toast('Укажите сумму цели'); return; }
+    const g = { id: uid(), name, target, u: Date.now() }; if (by) g.by = by; D.goals.push(g); save('tx'); toast('Цель добавлена'); }
+  else if (ds.gput || ds.gtake) { const id = ds.gput || ds.gtake, v = parseAmt(document.querySelector(`[data-gin="${id}"]`).value);
+    if (!(v > 0)) { toast('Введите сумму'); return; }
+    const x = { id: uid(), goal: id, date: todayISO(), amt: ds.gput ? v : -v, u: Date.now() }; if (Sync.cfg && Sync.cfg.user) x.by = Sync.cfg.user;
+    D.gc.push(x); save('tx'); toast(ds.gput ? `Отложено ${fmt(v)}` : `Взято ${fmt(v)}`); }
+  else if (ds.delgoal) { const g = byId(D.goals, ds.delgoal); if (!confirm(`Удалить цель «${g.name}»? Её история пополнений тоже удалится.`)) return; const n = Date.now();
+    D.goals = D.goals.filter(x => x.id !== g.id); D.del[g.id] = n; D.gc = D.gc.filter(x => x.goal === g.id ? (D.del[x.id] = n, false) : true); save('tx'); }
+  else if ('xls' in ds) { exportXlsx(); return; }
+  else if (ds.delinc) { const i = D.inc.findIndex(t => t.id === ds.delinc); if (i < 0) return; const [t] = D.inc.splice(i, 1); D.del[t.id] = Date.now(); save('tx'); toast('Доход удалён'); }
   else if ('clearplan' in ds) { if (!confirm(`Очистить план на ${mLabel(M).toLowerCase()}?`)) return; delete D.plans[M]; save('plan'); }
   else if (ds.addsub) { D.cats.find(c => c.id === ds.addsub).subs.push({ id: uid(), name: 'Новый подраздел' }); save('cats'); }
   else if ('addcat' in ds) { D.cats.push({ id: uid(), name: 'Новый раздел', subs: [{ id: uid(), name: 'Разное' }] }); save('cats'); }
@@ -524,7 +830,20 @@ function toastUndo(t){
   clearTimeout(toastT); toastT = setTimeout(() => { el.classList.remove('show'); el.style.pointerEvents = ''; el.onclick = null; }, 4000);
 }
 
-// ===== Settings: currency, backup =====
+// ===== Settings: currency, modules, backup =====
+const MODS = [
+  ['inc', 'Доходы и баланс', 'Зарплаты и другие поступления; сколько остаётся за месяц'],
+  ['rec', 'Регулярные платежи', 'Аренда, школа, сад, страховки — появляются каждый месяц сами'],
+  ['tags', 'Для кого трата', 'Ребёнок, машина, собака — во сколько обходится каждый'],
+  ['pay', 'Чем платили', 'Карта, наличные; итоги по способам оплаты'],
+  ['goals', 'Цели накоплений', 'Отпуск, машина — сколько отложено и сколько нужно в месяц'],
+  ['quick', 'Быстрый ввод', 'Частые траты одной кнопкой под формой'],
+  ['year', 'Аналитика за год', 'Месяцы и разделы за год, средние траты'],
+  ['xls', 'Экспорт в Excel', 'Траты, доходы, бюджет и итоги в таблицу']];
+function listEditor(k, title, ph){
+  return `<h4 style="margin-top:6px">${title}</h4><div class="ledit">${D.cfg[k].map(x => `<div><input data-li="${k}|${x.id}" value="${esc(x.name)}" placeholder="${ph}"><button class="icon danger" data-ldel="${k}|${x.id}" aria-label="Удалить">✕</button></div>`).join('')}
+    <button data-ladd="${k}" style="align-self:flex-start">+ Добавить</button></div>`;
+}
 function modal(html){
   const o = document.createElement('div'); o.className = 'overlay'; o.innerHTML = `<div class="card">${html}</div>`;
   o.addEventListener('click', e => { if (e.target === o) o.remove(); });
@@ -534,8 +853,13 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') document.que
 $('settings').onclick = () => {
   const o = modal(`<h3>Настройки</h3>
     <label class="f">Валюта<input id="s-cur" value="${esc(D.cur)}" maxlength="4"></label>
-    <p>Копия всех данных в файл — на всякий случай.</p>
-    <div class="btns"><button id="s-exp">Скачать копию</button><button id="s-imp">Загрузить копию</button><input type="file" id="s-file" accept=".json,application/json" hidden></div>
+    <hr><h4>Модули</h4>
+    <div class="mods">${MODS.map(([k, t, d]) => `<label><input type="checkbox" data-mod="${k}" ${on(k) ? 'checked' : ''}><span>${t}<small>${d}</small></span></label>`).join('')}</div>
+    ${on('tags') ? listEditor('tags', 'Для кого', 'Ребёнок, машина…') : ''}
+    ${on('pay') ? listEditor('pays', 'Чем платили', 'Карта Ильи, наличные…') : ''}
+    ${on('inc') ? listEditor('incs', 'Источники доходов', 'Зарплата…') : ''}
+    <hr><p>Копия всех данных в файл — на всякий случай.</p>
+    <div class="btns"><button id="s-exp">Скачать копию</button><button id="s-imp">Загрузить копию</button>${on('xls') ? '<button id="s-xls">Экспорт в Excel</button>' : ''}<input type="file" id="s-file" accept=".json,application/json" hidden></div>
     <hr><h4>Аккаунт</h4>
     <p>${Sync.cfg && Sync.cfg.user ? `Вы вошли как <b>${esc(Sync.cfg.user)}</b>.` : 'Вход по ключу GitHub.'} ${esc(Sync.label())}.</p>
     <div class="btns"><button id="s-now">Синхронизировать</button><button class="danger" id="s-out">Выйти</button></div>
@@ -553,6 +877,18 @@ $('settings').onclick = () => {
     a.download = `budget-${todayISO()}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   };
   q('#s-imp').onclick = () => q('#s-file').click();
+  if (q('#s-xls')) q('#s-xls').onclick = () => exportXlsx();
+  o.addEventListener('change', e => {
+    const t = e.target;
+    if (t.dataset.mod) { D.cfg.mods[t.dataset.mod] = t.checked; save('cfg'); o.remove(); render(); $('settings').click(); }
+    else if (t.dataset.li) { const [k, id] = t.dataset.li.split('|'), x = byId(D.cfg[k], id), v = t.value.trim(); if (!x) return; if (!v) { t.value = x.name; return; } x.name = v; save('cfg'); render(); }
+  });
+  o.addEventListener('click', e => {
+    const b = e.target.closest('[data-ladd],[data-ldel]'); if (!b) return;
+    if (b.dataset.ladd) { const k = b.dataset.ladd; D.cfg[k].push({ id: k[0] + uid(), name: 'Новый пункт' }); }
+    else { const [k, id] = b.dataset.ldel.split('|'); D.cfg[k] = D.cfg[k].filter(x => x.id !== id); }
+    save('cfg'); render(); const y = o.querySelector('.card').scrollTop; o.remove(); $('settings').click(); document.querySelector('.overlay .card').scrollTop = y;
+  });
   q('#s-now').onclick = () => { o.remove(); Sync.run(); };
   q('#s-out').onclick = async () => {
     if (!confirm('Выйти на этом устройстве? Траты останутся в общем файле, здесь они будут скрыты до следующего входа.')) return;
@@ -593,10 +929,10 @@ $('settings').onclick = () => {
     try { const d = JSON.parse(await e.target.files[0].text());
       if (!d || !Array.isArray(d.cats) || !Array.isArray(d.tx)) throw 0;
       if (!confirm('Заменить текущие данные загруженной копией?')) return;
-      D = { v: 1, cur: '€', plans: {}, ...d, del: { ...(D.del || {}), ...(d.del || {}) }, ts: d.ts || {} }; save('all'); o.remove(); render(); toast('Копия загружена');
+      D = normalize({ v: 1, cur: '€', plans: {}, ...d, del: { ...(D.del || {}), ...(d.del || {}) }, ts: d.ts || {} }); save('all'); o.remove(); render(); toast('Копия загружена');
     } catch(_) { toast('Это не файл копии бюджета'); }
   };
-  q('#s-reset').onclick = () => { if (confirm('Стереть все траты, планы и разделы?' + (Sync.on() ? '\nОни сотрутся и в GitHub, и на других устройствах.' : ''))) { const old = D; tomb(() => true); D = { ...defaults(), del: old.del, ts: {} }; for (const m in old.plans) D.ts['p' + m] = Date.now(); save('cats'); o.remove(); render(); } };
+  q('#s-reset').onclick = () => { if (confirm('Стереть все траты, планы и разделы?' + (Sync.on() ? '\nОни сотрутся и в GitHub, и на других устройствах.' : ''))) { const old = D, n = Date.now(); tomb(() => true); for (const k of LISTS) for (const x of old[k]) old.del[x.id] = n; D = { ...defaults(), del: old.del, ts: {} }; for (const m in old.plans) D.ts['p' + m] = n; save('all'); o.remove(); render(); } };
 };
 
 // ===== Sync: one data.json in a private GitHub repo, merged with what each device has =====
@@ -623,7 +959,8 @@ function remap(lose, winCats){
   }
   const fix = id => map[id] || id, plans = {};
   for (const m in lose.plans || {}) { plans[m] = {}; for (const k in lose.plans[m]) plans[m][fix(k)] = (plans[m][fix(k)] || 0) + (+lose.plans[m][k] || 0); }
-  return { ...lose, plans, tx: (lose.tx || []).map(t => map[t.sub] ? { ...t, sub: map[t.sub] } : t) };
+  const mv = x => map[x.sub] ? { ...x, sub: map[x.sub] } : x;
+  return { ...lose, plans, tx: (lose.tx || []).map(mv), rec: (lose.rec || []).map(mv) };
 }
 function merge(a, b){ // a = this device, b = GitHub; on a tie GitHub wins
   const A = a.ts || {}, B = b.ts || {}, del = { ...(b.del || {}) };
@@ -638,10 +975,15 @@ function merge(a, b){ // a = this device, b = GitHub; on a tie GitHub wins
     if (src.plans && src.plans[m] && Object.keys(src.plans[m]).length) out.plans[m] = src.plans[m];
     if (ta || tb) out.ts['p' + m] = Math.max(ta, tb);
   }
-  const tx = new Map();
-  for (const t of [...(b.tx || []), ...(a.tx || [])]) { const o = tx.get(t.id); if (!o || (t.u || 0) > (o.u || 0)) tx.set(t.id, t); }
-  out.tx = [...tx.values()].filter(t => !(del[t.id] >= (t.u || 0))).sort((x, y) => x.date.localeCompare(y.date) || x.id.localeCompare(y.id));
-  return out;
+  // lists: by id, newer edit wins, deletions win over older edits
+  for (const k of LISTS) {
+    const mp = new Map();
+    for (const t of [...(b[k] || []), ...(a[k] || [])]) { const o = mp.get(t.id); if (!o || (t.u || 0) > (o.u || 0)) mp.set(t.id, t); }
+    out[k] = [...mp.values()].filter(t => !(del[t.id] >= (t.u || 0))).sort((x, y) => (x.date || '').localeCompare(y.date || '') || x.id.localeCompare(y.id));
+  }
+  const ca = A.cfg || 0, cb = B.cfg || 0;
+  out.cfg = (ca > cb ? a.cfg : b.cfg) || a.cfg || b.cfg; if (ca || cb) out.ts.cfg = Math.max(ca, cb);
+  return normalize(out);
 }
 const b64e = s => { const u = new TextEncoder().encode(s); let r = ''; for (let i = 0; i < u.length; i += 0x8000) r += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(r); };
 const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
