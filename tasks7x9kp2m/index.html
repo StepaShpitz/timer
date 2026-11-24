@@ -494,6 +494,7 @@ let tempSteps=[], tempStatus='todo', tempPriority='none', tempTags=[], tempNewTa
 
 // Auto-reset daily
 function checkReset(){
+  if(!data||!data.daily) return;
   const today=new Date().toISOString().slice(0,10);
   if(data.dailyDate!==today){
     data.daily.forEach(t=>{t.done=false});
