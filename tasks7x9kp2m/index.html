@@ -125,6 +125,7 @@ header h1{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:
 .task-card.done{opacity:.4}
 .task-card.dragging{opacity:.4;border-style:dashed}
 .task-card.drag-over{box-shadow:0 0 0 2px var(--blue)}
+.section-body.drop-target{box-shadow:inset 0 0 0 2px var(--blue);border-radius:8px;background:rgba(59,130,246,.06)}
 
 /* Checkbox */
 .task-check{
@@ -756,6 +757,28 @@ function saveModal(){
 
 // ─── Drag & Drop ──────────────────────────────────────────────────────────
 let dragId=null, dragSec=null;
+function moveTask(fromSec, toSec, taskId, beforeId){
+  const fromList=data[fromSec];
+  const idx=fromList.findIndex(t=>t.id===taskId);
+  if(idx<0)return;
+  const [item]=fromList.splice(idx,1);
+  // adapt task fields when moving between sections
+  if(toSec==='daily'){
+    if(item.done===undefined) item.done=false;
+  } else {
+    if(!item.status) item.status='todo';
+  }
+  item.sec=toSec;
+  const toList=data[toSec];
+  if(beforeId){
+    const bi=toList.findIndex(t=>t.id===beforeId);
+    if(bi>=0){toList.splice(bi,0,item);} else {toList.push(item);}
+  } else {
+    toList.push(item);
+  }
+  save(data); render();
+}
+
 function initDrag(){
   document.querySelectorAll('.task-card[draggable]').forEach(card=>{
     card.addEventListener('dragstart',e=>{
@@ -763,20 +786,38 @@ function initDrag(){
       card.classList.add('dragging');
       e.dataTransfer.effectAllowed='move';
     });
-    card.addEventListener('dragend',()=>card.classList.remove('dragging'));
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('dragging');
+      document.querySelectorAll('.drag-over,.drop-target').forEach(el=>{
+        el.classList.remove('drag-over','drop-target');
+      });
+    });
     card.addEventListener('dragover',e=>{e.preventDefault();card.classList.add('drag-over')});
     card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
     card.addEventListener('drop',e=>{
       e.preventDefault(); card.classList.remove('drag-over');
       const overId=card.dataset.id;
-      if(dragId===overId||dragSec!==card.dataset.sec)return;
-      const list=data[dragSec];
-      const fromIdx=list.findIndex(t=>t.id===dragId);
-      const toIdx  =list.findIndex(t=>t.id===overId);
-      if(fromIdx<0||toIdx<0)return;
-      const [item]=list.splice(fromIdx,1);
-      list.splice(toIdx,0,item);
-      save(data); render();
+      const overSec=card.dataset.sec;
+      if(dragId===overId)return;
+      moveTask(dragSec, overSec, dragId, overId);
+    });
+  });
+  // drop on empty section body
+  document.querySelectorAll('.section-body').forEach(body=>{
+    body.addEventListener('dragover',e=>{
+      e.preventDefault();
+      body.classList.add('drop-target');
+    });
+    body.addEventListener('dragleave',e=>{
+      if(!body.contains(e.relatedTarget)) body.classList.remove('drop-target');
+    });
+    body.addEventListener('drop',e=>{
+      e.preventDefault(); body.classList.remove('drop-target');
+      const toSec=body.dataset.sec;
+      if(!toSec||!dragId)return;
+      // only act if dropped directly on body, not on a card
+      if(e.target.closest('.task-card'))return;
+      moveTask(dragSec, toSec, dragId, null);
     });
   });
 }
