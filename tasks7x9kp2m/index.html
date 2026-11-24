@@ -358,10 +358,11 @@ const ic = {
 };
 
 // ─── Config ───────────────────────────────────────────────────────────────
-const GIST_TOKEN = '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';
-const GIST_ID    = 'a311024d9f0fb86d3e52d4fbf8fe58c3';
-const GIST_FILE  = 'tasks.json';
-const LS_KEY     = 'tasks.v2'; // local cache
+const GH_TOKEN = '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';
+const GH_REPO  = 'StepaShpitz/timer';
+const GH_FILE  = 'tasks-data/tasks.json';
+const GH_API   = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+const LS_KEY   = 'tasks.v2'; // local cache
 
 // ─── Storage ──────────────────────────────────────────────────────────────
 function init(){return{daily:[],mid:[],long:[],dailyDate:'',tags:[],filterTag:null,showArchive:{daily:false,mid:false,long:false}}}
@@ -404,22 +405,24 @@ function setSyncStatus(state){ // 'ok'|'saving'|'error'|'loading'
   el.textContent=s.txt; el.style.color=s.color;
 }
 
-async function loadGist(){
+let ghSha=null; // current file SHA, needed for updates
+
+async function loadRemote(){
   setSyncStatus('loading');
   try{
-    const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-      headers:{Authorization:`token ${GIST_TOKEN}`,Accept:'application/vnd.github.v3+json'}
+    const r=await fetch(GH_API+'?t='+Date.now(),{
+      headers:{Authorization:`token ${GH_TOKEN}`,Accept:'application/vnd.github.v3+json'}
     });
+    if(r.status===404){ghSha=null;return init()} // file doesn't exist yet
     if(!r.ok) throw new Error(r.status);
-    const g=await r.json();
-    const content=g.files[GIST_FILE]?.content;
-    if(!content) return init();
-    const d=migrate(JSON.parse(content));
+    const f=await r.json();
+    ghSha=f.sha;
+    const d=migrate(JSON.parse(atob(f.content.replace(/\n/g,''))));
     saveLocal(d);
     setSyncStatus('ok');
     return d;
   }catch(e){
-    console.warn('Gist load failed, using local cache',e);
+    console.warn('GH load failed, using local cache',e);
     setSyncStatus('error');
     return loadLocal();
   }
@@ -432,21 +435,30 @@ async function save(d){
   saveTimer=setTimeout(async()=>{
     setSyncStatus('saving');
     try{
-      await fetch(`https://api.github.com/gists/${GIST_ID}`,{
-        method:'PATCH',
+      const body={
+        message:'tasks update',
+        content:btoa(unescape(encodeURIComponent(JSON.stringify(d,null,2)))),
+        branch:'main'
+      };
+      if(ghSha) body.sha=ghSha;
+      const r=await fetch(GH_API,{
+        method:'PUT',
         headers:{
-          Authorization:`token ${GIST_TOKEN}`,
+          Authorization:`token ${GH_TOKEN}`,
           Accept:'application/vnd.github.v3+json',
           'Content-Type':'application/json'
         },
-        body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(d,null,2)}}})
+        body:JSON.stringify(body)
       });
+      if(!r.ok){const e=await r.json();throw new Error(e.message)}
+      const f=await r.json();
+      ghSha=f.content?.sha||ghSha;
       setSyncStatus('ok');
     }catch(e){
-      console.warn('Gist save failed',e);
+      console.warn('GH save failed',e);
       setSyncStatus('error');
     }
-  },800); // debounce 800ms
+  },800);
 }
 
 let data=loadLocal(); // show cached immediately, then refresh from Gist
@@ -464,11 +476,11 @@ function checkReset(){
   }
 }
 
-// Boot: show local cache instantly, then load from Gist
+// Boot: show local cache instantly, then load from GitHub
 (async()=>{
   checkReset();
   render();
-  const fresh=await loadGist();
+  const fresh=await loadRemote();
   // Check reset again on fresh data (different device, different day)
   const today=new Date().toISOString().slice(0,10);
   if(fresh.dailyDate!==today){
