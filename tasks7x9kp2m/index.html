@@ -374,6 +374,7 @@ function migrate(d){
   if(d.filterTag===undefined) d.filterTag=null;
   if(!d.showArchive) d.showArchive={daily:false,mid:false,long:false};
   ['daily','mid','long'].forEach(s=>{
+    if(!d[s]) d[s]=[];
     (d[s]||[]).forEach(t=>{
       if(!t.priority) t.priority='none';
       if(!t.tags) t.tags=[];
