@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f9fafb;
+    --bg: #f3f4f6;
     --surface: #ffffff;
     --border: #e5e7eb;
     --text: #111827;
@@ -22,8 +22,8 @@
     --yellow-bg: #fffbeb;
     --red: #ef4444;
     --red-bg: #fef2f2;
-    --radius: 12px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --radius: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07);
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -41,155 +41,167 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: Inter, sans-serif; background: var(--bg); color: var(--text); min-height: 100dvh; }
 
-  /* Header */
   header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
     position: sticky; top: 0; z-index: 10;
   }
   header h1 { font-size: 1.1rem; font-weight: 700; }
-  .header-actions { display: flex; gap: 8px; align-items: center; }
 
-  /* Tabs */
-  .tabs {
-    display: flex;
-    gap: 2px;
-    background: var(--border);
-    border-radius: 10px;
-    padding: 3px;
+  /* Page layout: 3 columns on wide, stacked on mobile */
+  .page {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 20px 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
   }
-  .tab {
-    flex: 1;
-    padding: 6px 14px;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text2);
-    font: 500 0.85rem Inter, sans-serif;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
+  @media (max-width: 900px) {
+    .page { grid-template-columns: 1fr; }
   }
-  .tab.active { background: var(--surface); color: var(--blue); box-shadow: var(--shadow); }
 
-  /* Main layout */
-  main { max-width: 700px; margin: 0 auto; padding: 20px 16px; }
-
-  /* Section header */
-  .sec-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .sec-title { font-size: 0.8rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; }
-  .sec-count { font-size: 0.75rem; color: var(--text2); }
-
-  /* Add button */
-  .btn-add {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 7px 14px;
-    background: var(--blue);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    font: 500 0.85rem Inter, sans-serif;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .btn-add:hover { opacity: 0.85; }
-
-  /* Task card */
-  .task-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
-  .task-card {
+  /* Section block */
+  .section {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 12px 14px;
+    overflow: hidden;
+  }
+  .section-head {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
     display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    transition: box-shadow 0.15s;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
   }
-  .task-card:hover { box-shadow: var(--shadow); }
-  .task-card.done { opacity: 0.5; }
-
-  /* Checkbox */
-  .task-check {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-radius: 6px;
-    flex-shrink: 0;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    margin-top: 1px;
-    transition: all 0.15s;
+  .section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  .task-check.checked { background: var(--green); border-color: var(--green); }
-  .task-check.checked::after { content: '✓'; color: #fff; font-size: 11px; font-weight: 700; }
-
-  /* Status dot for mid/long */
-  .status-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    margin-top: 5px;
-    cursor: pointer;
-  }
-  .status-dot.todo   { background: var(--border); border: 2px solid var(--text2); }
-  .status-dot.inprog { background: var(--yellow); }
-  .status-dot.done   { background: var(--green); }
-
-  .task-body { flex: 1; min-width: 0; }
-  .task-name { font-size: 0.9rem; font-weight: 500; word-break: break-word; }
-  .task-name.strikethrough { text-decoration: line-through; }
-  .task-meta { display: flex; gap: 8px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
-  .task-note { font-size: 0.78rem; color: var(--text2); }
-  .task-due  { font-size: 0.75rem; padding: 1px 7px; border-radius: 999px; background: var(--yellow-bg); color: var(--yellow); font-weight: 500; }
-  .task-due.overdue { background: var(--red-bg); color: var(--red); }
-  .task-due.ok      { background: var(--green-bg); color: var(--green); }
-
-  .task-actions { display: flex; gap: 4px; }
-  .btn-icon {
-    background: none; border: none; cursor: pointer;
-    color: var(--text2); padding: 4px; border-radius: 6px;
-    font-size: 0.95rem; line-height: 1;
-    transition: background 0.1s;
-  }
-  .btn-icon:hover { background: var(--border); }
-
-  /* Progress bar for mid/long */
-  .progress-wrap { margin-top: 6px; }
-  .progress-bar { height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.3s; }
-  .progress-label { font-size: 0.72rem; color: var(--text2); margin-top: 2px; }
-
-  /* Empty state */
-  .empty {
-    text-align: center;
-    padding: 32px 16px;
+  .section-badge {
+    font-size: 0.72rem;
     color: var(--text2);
-    font-size: 0.88rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-weight: 500;
   }
-  .empty-icon { font-size: 2rem; margin-bottom: 8px; }
+  .section-actions { display: flex; gap: 6px; }
 
-  /* Reset button for daily */
+  .section-body { padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+
+  /* Buttons */
+  .btn-add {
+    display: flex; align-items: center; gap: 4px;
+    padding: 5px 10px;
+    background: var(--blue); color: #fff;
+    border: none; border-radius: 8px;
+    font: 500 0.8rem Inter, sans-serif; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-add:hover { opacity: 0.85; }
   .btn-reset {
     background: none; border: 1px solid var(--border);
-    color: var(--text2); font: 500 0.8rem Inter, sans-serif;
-    padding: 5px 12px; border-radius: 8px; cursor: pointer;
+    color: var(--text2); font: 500 0.78rem Inter, sans-serif;
+    padding: 4px 10px; border-radius: 8px; cursor: pointer;
     transition: all 0.15s;
   }
   .btn-reset:hover { background: var(--border); }
+  .btn-icon {
+    background: none; border: none; cursor: pointer;
+    color: var(--text2); padding: 3px 5px; border-radius: 6px;
+    font-size: 0.85rem; line-height: 1; transition: background 0.1s;
+  }
+  .btn-icon:hover { background: var(--border); }
 
-  /* Modal */
+  /* Task card */
+  .task-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    transition: box-shadow 0.15s;
+    background: var(--bg);
+  }
+  .task-card:hover { box-shadow: var(--shadow); }
+  .task-card.done { opacity: 0.45; }
+
+  /* Daily checkbox */
+  .task-check {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border); border-radius: 5px;
+    flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px; transition: all 0.15s;
+  }
+  .task-check.checked { background: var(--green); border-color: var(--green); }
+  .task-check.checked::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 800; }
+
+  /* Status dot */
+  .status-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 4px; cursor: pointer;
+  }
+  .status-dot.todo   { background: var(--border); border: 2px solid var(--text2); }
+  .status-dot.inprog { background: var(--yellow); }
+  .status-dot.done-st{ background: var(--green); }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-name { font-size: 0.85rem; font-weight: 500; word-break: break-word; line-height: 1.4; }
+  .task-name.strikethrough { text-decoration: line-through; }
+  .task-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 3px; }
+  .task-note { font-size: 0.75rem; color: var(--text2); }
+  .task-due  { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; background: var(--yellow-bg); color: var(--yellow); font-weight: 500; }
+  .task-due.overdue { background: var(--red-bg); color: var(--red); }
+  .task-due.ok      { background: var(--green-bg); color: var(--green); }
+
+  .task-actions { display: flex; gap: 2px; flex-shrink: 0; }
+
+  /* Steps */
+  .steps-list { display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+  .step-item { display: flex; align-items: center; gap: 5px; }
+  .step-check {
+    width: 13px; height: 13px; border: 2px solid var(--border); border-radius: 3px;
+    flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+  }
+  .step-check.checked { background: var(--blue); border-color: var(--blue); }
+  .step-check.checked::after { content: '✓'; color: #fff; font-size: 7px; font-weight: 800; }
+  .step-name { font-size: 0.75rem; color: var(--text2); }
+  .step-name.done { text-decoration: line-through; }
+  .progress-wrap { margin-top: 5px; }
+  .progress-bar { height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.3s; }
+  .progress-label { font-size: 0.7rem; color: var(--text2); margin-top: 2px; }
+
+  /* Group label inside section */
+  .group-label {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text2);
+    padding: 4px 0 2px;
+  }
+
+  /* Empty */
+  .empty { text-align: center; padding: 24px 10px; color: var(--text2); font-size: 0.82rem; }
+  .empty-icon { font-size: 1.6rem; margin-bottom: 6px; }
+
+  /* Progress summary in header */
+  .daily-progress {
+    font-size: 0.75rem; color: var(--text2);
+  }
+
+  /* ── Modal ── */
   .modal-backdrop {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.4);
@@ -198,101 +210,67 @@
   }
   .modal-backdrop.hidden { display: none; }
   .modal {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 20px;
-    width: 100%; max-width: 440px;
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px; width: 100%; max-width: 420px;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   }
-  .modal h2 { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
-  .field { margin-bottom: 12px; }
-  .field label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--text2); margin-bottom: 4px; }
+  .modal h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 500; color: var(--text2); margin-bottom: 3px; }
   .field input, .field textarea, .field select {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--bg);
-    color: var(--text);
-    font: 0.88rem Inter, sans-serif;
-    outline: none;
+    width: 100%; padding: 7px 10px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg); color: var(--text);
+    font: 0.85rem Inter, sans-serif; outline: none;
     transition: border-color 0.15s;
   }
-  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--blue); }
-  .field textarea { resize: vertical; min-height: 60px; }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .field input:focus, .field textarea:focus { border-color: var(--blue); }
+  .field textarea { resize: vertical; min-height: 54px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
   .btn-cancel {
-    padding: 7px 16px; border: 1px solid var(--border);
+    padding: 6px 14px; border: 1px solid var(--border);
     border-radius: 8px; background: none; color: var(--text);
-    font: 500 0.88rem Inter, sans-serif; cursor: pointer;
+    font: 500 0.85rem Inter, sans-serif; cursor: pointer;
   }
   .btn-save {
-    padding: 7px 16px; background: var(--blue); color: #fff;
+    padding: 6px 14px; background: var(--blue); color: #fff;
     border: none; border-radius: 8px;
-    font: 500 0.88rem Inter, sans-serif; cursor: pointer;
+    font: 500 0.85rem Inter, sans-serif; cursor: pointer;
   }
   .btn-save:hover { opacity: 0.85; }
-
-  /* Status select in mid/long */
-  .status-row { display: flex; gap: 8px; }
+  .status-row { display: flex; gap: 6px; }
   .status-btn {
-    flex: 1; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border);
-    background: none; color: var(--text2); font: 500 0.78rem Inter, sans-serif;
+    flex: 1; padding: 5px 6px; border-radius: 8px; border: 1px solid var(--border);
+    background: none; color: var(--text2); font: 500 0.75rem Inter, sans-serif;
     cursor: pointer; transition: all 0.15s;
   }
   .status-btn.active-todo   { background: var(--border); color: var(--text); border-color: transparent; }
   .status-btn.active-inprog { background: var(--yellow-bg); color: var(--yellow); border-color: var(--yellow); }
   .status-btn.active-done   { background: var(--green-bg); color: var(--green); border-color: var(--green); }
-
-  /* Steps (sub-tasks) */
-  .steps-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
-  .step-item { display: flex; align-items: center; gap: 6px; }
-  .step-check {
-    width: 14px; height: 14px; border: 2px solid var(--border); border-radius: 3px;
-    flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
-    transition: all 0.1s;
-  }
-  .step-check.checked { background: var(--blue); border-color: var(--blue); }
-  .step-check.checked::after { content: '✓'; color: #fff; font-size: 8px; font-weight: 800; }
-  .step-name { font-size: 0.8rem; color: var(--text2); }
-  .step-name.done { text-decoration: line-through; }
-
-  /* Steps editor */
-  .steps-editor { display: flex; flex-direction: column; gap: 6px; }
-  .step-editor-row { display: flex; gap: 6px; align-items: center; }
+  .steps-editor { display: flex; flex-direction: column; gap: 5px; }
+  .step-editor-row { display: flex; gap: 5px; align-items: center; }
   .step-editor-row input { flex: 1; }
-  .btn-step-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1rem; padding: 2px 4px; }
+  .btn-step-del { background: none; border: none; color: var(--red); cursor: pointer; font-size: 0.95rem; padding: 2px 4px; }
   .btn-add-step {
     background: none; border: 1px dashed var(--border); border-radius: 8px;
-    color: var(--text2); font: 500 0.8rem Inter, sans-serif;
-    padding: 6px; cursor: pointer; width: 100%; margin-top: 4px;
+    color: var(--text2); font: 500 0.78rem Inter, sans-serif;
+    padding: 5px; cursor: pointer; width: 100%; margin-top: 3px;
     transition: border-color 0.15s;
   }
   .btn-add-step:hover { border-color: var(--blue); color: var(--blue); }
-
-  @media (max-width: 480px) {
-    .tab { padding: 6px 10px; font-size: 0.8rem; }
-  }
 </style>
 </head>
 <body>
 
 <header>
   <h1>📋 Задачи</h1>
-  <div class="header-actions">
-    <div class="tabs" id="mainTabs">
-      <button class="tab active" data-tab="daily">Дейли</button>
-      <button class="tab" data-tab="mid">Средние</button>
-      <button class="tab" data-tab="long">Долгие</button>
-    </div>
-  </div>
 </header>
 
-<main id="app"></main>
+<div class="page" id="app"></div>
 
 <!-- Modal -->
 <div class="modal-backdrop hidden" id="modalBackdrop">
-  <div class="modal" id="modal">
+  <div class="modal">
     <h2 id="modalTitle">Задача</h2>
     <div id="modalBody"></div>
     <div class="modal-actions">
@@ -303,183 +281,158 @@
 </div>
 
 <script>
-// ─── Storage ───────────────────────────────────────────────────────────────
 const KEY = 'tasks.v1';
-function load() {
-  try { return JSON.parse(localStorage.getItem(KEY)) || initData(); }
-  catch { return initData(); }
-}
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || init(); } catch { return init(); } }
 function save(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
-function initData() {
-  return { daily: [], mid: [], long: [], dailyDate: '' };
-}
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function init() { return { daily: [], mid: [], long: [], dailyDate: '' }; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ─── State ─────────────────────────────────────────────────────────────────
 let data = load();
-let tab = 'daily';
-let editId = null;      // id of task being edited, null = new
-let tempSteps = [];     // steps for mid/long modal
-let tempStatus = 'todo';
+let editId = null, editSection = null;
+let tempSteps = [], tempStatus = 'todo';
 
-// Auto-reset daily on new day
-function checkDailyReset() {
-  const today = new Date().toISOString().slice(0, 10);
+// Daily auto-reset
+function checkReset() {
+  const today = new Date().toISOString().slice(0,10);
   if (data.dailyDate !== today) {
     data.daily.forEach(t => t.done = false);
     data.dailyDate = today;
     save(data);
   }
 }
-checkDailyReset();
+checkReset();
 
-// ─── Render ────────────────────────────────────────────────────────────────
+// ─── Render ───────────────────────────────────────────────────────────────
 function render() {
-  const app = document.getElementById('app');
-  if (tab === 'daily') app.innerHTML = renderDaily();
-  else if (tab === 'mid') app.innerHTML = renderList('mid', 'Средние задачи', 'нескольких дней до недели');
-  else app.innerHTML = renderList('long', 'Долгие задачи', 'проекты и цели');
+  document.getElementById('app').innerHTML =
+    renderDaily() + renderSection('mid','⏳ Средние','нескольких дней — неделя') + renderSection('long','🎯 Долгие','проекты и цели');
   bindEvents();
 }
 
 function renderDaily() {
   const tasks = data.daily;
   const done = tasks.filter(t => t.done).length;
-  const today = new Date().toLocaleDateString('ru', { weekday:'long', day:'numeric', month:'long' });
-  const todoTasks = tasks.filter(t => !t.done);
-  const doneTasks = tasks.filter(t => t.done);
-
+  const todo = tasks.filter(t => !t.done);
+  const doneList = tasks.filter(t => t.done);
   return `
-    <div class="sec-header">
-      <div>
-        <div class="sec-title">Дейли — ${today}</div>
-        <div class="sec-count">${done} / ${tasks.length} выполнено</div>
-      </div>
-      <div style="display:flex;gap:8px">
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">☀️ Дейли <span class="section-badge">${done}/${tasks.length}</span></div>
+      <div class="section-actions">
         ${tasks.length ? `<button class="btn-reset" data-action="resetDaily">Сбросить</button>` : ''}
-        <button class="btn-add" data-action="addTask"><span>＋</span> Задача</button>
+        <button class="btn-add" data-action="addTask" data-sec="daily">＋</button>
       </div>
     </div>
-    <div class="task-list" id="taskList">
-      ${todoTasks.map(t => dailyCard(t)).join('')}
-      ${doneTasks.map(t => dailyCard(t)).join('')}
-      ${tasks.length === 0 ? emptyState('Пусто — добавьте задачи на день') : ''}
-    </div>`;
+    <div class="section-body">
+      ${todo.map(t => dailyCard(t)).join('')}
+      ${doneList.length && todo.length ? `<div class="group-label">Выполнено</div>` : ''}
+      ${doneList.map(t => dailyCard(t)).join('')}
+      ${tasks.length === 0 ? `<div class="empty"><div class="empty-icon">☀️</div>Задачи на день</div>` : ''}
+    </div>
+  </div>`;
 }
 
 function dailyCard(t) {
   return `
-    <div class="task-card ${t.done ? 'done' : ''}" data-id="${t.id}">
-      <div class="task-check ${t.done ? 'checked' : ''}" data-action="toggleDone" data-id="${t.id}"></div>
-      <div class="task-body">
-        <div class="task-name ${t.done ? 'strikethrough' : ''}">${esc(t.name)}</div>
-        ${t.note ? `<div class="task-note">${esc(t.note)}</div>` : ''}
-      </div>
-      <div class="task-actions">
-        <button class="btn-icon" data-action="editTask" data-id="${t.id}" title="Изменить">✏️</button>
-        <button class="btn-icon" data-action="deleteTask" data-id="${t.id}" title="Удалить">🗑️</button>
-      </div>
-    </div>`;
+  <div class="task-card ${t.done?'done':''}" data-id="${t.id}">
+    <div class="task-check ${t.done?'checked':''}" data-action="toggleDone" data-id="${t.id}"></div>
+    <div class="task-body">
+      <div class="task-name ${t.done?'strikethrough':''}">${esc(t.name)}</div>
+      ${t.note ? `<div class="task-meta"><span class="task-note">${esc(t.note)}</span></div>` : ''}
+    </div>
+    <div class="task-actions">
+      <button class="btn-icon" data-action="editTask" data-sec="daily" data-id="${t.id}">✏️</button>
+      <button class="btn-icon" data-action="deleteTask" data-sec="daily" data-id="${t.id}">🗑️</button>
+    </div>
+  </div>`;
 }
 
-function renderList(type, title, hint) {
+function renderSection(type, title, hint) {
   const tasks = data[type];
-  const statuses = { todo: 'Не начато', inprog: 'В процессе', done: 'Готово' };
-
   const groups = [
-    { key: 'inprog', label: 'В процессе' },
-    { key: 'todo',   label: 'Не начато' },
-    { key: 'done',   label: 'Готово' },
+    { key:'inprog', label:'В процессе' },
+    { key:'todo',   label:'Не начато' },
+    { key:'done',   label:'Готово' },
   ];
-
-  let html = `
-    <div class="sec-header">
-      <div>
-        <div class="sec-title">${title}</div>
-        <div class="sec-count">${hint}</div>
-      </div>
-      <button class="btn-add" data-action="addTask"><span>＋</span> Задача</button>
-    </div>`;
-
+  let body = '';
+  let hasAny = false;
   groups.forEach(g => {
-    const group = tasks.filter(t => (t.status || 'todo') === g.key);
-    if (!group.length) return;
-    html += `<div class="sec-header" style="margin-top:16px"><div class="sec-title">${g.label}</div><div class="sec-count">${group.length}</div></div>`;
-    html += `<div class="task-list">`;
-    group.forEach(t => { html += midLongCard(t); });
-    html += `</div>`;
+    const list = tasks.filter(t => (t.status||'todo') === g.key);
+    if (!list.length) return;
+    hasAny = true;
+    body += `<div class="group-label">${g.label}</div>`;
+    list.forEach(t => { body += midCard(t, type); });
   });
-
-  if (!tasks.length) html += emptyState('Нет задач — добавьте первую');
-  return html;
+  if (!hasAny) body = `<div class="empty"><div class="empty-icon">${type==='mid'?'⏳':'🎯'}</div>${hint}</div>`;
+  return `
+  <div class="section">
+    <div class="section-head">
+      <div class="section-title">${title}</div>
+      <button class="btn-add" data-action="addTask" data-sec="${type}">＋</button>
+    </div>
+    <div class="section-body">${body}</div>
+  </div>`;
 }
 
-function midLongCard(t) {
+function midCard(t, type) {
   const steps = t.steps || [];
   const doneSteps = steps.filter(s => s.done).length;
-  const pct = steps.length ? Math.round(doneSteps / steps.length * 100) : 0;
+  const pct = steps.length ? Math.round(doneSteps/steps.length*100) : 0;
   const st = t.status || 'todo';
-  const dotClass = st === 'done' ? 'done' : st === 'inprog' ? 'inprog' : 'todo';
+  const dotCls = st==='done' ? 'done-st' : st==='inprog' ? 'inprog' : 'todo';
 
   let dueHtml = '';
   if (t.due) {
     const diff = Math.round((new Date(t.due) - new Date()) / 86400000);
     const cls = diff < 0 ? 'overdue' : diff <= 3 ? '' : 'ok';
-    const label = diff < 0 ? `просрочено на ${-diff} д.` : diff === 0 ? 'сегодня' : `через ${diff} д.`;
+    const label = diff < 0 ? `просрочено ${-diff}д` : diff === 0 ? 'сегодня' : `через ${diff}д`;
     dueHtml = `<span class="task-due ${cls}">📅 ${label}</span>`;
   }
 
   return `
-    <div class="task-card" data-id="${t.id}">
-      <div class="status-dot ${dotClass}" data-action="cycleStatus" data-id="${t.id}" title="Изменить статус"></div>
-      <div class="task-body">
-        <div class="task-name ${st === 'done' ? 'strikethrough' : ''}">${esc(t.name)}</div>
-        ${t.note || t.due ? `<div class="task-meta">
-          ${t.note ? `<span class="task-note">${esc(t.note)}</span>` : ''}
-          ${dueHtml}
+  <div class="task-card" data-id="${t.id}">
+    <div class="status-dot ${dotCls}" data-action="cycleStatus" data-sec="${type}" data-id="${t.id}" title="Изменить статус"></div>
+    <div class="task-body">
+      <div class="task-name ${st==='done'?'strikethrough':''}">${esc(t.name)}</div>
+      ${t.note||t.due ? `<div class="task-meta">${t.note?`<span class="task-note">${esc(t.note)}</span>`:''}${dueHtml}</div>` : ''}
+      ${steps.length ? `
+        <div class="steps-list">
+          ${steps.map(s=>`
+            <div class="step-item">
+              <div class="step-check ${s.done?'checked':''}" data-action="toggleStep" data-sec="${type}" data-tid="${t.id}" data-sid="${s.id}"></div>
+              <span class="step-name ${s.done?'done':''}">${esc(s.name)}</span>
+            </div>`).join('')}
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="progress-label">${doneSteps} из ${steps.length}</div>
         </div>` : ''}
-        ${steps.length ? `
-          <div class="steps-list">
-            ${steps.map(s => `
-              <div class="step-item">
-                <div class="step-check ${s.done ? 'checked' : ''}" data-action="toggleStep" data-tid="${t.id}" data-sid="${s.id}"></div>
-                <span class="step-name ${s.done ? 'done' : ''}">${esc(s.name)}</span>
-              </div>`).join('')}
-          </div>
-          <div class="progress-wrap">
-            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-            <div class="progress-label">${doneSteps} из ${steps.length} шагов</div>
-          </div>` : ''}
-      </div>
-      <div class="task-actions">
-        <button class="btn-icon" data-action="editTask" data-id="${t.id}" title="Изменить">✏️</button>
-        <button class="btn-icon" data-action="deleteTask" data-id="${t.id}" title="Удалить">🗑️</button>
-      </div>
-    </div>`;
+    </div>
+    <div class="task-actions">
+      <button class="btn-icon" data-action="editTask" data-sec="${type}" data-id="${t.id}">✏️</button>
+      <button class="btn-icon" data-action="deleteTask" data-sec="${type}" data-id="${t.id}">🗑️</button>
+    </div>
+  </div>`;
 }
 
-function emptyState(msg) {
-  return `<div class="empty"><div class="empty-icon">📭</div>${msg}</div>`;
-}
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-// ─── Modal ─────────────────────────────────────────────────────────────────
-function openModal(id) {
-  editId = id || null;
-  const list = data[tab];
+// ─── Modal ────────────────────────────────────────────────────────────────
+function openModal(sec, id) {
+  editSection = sec; editId = id || null;
+  const list = data[sec];
   const task = id ? list.find(t => t.id === id) : null;
   tempSteps = task ? JSON.parse(JSON.stringify(task.steps || [])) : [];
   tempStatus = task ? (task.status || 'todo') : 'todo';
 
   document.getElementById('modalTitle').textContent = id ? 'Изменить задачу' : 'Новая задача';
 
-  if (tab === 'daily') {
+  if (sec === 'daily') {
     document.getElementById('modalBody').innerHTML = `
-      <div class="field"><label>Название</label><input id="fName" placeholder="Что нужно сделать?" value="${esc(task?.name || '')}"></div>
-      <div class="field"><label>Заметка (необязательно)</label><textarea id="fNote">${esc(task?.note || '')}</textarea></div>`;
+      <div class="field"><label>Название</label><input id="fName" placeholder="Что нужно сделать?" value="${esc(task?.name||'')}"></div>
+      <div class="field"><label>Заметка</label><textarea id="fNote">${esc(task?.note||'')}</textarea></div>`;
   } else {
     document.getElementById('modalBody').innerHTML = `
-      <div class="field"><label>Название</label><input id="fName" placeholder="Задача" value="${esc(task?.name || '')}"></div>
+      <div class="field"><label>Название</label><input id="fName" placeholder="Задача" value="${esc(task?.name||'')}"></div>
       <div class="field"><label>Статус</label>
         <div class="status-row">
           <button class="status-btn ${tempStatus==='todo'?'active-todo':''}" data-st="todo">Не начато</button>
@@ -487,40 +440,37 @@ function openModal(id) {
           <button class="status-btn ${tempStatus==='done'?'active-done':''}" data-st="done">Готово</button>
         </div>
       </div>
-      <div class="field"><label>Срок (необязательно)</label><input id="fDue" type="date" value="${task?.due || ''}"></div>
-      <div class="field"><label>Заметка</label><textarea id="fNote">${esc(task?.note || '')}</textarea></div>
+      <div class="field"><label>Срок</label><input id="fDue" type="date" value="${task?.due||''}"></div>
+      <div class="field"><label>Заметка</label><textarea id="fNote">${esc(task?.note||'')}</textarea></div>
       <div class="field"><label>Шаги</label>
         <div class="steps-editor" id="stepsEditor">${renderStepsEditor()}</div>
         <button class="btn-add-step" id="btnAddStep">＋ Добавить шаг</button>
       </div>`;
-    // bind status buttons
     setTimeout(() => {
       document.querySelectorAll('[data-st]').forEach(b => b.addEventListener('click', () => {
         tempStatus = b.dataset.st;
-        document.querySelectorAll('[data-st]').forEach(x => x.className = 'status-btn');
-        b.classList.add('active-' + tempStatus);
+        document.querySelectorAll('[data-st]').forEach(x => x.className='status-btn');
+        b.classList.add('active-'+tempStatus);
       }));
       document.getElementById('btnAddStep').addEventListener('click', () => {
-        tempSteps.push({ id: uid(), name: '', done: false });
+        tempSteps.push({id:uid(),name:'',done:false});
         document.getElementById('stepsEditor').innerHTML = renderStepsEditor();
         bindStepEditorEvents();
       });
       bindStepEditorEvents();
     }, 0);
   }
-
   document.getElementById('modalBackdrop').classList.remove('hidden');
   setTimeout(() => document.getElementById('fName')?.focus(), 50);
 }
 
 function renderStepsEditor() {
-  return tempSteps.map((s, i) => `
+  return tempSteps.map((s,i) => `
     <div class="step-editor-row" data-si="${i}">
       <input class="step-input" data-si="${i}" value="${esc(s.name)}" placeholder="Шаг ${i+1}">
       <button class="btn-step-del" data-action="delStep" data-si="${i}">✕</button>
     </div>`).join('');
 }
-
 function bindStepEditorEvents() {
   document.querySelectorAll('.step-input').forEach(inp => {
     inp.addEventListener('input', e => { tempSteps[+e.target.dataset.si].name = e.target.value; });
@@ -534,74 +484,61 @@ function bindStepEditorEvents() {
   });
 }
 
-function closeModal() {
-  document.getElementById('modalBackdrop').classList.add('hidden');
-  editId = null;
-}
+function closeModal() { document.getElementById('modalBackdrop').classList.add('hidden'); editId = null; }
 
 function saveModal() {
   const name = document.getElementById('fName')?.value.trim();
   if (!name) { document.getElementById('fName')?.focus(); return; }
   const note = document.getElementById('fNote')?.value.trim() || '';
   const due  = document.getElementById('fDue')?.value || '';
-
-  const list = data[tab];
+  const list = data[editSection];
   if (editId) {
     const t = list.find(x => x.id === editId);
     if (!t) return;
     t.name = name; t.note = note;
-    if (tab !== 'daily') { t.status = tempStatus; t.due = due; t.steps = tempSteps.filter(s => s.name.trim()); }
+    if (editSection !== 'daily') { t.status = tempStatus; t.due = due; t.steps = tempSteps.filter(s => s.name.trim()); }
   } else {
-    const task = { id: uid(), name, note };
-    if (tab === 'daily') task.done = false;
+    const task = {id:uid(), name, note};
+    if (editSection === 'daily') task.done = false;
     else { task.status = tempStatus; task.due = due; task.steps = tempSteps.filter(s => s.name.trim()); }
     list.push(task);
   }
-  save(data);
-  closeModal();
-  render();
+  save(data); closeModal(); render();
 }
 
-// ─── Events ────────────────────────────────────────────────────────────────
+// ─── Events ───────────────────────────────────────────────────────────────
 function bindEvents() {
-  document.querySelectorAll('[data-action]').forEach(el => {
-    el.addEventListener('click', handleAction);
-  });
+  document.querySelectorAll('[data-action]').forEach(el => el.addEventListener('click', handleAction));
 }
-
 function handleAction(e) {
   const a = e.currentTarget.dataset.action;
   const id = e.currentTarget.dataset.id;
+  const sec = e.currentTarget.dataset.sec;
 
-  if (a === 'addTask') { openModal(null); return; }
-  if (a === 'editTask') { openModal(id); return; }
+  if (a === 'addTask') { openModal(sec, null); return; }
+  if (a === 'editTask') { openModal(sec, id); return; }
   if (a === 'deleteTask') {
     if (!confirm('Удалить задачу?')) return;
-    data[tab] = data[tab].filter(t => t.id !== id);
+    data[sec] = data[sec].filter(t => t.id !== id);
     save(data); render(); return;
   }
   if (a === 'toggleDone') {
     const t = data.daily.find(x => x.id === id);
-    if (t) { t.done = !t.done; save(data); render(); }
-    return;
+    if (t) { t.done = !t.done; save(data); render(); } return;
   }
   if (a === 'cycleStatus') {
-    const list = data[tab];
-    const t = list.find(x => x.id === id);
+    const t = data[sec]?.find(x => x.id === id);
     if (!t) return;
-    const cycle = ['todo','inprog','done'];
-    t.status = cycle[(cycle.indexOf(t.status || 'todo') + 1) % 3];
+    const c = ['todo','inprog','done'];
+    t.status = c[(c.indexOf(t.status||'todo')+1)%3];
     save(data); render(); return;
   }
   if (a === 'toggleStep') {
     const tid = e.currentTarget.dataset.tid;
     const sid = e.currentTarget.dataset.sid;
-    const list = data[tab];
-    const t = list.find(x => x.id === tid);
-    if (!t) return;
-    const s = t.steps?.find(x => x.id === sid);
-    if (s) { s.done = !s.done; save(data); render(); }
-    return;
+    const t = data[sec]?.find(x => x.id === tid);
+    const s = t?.steps?.find(x => x.id === sid);
+    if (s) { s.done = !s.done; save(data); render(); } return;
   }
   if (a === 'resetDaily') {
     if (!confirm('Сбросить все задачи дня?')) return;
@@ -609,16 +546,6 @@ function handleAction(e) {
     save(data); render(); return;
   }
 }
-
-// ─── Init ──────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    tab = btn.dataset.tab;
-    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    render();
-  });
-});
 
 document.getElementById('modalCancel').addEventListener('click', closeModal);
 document.getElementById('modalSave').addEventListener('click', saveModal);
