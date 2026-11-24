@@ -324,6 +324,7 @@ header h1{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:
       </span>
       Задачи
     </h1>
+    <span id="syncStatus" style="font-size:0.72rem;font-weight:500;color:var(--text2);margin-left:4px">загрузка…</span>
   </div>
   <div class="tags-bar" id="tagsBar"></div>
 </header>
@@ -356,27 +357,99 @@ const ic = {
   chevron:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`,
 };
 
+// ─── Config ───────────────────────────────────────────────────────────────
+const GIST_TOKEN = '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';
+const GIST_ID    = 'a311024d9f0fb86d3e52d4fbf8fe58c3';
+const GIST_FILE  = 'tasks.json';
+const LS_KEY     = 'tasks.v2'; // local cache
+
 // ─── Storage ──────────────────────────────────────────────────────────────
-const KEY = 'tasks.v2';
-function load(){try{return JSON.parse(localStorage.getItem(KEY))||init()}catch{return init()}}
-function save(d){localStorage.setItem(KEY,JSON.stringify(d))}
 function init(){return{daily:[],mid:[],long:[],dailyDate:'',tags:[],filterTag:null,showArchive:{daily:false,mid:false,long:false}}}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-let data=load();
-// migrate old data
-if(!data.tags) data.tags=[];
-if(!data.filterTag) data.filterTag=null;
-if(!data.showArchive) data.showArchive={daily:false,mid:false,long:false};
-['daily','mid','long'].forEach(s=>{
-  data[s].forEach(t=>{
-    if(!t.priority) t.priority='none';
-    if(!t.tags) t.tags=[];
-    if(!t.note) t.note='';
-    if(s==='daily' && t.recurring===undefined) t.recurring=false;
+function migrate(d){
+  if(!d.tags) d.tags=[];
+  if(d.filterTag===undefined) d.filterTag=null;
+  if(!d.showArchive) d.showArchive={daily:false,mid:false,long:false};
+  ['daily','mid','long'].forEach(s=>{
+    (d[s]||[]).forEach(t=>{
+      if(!t.priority) t.priority='none';
+      if(!t.tags) t.tags=[];
+      if(!t.note) t.note='';
+      if(s==='daily'&&t.recurring===undefined) t.recurring=false;
+    });
   });
-});
+  return d;
+}
+
+function loadLocal(){
+  try{return migrate(JSON.parse(localStorage.getItem(LS_KEY))||init())}catch{return init()}
+}
+function saveLocal(d){
+  localStorage.setItem(LS_KEY,JSON.stringify(d));
+}
+
+// Status indicator in header
+function setSyncStatus(state){ // 'ok'|'saving'|'error'|'loading'
+  const el=document.getElementById('syncStatus');
+  if(!el)return;
+  const map={
+    loading:{txt:'загрузка…',  color:'var(--text2)'},
+    saving: {txt:'сохранение…',color:'var(--yellow)'},
+    ok:     {txt:'✓ сохранено', color:'var(--green)'},
+    error:  {txt:'⚠ ошибка',   color:'var(--red)'},
+  };
+  const s=map[state]||map.ok;
+  el.textContent=s.txt; el.style.color=s.color;
+}
+
+async function loadGist(){
+  setSyncStatus('loading');
+  try{
+    const r=await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+      headers:{Authorization:`token ${GIST_TOKEN}`,Accept:'application/vnd.github.v3+json'}
+    });
+    if(!r.ok) throw new Error(r.status);
+    const g=await r.json();
+    const content=g.files[GIST_FILE]?.content;
+    if(!content) return init();
+    const d=migrate(JSON.parse(content));
+    saveLocal(d);
+    setSyncStatus('ok');
+    return d;
+  }catch(e){
+    console.warn('Gist load failed, using local cache',e);
+    setSyncStatus('error');
+    return loadLocal();
+  }
+}
+
+let saveTimer=null;
+async function save(d){
+  saveLocal(d);
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{
+    setSyncStatus('saving');
+    try{
+      await fetch(`https://api.github.com/gists/${GIST_ID}`,{
+        method:'PATCH',
+        headers:{
+          Authorization:`token ${GIST_TOKEN}`,
+          Accept:'application/vnd.github.v3+json',
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(d,null,2)}}})
+      });
+      setSyncStatus('ok');
+    }catch(e){
+      console.warn('Gist save failed',e);
+      setSyncStatus('error');
+    }
+  },800); // debounce 800ms
+}
+
+let data=loadLocal(); // show cached immediately, then refresh from Gist
 
 let editId=null, editSection=null;
 let tempSteps=[], tempStatus='todo', tempPriority='none', tempTags=[], tempNewTag='';
@@ -385,12 +458,27 @@ let tempSteps=[], tempStatus='todo', tempPriority='none', tempTags=[], tempNewTa
 function checkReset(){
   const today=new Date().toISOString().slice(0,10);
   if(data.dailyDate!==today){
-    data.daily.forEach(t=>{if(!t.recurring)t.done=false;else t.done=false});
+    data.daily.forEach(t=>{t.done=false});
     data.dailyDate=today;
     save(data);
   }
 }
-checkReset();
+
+// Boot: show local cache instantly, then load from Gist
+(async()=>{
+  checkReset();
+  render();
+  const fresh=await loadGist();
+  // Check reset again on fresh data (different device, different day)
+  const today=new Date().toISOString().slice(0,10);
+  if(fresh.dailyDate!==today){
+    fresh.daily.forEach(t=>{t.done=false});
+    fresh.dailyDate=today;
+    await save(fresh);
+  }
+  data=fresh;
+  render();
+})();
 
 // ─── Tags bar ─────────────────────────────────────────────────────────────
 function renderTagsBar(){
@@ -809,8 +897,6 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape')closeModal();
   if(e.key==='Enter'&&e.ctrlKey)saveModal();
 });
-
-render();
 </script>
 </body>
 </html>
