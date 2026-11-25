@@ -311,6 +311,116 @@ header h1{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:
 }
 .toggle.on::after{left:18px}
 .toggle-label{font-size:0.8rem;color:var(--text2)}
+
+/* ── Drawer ── */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:200;
+  opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.drawer-backdrop.open{opacity:1;pointer-events:all}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:420px;max-width:100vw;
+  background:var(--surface);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:201;
+  transform:translateX(100%);transition:transform .22s cubic-bezier(.4,0,.2,1);
+  box-shadow:-4px 0 24px rgba(0,0,0,.12);
+}
+.drawer.open{transform:translateX(0)}
+.drawer-head{
+  padding:14px 16px 12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;gap:10px;flex-shrink:0;
+}
+.drawer-title{
+  flex:1;font-size:1rem;font-weight:700;line-height:1.3;word-break:break-word;
+}
+.drawer-head-actions{display:flex;gap:5px;flex-shrink:0;margin-top:1px}
+.drawer-body{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.drawer-close{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--border);
+  background:none;color:var(--text2);cursor:pointer;font-size:1rem;line-height:1;
+}
+.drawer-close:hover{background:var(--border)}
+
+/* Drawer sections */
+.d-section-label{
+  font-size:0.7rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--text2);margin-bottom:6px;
+}
+.d-desc{
+  font-size:0.84rem;color:var(--text);line-height:1.6;
+  white-space:pre-wrap;word-break:break-word;
+  min-height:28px;
+}
+.d-desc.empty-hint{color:var(--text2);font-style:italic}
+
+/* Drawer steps */
+.d-steps{display:flex;flex-direction:column;gap:6px}
+.d-step{display:flex;align-items:center;gap:9px;padding:5px 0}
+.d-check{
+  width:18px;height:18px;border:2px solid var(--border);border-radius:5px;
+  flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.d-check.checked{background:var(--blue);border-color:var(--blue)}
+.d-check.checked::after{content:'✓';color:#fff;font-size:10px;font-weight:800}
+.d-step-name{font-size:0.84rem;color:var(--text)}
+.d-step-name.done{text-decoration:line-through;color:var(--text2)}
+
+/* Drawer progress */
+.d-progress-bar{height:5px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:4px}
+.d-progress-fill{height:100%;background:var(--blue);border-radius:3px;transition:width .3s}
+.d-progress-label{font-size:0.75rem;color:var(--text2)}
+
+/* Drawer comments */
+.d-comments{display:flex;flex-direction:column;gap:8px}
+.d-comment{
+  background:var(--bg);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;font-size:0.82rem;line-height:1.5;word-break:break-word;
+}
+.d-comment-meta{font-size:0.7rem;color:var(--text2);margin-top:4px}
+.d-comment-add{display:flex;gap:7px;margin-top:4px}
+.d-comment-add textarea{
+  flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:8px;
+  background:var(--bg);color:var(--text);font:0.82rem Inter,sans-serif;
+  resize:none;min-height:38px;outline:none;transition:border-color .15s;
+}
+.d-comment-add textarea:focus{border-color:var(--blue)}
+.d-comment-add textarea::placeholder{color:var(--text2)}
+.btn-comment-send{
+  padding:7px 12px;background:var(--blue);color:#fff;border:none;
+  border-radius:8px;font:500 0.8rem Inter,sans-serif;cursor:pointer;
+  align-self:flex-end;white-space:nowrap;
+}
+.btn-comment-send:hover{opacity:.87}
+
+/* Add subtask in drawer */
+.d-add-step-row{display:flex;gap:7px;margin-top:4px}
+.d-add-step-row input{
+  flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:7px;
+  background:var(--bg);color:var(--text);font:0.82rem Inter,sans-serif;outline:none;
+  transition:border-color .15s;
+}
+.d-add-step-row input:focus{border-color:var(--blue)}
+.btn-add-step-inline{
+  padding:6px 11px;background:none;border:1px solid var(--border);
+  border-radius:7px;color:var(--text2);font:500 0.8rem Inter,sans-serif;cursor:pointer;
+  white-space:nowrap;
+}
+.btn-add-step-inline:hover{background:var(--border);color:var(--text)}
+
+/* Drawer meta row */
+.d-meta-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.d-status-pill{
+  padding:3px 10px;border-radius:999px;font:500 0.75rem Inter,sans-serif;cursor:pointer;
+  border:1px solid var(--border);background:none;color:var(--text2);transition:all .15s;
+}
+.d-status-pill.inprog{background:var(--yellow-bg);color:var(--yellow);border-color:var(--yellow)}
+.d-status-pill.done-st{background:var(--green-bg);color:var(--green);border-color:var(--green)}
+.d-status-pill.todo{background:var(--border);color:var(--text)}
+
+/* Card clickable body */
+.task-card-body-click{cursor:pointer;flex:1;min-width:0}
 </style>
 </head>
 <body>
@@ -339,6 +449,20 @@ header h1{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:
       <button class="btn-save" id="modalSave">Сохранить</button>
     </div>
   </div>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-title" id="drawerTitle"></div>
+    <div class="drawer-head-actions">
+      <button class="btn-icon" id="drawerEditBtn" title="Редактировать задачу"></button>
+      <button class="btn-icon" id="drawerDeleteBtn" title="Удалить задачу"></button>
+      <button class="drawer-close" id="drawerClose">✕</button>
+    </div>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
 </div>
 
 <script>
@@ -374,6 +498,8 @@ function migrate(d){
       if(!t.priority) t.priority='none';
       if(!t.tags) t.tags=[];
       if(!t.note) t.note='';
+      if(!t.comments) t.comments=[];
+      if(!t.steps) t.steps=[];
       if(s==='daily'&&t.recurring===undefined) t.recurring=false;
     });
   });
@@ -395,6 +521,7 @@ let data=loadLocal();
 
 let editId=null, editSection=null;
 let tempSteps=[], tempStatus='todo', tempPriority='none', tempTags=[], tempNewTag='';
+let drawerTaskId=null, drawerSec=null;
 
 // Auto-reset daily
 function checkReset(){
@@ -543,33 +670,25 @@ function midCard(t,type){
     const label=diff<0?`просрочено ${-diff}д`:diff===0?'сегодня':`через ${diff}д`;
     dueHtml=`<span class="task-due ${cls}">${ic.cal}${label}</span>`;
   }
+  const tagsHtml=(t.tags||[]).map(g=>`<span class="task-tag">${esc(g)}</span>`).join('');
+  const stLabel=st==='inprog'?'В процессе':st==='done'?'Готово':'Не начато';
   return `
   <div class="task-card ${hasPrio?'has-priority':''}" data-id="${t.id}" data-sec="${type}" draggable="true">
     ${hasPrio?`<div class="priority-stripe ${t.priority}"></div>`:''}
-    <div class="status-dot ${dotCls}" data-action="cycleStatus" data-sec="${type}" data-id="${t.id}" title="Изменить статус"></div>
-    <div class="task-body">
+    <div class="status-dot ${dotCls}" data-action="cycleStatus" data-sec="${type}" data-id="${t.id}" title="${stLabel}"></div>
+    <div class="task-card-body-click" data-action="openDrawer" data-sec="${type}" data-id="${t.id}">
       <div class="task-name ${st==='done'?'strikethrough':''}">${esc(t.name)}</div>
-      ${t.note?`<div class="task-note">${esc(t.note)}</div>`:''}
       <div class="task-meta">
-        ${dueHtml}
-        ${(t.tags||[]).map(g=>`<span class="task-tag">${esc(g)}</span>`).join('')}
+        ${dueHtml}${tagsHtml}
       </div>
       ${steps.length?`
-        <div class="steps-list">
-          ${steps.map(s=>`
-            <div class="step-item">
-              <div class="step-check ${s.done?'checked':''}" data-action="toggleStep" data-sec="${type}" data-tid="${t.id}" data-sid="${s.id}"></div>
-              <span class="step-name ${s.done?'done':''}">${esc(s.name)}</span>
-            </div>`).join('')}
-        </div>
-        <div class="progress-wrap">
+        <div class="progress-wrap" style="margin-top:5px">
           <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           <div class="progress-label">${doneSteps} из ${steps.length}</div>
         </div>`:''}
     </div>
     <div class="task-actions">
       <button class="btn-icon" data-action="editTask" data-sec="${type}" data-id="${t.id}" title="Изменить">${ic.pencil}</button>
-      <button class="btn-icon" data-action="deleteTask" data-sec="${type}" data-id="${t.id}" title="Удалить">${ic.trash}</button>
     </div>
   </div>`;
 }
@@ -748,6 +867,135 @@ function saveModal(){
   save(data);closeModal();render();
 }
 
+// ─── Drawer ───────────────────────────────────────────────────────────────
+function openDrawer(sec, id){
+  drawerSec=sec; drawerTaskId=id;
+  renderDrawer();
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerBackdrop').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerBackdrop').classList.remove('open');
+  drawerTaskId=null; drawerSec=null;
+}
+function renderDrawer(){
+  if(!drawerTaskId||!drawerSec) return;
+  const t=data[drawerSec]?.find(x=>x.id===drawerTaskId);
+  if(!t){closeDrawer();return}
+  const steps=t.steps||[];
+  const comments=t.comments||[];
+  const doneSteps=steps.filter(s=>s.done).length;
+  const pct=steps.length?Math.round(doneSteps/steps.length*100):0;
+  const st=t.status||'todo';
+  const dotCls=st==='done'?'done-st':st==='inprog'?'inprog':'todo';
+  const stLabel=st==='inprog'?'В процессе':st==='done'?'Готово':'Не начато';
+
+  document.getElementById('drawerTitle').textContent=t.name;
+  document.getElementById('drawerEditBtn').innerHTML=ic.pencil;
+  document.getElementById('drawerDeleteBtn').innerHTML=ic.trash;
+
+  // Meta row (status pill + tags + due)
+  let metaHtml=`<span class="d-status-pill ${dotCls}" data-action="drawerCycleStatus">${stLabel}</span>`;
+  if(t.due){
+    const diff=Math.round((new Date(t.due)-new Date())/86400000);
+    const cls=diff<0?'overdue':diff<=3?'':'ok';
+    const label=diff<0?`просрочено ${-diff}д`:diff===0?'сегодня':`через ${diff}д`;
+    metaHtml+=`<span class="task-due ${cls}">${ic.cal}${label}</span>`;
+  }
+  (t.tags||[]).forEach(g=>{metaHtml+=`<span class="task-tag">${esc(g)}</span>`});
+
+  // Steps html
+  let stepsHtml='';
+  if(steps.length){
+    stepsHtml=`
+      <div class="d-progress-bar"><div class="d-progress-fill" style="width:${pct}%"></div></div>
+      <div class="d-progress-label">${doneSteps} из ${steps.length}</div>
+      <div class="d-steps" style="margin-top:8px">
+        ${steps.map(s=>`
+          <div class="d-step">
+            <div class="d-check ${s.done?'checked':''}" data-action="drawerToggleStep" data-sid="${s.id}"></div>
+            <span class="d-step-name ${s.done?'done':''}">${esc(s.name)}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+
+  // Comments html
+  const commHtml=comments.map(c=>`
+    <div class="d-comment">
+      ${esc(c.text)}
+      <div class="d-comment-meta">${c.date}</div>
+    </div>`).join('');
+
+  document.getElementById('drawerBody').innerHTML=`
+    <div>
+      <div class="d-section-label">Статус и теги</div>
+      <div class="d-meta-row">${metaHtml}</div>
+    </div>
+    <div>
+      <div class="d-section-label">Описание</div>
+      <div class="d-desc ${!t.note?'empty-hint':''}">${t.note?esc(t.note):'Нет описания'}</div>
+    </div>
+    <div>
+      <div class="d-section-label">Подзадачи</div>
+      ${stepsHtml}
+      <div class="d-add-step-row" style="margin-top:${steps.length?'10px':'0'}">
+        <input id="drawerNewStep" placeholder="Новая подзадача…">
+        <button class="btn-add-step-inline" id="drawerAddStepBtn">Добавить</button>
+      </div>
+    </div>
+    <div>
+      <div class="d-section-label">Комментарии</div>
+      <div class="d-comments">${commHtml}</div>
+      <div class="d-comment-add" style="margin-top:${comments.length?'8px':'0'}">
+        <textarea id="drawerCommentInput" placeholder="Написать комментарий…" rows="2"></textarea>
+        <button class="btn-comment-send" id="drawerCommentSend">↑</button>
+      </div>
+    </div>`;
+
+  // Bind drawer events
+  const _sec=drawerSec, _id=drawerTaskId;
+  document.getElementById('drawerEditBtn').onclick=()=>{closeDrawer();openModal(_sec,_id)};
+  document.getElementById('drawerDeleteBtn').onclick=()=>{
+    if(!confirm('Удалить задачу?'))return;
+    data[drawerSec]=data[drawerSec].filter(x=>x.id!==drawerTaskId);
+    save(data);closeDrawer();render();
+  };
+  document.querySelectorAll('[data-action="drawerToggleStep"]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const s=t.steps?.find(x=>x.id===el.dataset.sid);
+      if(s){s.done=!s.done;save(data);renderDrawer();render();}
+    });
+  });
+  document.querySelector('[data-action="drawerCycleStatus"]')?.addEventListener('click',()=>{
+    const c=['todo','inprog','done'];
+    t.status=c[(c.indexOf(t.status||'todo')+1)%3];
+    save(data);renderDrawer();render();
+  });
+  document.getElementById('drawerAddStepBtn').onclick=()=>{
+    const val=document.getElementById('drawerNewStep').value.trim();
+    if(!val)return;
+    if(!t.steps) t.steps=[];
+    t.steps.push({id:uid(),name:val,done:false});
+    save(data);renderDrawer();render();
+  };
+  document.getElementById('drawerNewStep').addEventListener('keydown',e=>{
+    if(e.key==='Enter'){e.preventDefault();document.getElementById('drawerAddStepBtn').click()}
+  });
+  document.getElementById('drawerCommentSend').onclick=()=>{
+    const val=document.getElementById('drawerCommentInput').value.trim();
+    if(!val)return;
+    if(!t.comments) t.comments=[];
+    const now=new Date();
+    const date=`${now.toLocaleDateString('ru',{day:'numeric',month:'short'})} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    t.comments.push({id:uid(),text:val,date});
+    save(data);renderDrawer();
+  };
+  document.getElementById('drawerCommentInput').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.ctrlKey){e.preventDefault();document.getElementById('drawerCommentSend').click()}
+  });
+}
+
 // ─── Drag & Drop ──────────────────────────────────────────────────────────
 let dragId=null, dragSec=null;
 function moveTask(fromSec, toSec, taskId, beforeId){
@@ -824,6 +1072,7 @@ function handleAction(e){
   const id=e.currentTarget.dataset.id;
   const sec=e.currentTarget.dataset.sec;
   if(a==='addTask'){openModal(sec,null);return}
+  if(a==='openDrawer'){openDrawer(sec,id);return}
   if(a==='editTask'){openModal(sec,id);return}
   if(a==='deleteTask'){
     if(!confirm('Удалить задачу?'))return;
@@ -864,8 +1113,10 @@ document.getElementById('modalSave').addEventListener('click',saveModal);
 document.getElementById('modalBackdrop').addEventListener('click',e=>{
   if(e.target===document.getElementById('modalBackdrop'))closeModal();
 });
+document.getElementById('drawerClose').addEventListener('click',closeDrawer);
+document.getElementById('drawerBackdrop').addEventListener('click',closeDrawer);
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeModal();
+  if(e.key==='Escape'){closeModal();closeDrawer();}
   if(e.key==='Enter'&&e.ctrlKey)saveModal();
 });
 </script>
